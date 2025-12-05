@@ -99,3 +99,4 @@ Para ejecutar este proyecto localmente, aseg√∫rate de tener el [SDK de Flutter](
    flutter run
    ```
 
+"Actualizaci¢n para forzar la recarga de GitHub" 
