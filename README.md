@@ -84,7 +84,7 @@ Para ejecutar este proyecto localmente, asegúrate de tener el [SDK de Flutter](
 
 1. **Clona el repositorio:**
    ```sh
-   git clone https://github.com/cobsari123-dotcom/marcket_app.git
+   git clone https://github.com/cobsari123-dotcom/marcket_app2.git
    ```
 2. **Navega al directorio del proyecto:**
    ```sh
@@ -99,4 +99,4 @@ Para ejecutar este proyecto localmente, asegúrate de tener el [SDK de Flutter](
    flutter run
    ```
 
-"Actualizaci�n para forzar la recarga de GitHub" 
+"Actualizaci�n para forzar la recarga de GitHub" 
