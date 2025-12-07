@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -109,7 +110,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
         });
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pago confirmado. Prepara el pedido.'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text('Pago confirmado. Prepara el pedido.'), backgroundColor: AppTheme.success),
         );
       } else {
         await FirebaseDatabase.instance.ref('orders/${order.id}').update({

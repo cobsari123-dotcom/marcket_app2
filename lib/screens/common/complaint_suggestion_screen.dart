@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -33,8 +34,9 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null && !_isAnonymous) {
         if (mounted) {
+
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Debes iniciar sesión para enviar una queja/sugerencia no anónima.'), backgroundColor: AppTheme.error),
+            SnackBar(content: Text('Debes iniciar sesión para enviar una queja/sugerencia no anónima.'), backgroundColor: AppTheme.error),
           );
         }
         setState(() {

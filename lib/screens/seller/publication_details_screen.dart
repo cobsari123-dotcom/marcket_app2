@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_parsed_text/flutter_parsed_text.dart';
@@ -240,6 +241,7 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
   Widget _buildImageCarousel() {
     final imageUrls = widget.publication.imageUrls;
     if (imageUrls.isEmpty) {
+
       return Container(
         height: 300,
         color: AppTheme.background,

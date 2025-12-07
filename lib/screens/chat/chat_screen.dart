@@ -72,9 +72,8 @@ class ChatScreenState extends State<ChatScreen> {
 
     try {
       if (_imageFile != null) {
-        final fileExtension = 'jpg';
-        final storagePath = 'chat_images';
-
+              const fileExtension = 'jpg';
+              const storagePath = 'chat_images';
         final storageRef = FirebaseStorage.instance
             .ref()
             .child(storagePath)
@@ -89,8 +88,9 @@ class ChatScreenState extends State<ChatScreen> {
         finalMessageType = 'image';
         lastMessageText = '[Imagen]';
       } else if (_docFile != null) {
+        // ignore: prefer_const_declarations
         final fileExtension = text.split('.').last;
-        final storagePath = 'chat_files';
+        const storagePath = 'chat_files';
         final storageRef = FirebaseStorage.instance
             .ref()
             .child(storagePath)

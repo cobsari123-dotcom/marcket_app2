@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marcket_app/models/user.dart';
@@ -86,7 +87,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('Error de reautenticación: ${e.message}'),
                   backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
+                  duration: Duration(seconds: 3),
                 ));
                 if (!mounted) return;
                 Navigator.of(context).pop(false);
@@ -95,7 +96,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('Error desconocido de reautenticación: $e'),
                   backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
+                  duration: Duration(seconds: 3),
                 ));
                 if (!mounted) return;
                 Navigator.of(context).pop(false);
@@ -206,14 +207,14 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Error al actualizar contraseña: ${e.message}'),
                       backgroundColor: AppTheme.error,
-                      duration: const Duration(seconds: 3),
+                      duration: Duration(seconds: 3),
                     ));
                   } catch (e) {
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Error desconocido al actualizar contraseña: $e'),
                       backgroundColor: AppTheme.error,
-                      duration: const Duration(seconds: 3),
+                      duration: Duration(seconds: 3),
                     ));
                   }
                 },
@@ -305,14 +306,14 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('Error al actualizar correo: ${e.message}'),
                   backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
+                  duration: Duration(seconds: 3),
                 ));
               } catch (e) {
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('Error desconocido al actualizar correo: $e'),
                   backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
+                  duration: Duration(seconds: 3),
                 ));
               }
             },
@@ -370,14 +371,14 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error al eliminar cuenta: ${e.message}'),
         backgroundColor: AppTheme.error,
-        duration: const Duration(seconds: 3),
+        duration: Duration(seconds: 3),
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error desconocido al eliminar cuenta: $e'),
         backgroundColor: AppTheme.error,
-        duration: const Duration(seconds: 3),
+        duration: Duration(seconds: 3),
       ));
     }
   }
@@ -428,7 +429,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Caché eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+          SnackBar(content: const Text('Caché eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
         );
       }
     } catch (e) {

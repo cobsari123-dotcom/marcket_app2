@@ -6,34 +6,33 @@ class PublicationCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return const Card(
       elevation: 2.0,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: [
-                const ShimmerLoading.circular(width: 40, height: 40),
-                const SizedBox(width: 12),
+                                children: [                ShimmerLoading.circular(width: 40, height: 40),
+                SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const ShimmerLoading.rectangular(height: 16, width: 150),
-                    const SizedBox(height: 4),
+                 children: [
+                    ShimmerLoading.rectangular(height: 16, width: 150),
+                    SizedBox(height: 4),
                     ShimmerLoading.rectangular(height: 12, width: 100),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const ShimmerLoading.rectangular(height: 200),
-            const SizedBox(height: 12),
-            const ShimmerLoading.rectangular(height: 14, width: 250),
-            const SizedBox(height: 8),
-            const ShimmerLoading.rectangular(height: 14, width: 200),
+            SizedBox(height: 12),
+            ShimmerLoading.rectangular(height: 200),
+            SizedBox(height: 12),
+            ShimmerLoading.rectangular(height: 14, width: 250),
+            SizedBox(height: 8),
+            ShimmerLoading.rectangular(height: 14, width: 200),
           ],
         ),
       ),
