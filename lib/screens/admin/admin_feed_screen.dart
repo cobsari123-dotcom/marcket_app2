@@ -41,57 +41,55 @@ class _AdminFeedScreenState extends State<AdminFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<FeedProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoadingInitial) {
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: 5,
-              itemBuilder: (context, index) => const PublicationCardSkeleton(),
-            );
-          }
-
-          if (provider.errorMessage != null) {
-            return Center(child: Text(provider.errorMessage!));
-          }
-
-          if (provider.publications.isEmpty) {
-            return const Center(child: Text('No hay publicaciones para mostrar.'));
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => provider.init(),
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16.0),
-              itemCount: provider.publications.length + (provider.isLoadingMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == provider.publications.length) {
-                  return const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                final publication = provider.publications[index];
-                final sellerInfo = provider.sellerData[publication.sellerId];
-                return PublicationCard(
-                  publication: publication,
-                  sellerName: sellerInfo?.fullName ?? 'Cargando...',
-                  sellerProfilePicture: sellerInfo?.profilePicture,
-                  onSellerTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/public_seller_profile',
-                      arguments: publication.sellerId,
-                    );
-                  },
-                );
-              },
-            ),
+    return Consumer<FeedProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoadingInitial) {
+          return ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: 5,
+            itemBuilder: (context, index) => const PublicationCardSkeleton(),
           );
-        },
-      ),
+        }
+
+        if (provider.errorMessage != null) {
+          return Center(child: Text(provider.errorMessage!));
+        }
+
+        if (provider.publications.isEmpty) {
+          return const Center(child: Text('No hay publicaciones para mostrar.'));
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => provider.init(),
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16.0),
+            itemCount: provider.publications.length + (provider.isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == provider.publications.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final publication = provider.publications[index];
+              final sellerInfo = provider.sellerData[publication.sellerId];
+              return PublicationCard(
+                publication: publication,
+                sellerName: sellerInfo?.fullName ?? 'Cargando...',
+                sellerProfilePicture: sellerInfo?.profilePicture,
+                onSellerTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/public_seller_profile',
+                    arguments: publication.sellerId,
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

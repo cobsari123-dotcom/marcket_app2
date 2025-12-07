@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/models/user.dart' as app_user;
 import 'package:marcket_app/services/auth_service.dart';
 import 'package:marcket_app/services/user_service.dart';
+import 'package:marcket_app/screens/complete_profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -76,52 +76,106 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> _handleSuccessfulLogin(User user, {bool isGoogleSignIn = false}) async {
     final userModel = await _userService.getUserById(user.uid);
 
-    if (!mounted) return;
-
     if (userModel != null) {
+      // User exists in DB, navigate to their respective dashboard
       _navigateUser(userModel.userType);
-    } else if (isGoogleSignIn) {
-      // Check if the user is a whitelisted admin
-      final isAdmin = await _userService.isAdminEmail(user.email!);
-      if (isAdmin) {
-        final newAdmin = app_user.UserModel(
-          id: user.uid,
-          fullName: user.displayName ?? 'Admin Sin Nombre',
-          email: user.email!,
-          userType: 'admin',
-          profilePicture: user.photoURL,
-        );
-        await _userService.setUserData(user.uid, newAdmin.toMap());
-        if (mounted) _navigateUser('admin');
-      } else {
-        await _showCompleteProfileDialog(user);
-      }
     } else {
-      await _authService.signOut();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('No se encontraron datos de usuario.'),
-          backgroundColor: AppTheme.error,
-        ));
+      // User does NOT exist in DB, check if their email is on the admin whitelist
+      final isAdminByEmail = await _userService.isAdminEmail(user.email!);
+      if (isAdminByEmail) {
+        // This is a potential admin. Ask for the secret key.
+        final bool? codeVerified = await _showAdminKeyCodeDialog();
+        if (codeVerified == true) {
+          // Key is correct, create their admin profile on the fly
+          final newAdmin = app_user.UserModel(
+            id: user.uid,
+            fullName: user.displayName ?? 'Admin',
+            email: user.email!,
+            userType: 'admin',
+            profilePicture: user.photoURL,
+          );
+          await _userService.setUserData(user.uid, newAdmin.toMap());
+          if (mounted) _navigateUser('admin');
+        } else {
+          // Key is incorrect or dialog was cancelled, sign out
+          await _authService.signOut();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('La clave de administrador es incorrecta.'),
+              backgroundColor: AppTheme.error,
+            ));
+          }
+        }
+      } else if (isGoogleSignIn) {
+        // If it was a Google Sign-In by a non-admin new user, prompt to complete profile
+        await _navigateToCompleteProfile(user);
+      } else {
+        // If it was a manual email/password sign-in and the user is not in DB and not an admin, deny access
+        await _authService.signOut();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Este usuario no está registrado. Por favor, regístrese o contacte a soporte.'),
+            backgroundColor: AppTheme.error,
+          ));
+        }
       }
     }
   }
 
-  Future<void> _showCompleteProfileDialog(User user) async {
-    if (!mounted) return;
-    final result = await showDialog<app_user.UserModel>(
+  Future<bool?> _showAdminKeyCodeDialog() async {
+    final TextEditingController keyController = TextEditingController();
+    return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) => CompleteProfileDialog(user: user),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Verificación de Administrador'),
+          content: TextField(
+            controller: keyController,
+            autofocus: true,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Clave de Administrador',
+              hintText: 'Ingresa la clave secreta',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final bool isCorrect = keyController.text.trim() == '12345678';
+                Navigator.of(context).pop(isCorrect);
+              },
+              child: const Text('Verificar'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Future<void> _navigateToCompleteProfile(User user) async {
+    if (!mounted) return;
+    // Navigate to the new screen instead of showing a dialog
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<app_user.UserModel>(
+        builder: (context) => CompleteProfileScreen(user: user),
+      ),
+    );
+
     if (!mounted) return;
     if (result != null) {
       _navigateUser(result.userType);
     } else {
+      // If the user cancelled (e.g., pressed back or the cancel button), sign them out.
       try {
-        await user.delete();
+        await user.delete(); // Also delete the partially created user from Auth
       } catch (e) {
-        // Silently fail
+        // This might fail if re-authentication is required, but we can fail silently.
       }
       await _authService.signOut();
     }
@@ -135,12 +189,13 @@ class LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppTheme.success,
     ));
     final route = switch (userType) {
-      'admin' => '/admin_home',
-      'Buyer' || 'Seller' => '/home',
+      'admin' => '/admin_dashboard', // Correct route for admin
+      'Buyer' => '/buyer_dashboard', // Correct route
+      'Seller' => '/seller_dashboard', // Correct route
       _ => null
     };
     if (route != null) {
-      Navigator.pushReplacementNamed(context, route, arguments: userType);
+      Navigator.pushReplacementNamed(context, route);
     } else {
       _authService.signOut();
       if (mounted) {
@@ -169,7 +224,6 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (El resto del build method se mantiene igual)
     return Scaffold(
       body: Stack(
         children: [
@@ -258,7 +312,7 @@ class LoginScreenState extends State<LoginScreen> {
           TextButton(
             onPressed: () => Navigator.pushReplacementNamed(context, '/'),
             child: const Text('Volver a la Bienvenida'),
-          ).animate().fade(delay: 1100.ms), // Add a slight delay for animation
+          ).animate().fade(delay: 1100.ms),
         ],
       ),
     );
@@ -330,161 +384,4 @@ class LoginScreenState extends State<LoginScreen> {
           ),
         ],
       );
-}
-
-class CompleteProfileDialog extends StatefulWidget {
-  final User user;
-  const CompleteProfileDialog({super.key, required this.user});
-  @override
-  State<CompleteProfileDialog> createState() => CompleteProfileDialogState();
-}
-
-class CompleteProfileDialogState extends State<CompleteProfileDialog> {
-  final _formKey = GlobalKey<FormState>();
-  String? _selectedUserType;
-  bool _isSaving = false;
-
-  final _dobController = TextEditingController();
-  final _rfcController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  final _placeOfBirthController = TextEditingController();
-  final _businessNameController = TextEditingController();
-  final _businessAddressController = TextEditingController();
-  DateTime? _selectedDate;
-  
-  @override
-  void dispose() {
-    _dobController.dispose();
-    _rfcController.dispose();
-    _phoneNumberController.dispose();
-    _placeOfBirthController.dispose();
-    _businessNameController.dispose();
-    _businessAddressController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      locale: const Locale('es', 'ES'),
-    );
-    if (picked != null && picked != _selectedDate) {
-      if (!mounted) return;
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = DateFormat('dd/MM/yyyy').format(picked);
-      });
-    }
-  }
-
-  Future<void> _saveProfile() async {
-    if (!(_formKey.currentState?.validate() ?? false) || !mounted) return;
-    setState(() => _isSaving = true);
-    
-    try {
-      final newUser = app_user.UserModel(
-        id: widget.user.uid,
-        fullName: widget.user.displayName ?? 'Sin Nombre',
-        email: widget.user.email!,
-        userType: _selectedUserType!,
-        profilePicture: widget.user.photoURL,
-        dob: _dobController.text.trim(),
-        rfc: _rfcController.text.trim(),
-        phoneNumber: _phoneNumberController.text.trim(),
-        placeOfBirth: _placeOfBirthController.text.trim(),
-        businessName: _selectedUserType == 'Seller' ? _businessNameController.text.trim() : null,
-        businessAddress: _selectedUserType == 'Seller' ? _businessAddressController.text.trim() : null,
-      );
-      await UserService().setUserData(widget.user.uid, newUser.toMap());
-      if (mounted) Navigator.of(context).pop(newUser);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error al guardar el perfil: ${e.toString()}'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ));
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // ... (El resto del build method se mantiene igual)
-    return AlertDialog(
-      title: const Text('Completa tu Perfil'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('¡Bienvenido! Revisa tus datos y completa lo que falta.'),
-              const SizedBox(height: 24),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedUserType,
-                decoration: const InputDecoration(labelText: 'Soy un...', border: OutlineInputBorder()),
-                items: ['Buyer', 'Seller'].map((v) => DropdownMenuItem(value: v, child: Text(v == 'Buyer' ? 'Comprador' : 'Vendedor'))).toList(),
-                onChanged: (v) => setState(() => _selectedUserType = v),
-                validator: (v) => v == null ? 'Por favor selecciona un tipo' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneNumberController,
-                decoration: const InputDecoration(labelText: 'Número de Teléfono'),
-                keyboardType: TextInputType.phone,
-                validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa tu número de teléfono' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _dobController,
-                readOnly: true,
-                onTap: () => _selectDate(context),
-                decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
-                validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa tu fecha de nacimiento' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _rfcController,
-                decoration: const InputDecoration(labelText: 'RFC'),
-                validator: (v) => (v?.isEmpty ?? true) ? 'Por favor ingresa tu RFC' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _placeOfBirthController,
-                decoration: const InputDecoration(labelText: 'Lugar de Nacimiento'),
-                validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa tu lugar de nacimiento' : null,
-              ),
-              if (_selectedUserType == 'Seller') ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _businessNameController,
-                  decoration: const InputDecoration(labelText: 'Nombre del Negocio'),
-                  validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa el nombre de tu negocio' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _businessAddressController,
-                  decoration: const InputDecoration(labelText: 'Dirección del Negocio'),
-                  validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa la dirección de tu negocio' : null,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(onPressed: _isSaving ? null : () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _saveProfile,
-          child: _isSaving ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('REGISTRARME'),
-        ),
-      ],
-    );
-  }
 }

@@ -13,7 +13,7 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Filtros y Ordenamiento:** Filtra las publicaciones por categoría y ordénalas por fecha o título para encontrar exactamente lo que buscas.
 - **Lista de Deseos (Favoritos):** Guarda tus productos preferidos en una lista de favoritos para acceder a ellos fácilmente.
 - **Carrito de Compras y Pedidos:** Añade productos al carrito, realiza pedidos y lleva un seguimiento de su estado en tu historial.
-- **Chat Directo con Vendedores:** Comunícate directamente con los vendedores para resolver dudas.
+- **Chat Directo con Vendedores:** Comunícate directamente con artesanos y pescadores locales.
 - **Reseñas y Calificaciones:** Valora los productos y vendedores después de una compra.
 
 ### Para Vendedores 🧑‍💼
@@ -37,36 +37,29 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
--   **Corrección de Inicio de Sesión con Google en Web:**
-    *   Se ha implementado la configuración necesaria para el plugin `google_sign_in` en la plataforma web, utilizando el "ID de Cliente Web" provisto. Esto soluciona el problema donde el inicio de sesión con Google no funcionaba correctamente en navegadores.
+-   **Autenticación y Gestión de Roles Mejorada:**
+    *   **Lógica de Administrador Unificada:** Se consolidó la creación de cuentas de administrador, requiriendo el código secreto (`12345678`) tanto para registros manuales como para nuevos inicios de sesión de Google (si el email está en la lista blanca).
+    *   **Flujo de Primer Inicio de Sesión:** La pantalla "Completa tu Perfil" (para nuevos usuarios de Google) ahora es una pantalla completa y desplazable (`CompleteProfileScreen`) para una mejor experiencia y evitar desbordamientos.
+    *   **Flujo de Bienvenida y Login Ajustado:**
+        *   La pantalla de bienvenida (`welcome_screen.dart`) es un punto de entrada claro con un único botón "Deseo ir a iniciar sesión".
+        *   La pantalla de login (`login_screen.dart`) ahora incluye un botón para regresar a la bienvenida.
 
--   **Refactorización Completa de la Navegación (Diseño Adaptable):**
-    *   Se ha introducido un diseño de navegación totalmente responsivo para mejorar drásticamente la experiencia de usuario en diferentes dispositivos (móviles, tabletas y escritorio).
-    *   **Nuevo Widget Centralizado:** Se creó un nuevo widget reutilizable, `ResponsiveScaffold`, que gestiona la lógica de la navegación principal de la aplicación.
-    *   **Comportamiento en Escritorio/Tableta (Pantallas Anchas):** En pantallas con un ancho mayor a 800px, la aplicación ahora muestra un menú de navegación lateral fijo (`NavigationRail`). Esto permite un acceso rápido y visible a todas las secciones principales sin necesidad de abrir un menú.
-    *   **Comportamiento en Móvil (Pantallas Estrechas):** En pantallas pequeñas, la aplicación mantiene el tradicional menú de hamburguesa deslizable (`Drawer`), optimizando el espacio disponible.
-    *   **Aplicado a Todos los Roles:** Este nuevo sistema de navegación se ha implementado en los paneles de control de los tres roles de usuario: **Comprador, Vendedor y Administrador**, unificando y mejorando la coherencia de la interfaz en toda la aplicación.
-    *   **Corrección de Errores:** Durante el proceso, se corrigió el error que provocaba que el icono del menú de hamburguesa no apareciera en los paneles de Comprador y Administrador.
+-   **Navegación Adaptable (Responsive) para Todos los Roles:**
+    *   Se implementó un sistema de navegación inteligente con `ResponsiveScaffold` que se adapta al tamaño de la pantalla, mostrando un menú de hamburguesa (`Drawer`) en móviles y un menú lateral fijo (`NavigationRail`) en escritorio/tabletas.
+    *   **Limpieza de Diseño:** Se eliminaron `Scaffold` anidados redundantes en todas las pantallas principales (`FeedScreen`, `BuyerOrdersScreen`, `SellerHomeScreen`, `MyProductsScreen`, etc.) para asegurar títulos únicos y controlar las flechas de retroceso.
+    *   Los `FloatingActionButton` se gestionan ahora desde los paneles principales (`Dashboard`) para su visualización condicional.
 
--   **Mejoras de UI y Compatibilidad Web:**
-    *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
-    *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
--   **Panel de Administrador Mejorado:**
-    *   La pantalla principal para administradores ahora es un feed de publicaciones completo.
-    *   Implementado un modo de solo lectura para administradores en el feed, detalles de publicaciones y detalles de productos (sin opciones de compra, comentarios o calificaciones).
-    *   Pantalla de perfil de administrador completamente rediseñada con estadísticas, información extendida, y funciones de seguridad (cambio de contraseña).
-    *   Integrado el inicio de sesión con Google para administradores a través de una lista blanca de correos en Firebase (requiere configuración manual de emails en la base de datos).
-    *   Se eliminó la opción de que los administradores cambien su foto de perfil, manteniendo un ícono predeterminado.
--   **Perfiles de Vendedor Detallados:**
-    *   Implementada una vista de perfil público de vendedor con 3 pestañas (Productos, Publicaciones, Información del perfil).
-    *   Esta vista es accesible tanto desde el feed principal como desde la gestión de usuarios, y opera en modo de solo lectura para administradores.
--   **Gestión de Usuarios Optimizada:**
-    *   Al seleccionar un usuario en la pantalla de gestión, ahora se accede a su perfil público detallado (con las 3 pestañas).
--   **Mejoras en el Chat de Soporte (Administradores):**
-    *   El listado de chats de soporte ahora muestra claramente el rol del usuario (Comprador/Vendedor) con etiquetas visuales (`Chips`).
-    *   Se confirmó la funcionalidad existente de envío de imágenes y archivos en el chat.
--   **Correcciones de Estabilidad y Lints:**
-    *   Se corrigieron errores de sintaxis y lints para mejorar la calidad y estabilidad del código.
+-   **Manejo de Perfiles y Configuración Refinado:**
+    *   **Distinción Clara:** Se separaron estrictamente las funciones de "Perfil" y "Configuración". `SellerSettingsScreen` ahora se enfoca solo en ajustes de seguridad, negocio, preferencias y utilidades.
+    *   **Gestión Precisa de Fotos de Perfil:**
+        *   **Vendedores:** Pueden gestionar (subir/cambiar/eliminar) su foto de perfil en `SellerProfileScreen`.
+        *   **Compradores:** Solo pueden *ver* su foto de perfil en `BuyerProfileScreen`, sin opciones de edición.
+        *   **Administradores:** Solo ven un icono predeterminado.
+    *   **Ubicación Consistente:** La gestión y visualización de la foto de perfil se limita exclusivamente a las pantallas de perfil.
+
+-   **Estabilidad y Calidad del Código:**
+    *   Se resolvieron todos los errores, advertencias y sugerencias (`lints`) detectados por el analizador de Flutter (`flutter analyze`), asegurando un código limpio y robusto.
+    *   Se corrigieron errores de compilación (`UnimplementedError: getLostData`) y errores de interfaz de usuario (`RenderFlex overflowed`) previamente reportados.
 
 ---
 

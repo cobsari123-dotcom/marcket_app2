@@ -81,79 +81,77 @@ class UserManagementScreenState extends State<UserManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit width for the user management content
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar usuarios...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(25.0)))
-                  ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800), // Limit width for the user management content
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar usuarios...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(25.0)))
                 ),
               ),
-              Expanded(
-                child: Consumer<UserManagementProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (provider.errorMessage != null) {
-                      return Center(child: Text('Error: ${provider.errorMessage}'));
-                    }
-                    if (provider.users.isEmpty) {
-                      return const Center(child: Text('No hay usuarios registrados.'));
-                    }
+            ),
+            Expanded(
+              child: Consumer<UserManagementProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (provider.errorMessage != null) {
+                    return Center(child: Text('Error: ${provider.errorMessage}'));
+                  }
+                  if (provider.users.isEmpty) {
+                    return const Center(child: Text('No hay usuarios registrados.'));
+                  }
 
-                    final filteredUsers = provider.users.where((user) {
-                      final query = provider.searchQuery.toLowerCase();
-                      return user.fullName.toLowerCase().contains(query) ||
-                             user.email.toLowerCase().contains(query);
-                    }).toList();
+                  final filteredUsers = provider.users.where((user) {
+                    final query = provider.searchQuery.toLowerCase();
+                    return user.fullName.toLowerCase().contains(query) ||
+                           user.email.toLowerCase().contains(query);
+                  }).toList();
 
-                    if (filteredUsers.isEmpty) {
-                      return const Center(child: Text('No se encontraron usuarios que coincidan con la búsqueda.'));
-                    }
+                  if (filteredUsers.isEmpty) {
+                    return const Center(child: Text('No se encontraron usuarios que coincidan con la búsqueda.'));
+                  }
 
-                    return ListView.builder(
-                      itemCount: filteredUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = filteredUsers[index];
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: user.profilePicture != null ? NetworkImage(user.profilePicture!) : null,
-                            child: user.profilePicture == null ? const Icon(Icons.person) : null,
-                          ),
-                          title: Text(user.fullName),
-                          subtitle: Text(user.email),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: AppTheme.error),
-                            onPressed: () => _deleteUser(context, user),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/public_seller_profile',
-                              arguments: {
-                                'sellerId': user.id,
-                                'isAdmin': true,
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
+                  return ListView.builder(
+                    itemCount: filteredUsers.length,
+                    itemBuilder: (context, index) {
+                      final user = filteredUsers[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: user.profilePicture != null ? NetworkImage(user.profilePicture!) : null,
+                          child: user.profilePicture == null ? const Icon(Icons.person) : null,
+                        ),
+                        title: Text(user.fullName),
+                        subtitle: Text(user.email),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: AppTheme.error),
+                          onPressed: () => _deleteUser(context, user),
+                        ),
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/public_seller_profile',
+                            arguments: {
+                              'sellerId': user.id,
+                              'isAdmin': true,
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

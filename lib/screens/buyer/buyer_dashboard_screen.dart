@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:marcket_app/models/user.dart';
+import 'package:marcket_app/providers/feed_provider.dart';
 import 'package:marcket_app/screens/buyer/buyer_orders_screen.dart';
 import 'package:marcket_app/screens/buyer/buyer_profile_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
@@ -38,6 +39,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     'Favoritos',
   ];
 
+  // Dependencies for the filter/sort dialog, moved from FeedScreen
+  final List<String> _categories = ['Todas', 'Artesanía', 'Comida', 'Servicios', 'Otros'];
+  final Map<String, String> _sortByOptions = {
+    'timestamp': 'Más Recientes',
+    'title': 'Título',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -72,13 +80,85 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     Navigator.pop(context); // Close the drawer
   }
 
+  void _showFilterSortDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Filtrar y Ordenar Publicaciones'),
+          content: Consumer<FeedProvider>(
+            builder: (context, provider, child) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Categoría:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    value: provider.selectedCategory ?? 'Todas',
+                    onChanged: (String? newValue) {
+                      provider.setCategory(newValue == 'Todas' ? null : newValue);
+                    },
+                    items: _categories.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Ordenar por:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    value: provider.sortBy,
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        provider.setSortBy(newValue);
+                      }
+                    },
+                    items: _sortByOptions.entries.map<DropdownMenuItem<String>>((MapEntry<String, String> entry) {
+                      return DropdownMenuItem<String>(
+                        value: entry.key,
+                        child: Text(entry.value),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Text('Orden:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Switch(
+                        value: provider.descending,
+                        onChanged: (bool value) {
+                          provider.setDescending(value);
+                        },
+                        activeThumbColor: AppTheme.primary,
+                      ),
+                      Text(provider.descending ? 'Descendente' : 'Ascendente'),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final user = FirebaseAuth.instance.currentUser;
 
     final List<Widget> buyerContent = [
-      FeedScreen(),
+      const FeedScreen(),
       const BuyerOrdersScreen(),
       BuyerProfileScreen(onProfileUpdated: _loadUserData),
       const ChatListScreen(),
@@ -234,6 +314,15 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         ],
       ),
     );
+    
+    Widget? fab;
+    if (_selectedIndex == 0) { // Only show FAB for FeedScreen
+        fab = FloatingActionButton(
+        onPressed: _showFilterSortDialog,
+        backgroundColor: AppTheme.primary,
+        child: const Icon(Icons.filter_list),
+      );
+    }
 
     return ResponsiveScaffold(
       pages: buyerContent,
@@ -242,6 +331,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       drawer: drawer,
       initialIndex: _selectedIndex,
       onIndexChanged: _onItemTapped,
+      floatingActionButton: fab,
       appBarActions: _selectedIndex == 0
           ? [
               IconButton(

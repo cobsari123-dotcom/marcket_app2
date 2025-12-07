@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:marcket_app/utils/theme.dart';
+
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
+import 'package:marcket_app/utils/theme.dart';
 
 class BuyerProfileScreen extends StatefulWidget {
-  final VoidCallback onProfileUpdated; // Ya no es necesario con Provider, pero lo mantengo por si acaso
+  final VoidCallback onProfileUpdated;
 
   const BuyerProfileScreen({super.key, required this.onProfileUpdated});
 
@@ -24,6 +25,12 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
 
+  // No longer needed for buyers based on new requirement:
+  // File? _imageFile;
+  // String? _networkImageUrl;
+  // bool _isGoogleUser = false;
+  // bool _isLoadingImage = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +40,6 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Vuelve a poblar si el usuario cambia (ej. cierra sesión y otro inicia sesión)
     _populateFields();
   }
 
@@ -49,6 +55,10 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       _dobController.text = user.dob ?? '';
       _rfcController.text = user.rfc ?? '';
       _placeOfBirthController.text = user.placeOfBirth ?? '';
+      // _networkImageUrl = user.profilePicture; // No longer needed for buyers
+      // _isGoogleUser = _auth.currentUser?.providerData.any(
+      //   (p) => p.providerId == 'google.com',
+      // ) ?? false; // No longer needed for buyers
     }
   }
 
@@ -63,6 +73,9 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
     _placeOfBirthController.dispose();
     super.dispose();
   }
+
+  // Remove all photo management methods as buyers cannot manage their PP
+  // _showSnackBar, _pickAndUploadImage, _syncPhotoFromGoogle, _manageInGoogle, _deleteProfilePicture, _showProfilePictureMenu
 
   Future<void> _saveUserData() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -136,87 +149,96 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Removed _buildProfileHeader() and its logic, replacing with simplified display
                     CircleAvatar(
-                      radius: 60,
+                      radius: 80,
+                      backgroundImage: user.profilePicture != null
+                          ? NetworkImage(user.profilePicture!)
+                          : null,
                       backgroundColor: AppTheme.beigeArena,
-                      backgroundImage: user.profilePicture != null ? NetworkImage(user.profilePicture!) : null,
                       child: user.profilePicture == null
-                          ? const Icon(Icons.person, size: 60, color: AppTheme.primary)
+                          ? const Icon(
+                              Icons.person, // Icono de persona para comprador
+                              size: 80,
+                              color: AppTheme.primary,
+                            )
                           : null,
                     ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _fullNameController,
-                      decoration: const InputDecoration(labelText: 'Nombre Completo', border: OutlineInputBorder(), prefixIcon: Icon(Icons.person)),
-                      validator: (v) => (v == null || v.isEmpty) ? 'Por favor ingresa tu nombre completo' : null,
-                    ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder(), prefixIcon: Icon(Icons.email)),
-                      readOnly: true,
+                    Text(
+                      user.fullName,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneNumberController,
-                      decoration: const InputDecoration(labelText: 'Número de Teléfono', border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _addressController,
-                      decoration: const InputDecoration(labelText: 'Dirección', border: OutlineInputBorder(), prefixIcon: Icon(Icons.home)),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _dobController,
-                      decoration: const InputDecoration(labelText: 'Fecha de Nacimiento', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today)),
-                      readOnly: true,
-                      onTap: () => _selectDate(context),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _rfcController,
-                      decoration: const InputDecoration(labelText: 'RFC', border: OutlineInputBorder(), prefixIcon: Icon(Icons.badge)),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _placeOfBirthController,
-                      decoration: const InputDecoration(labelText: 'Lugar de Nacimiento', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_city)),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: userProfileProvider.isLoading ? null : _saveUserData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: const Text('Guardar Cambios'),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: userProfileProvider.isLoading ? null : () => {}, // TODO: Implementar eliminar cuenta
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.error,
-                          side: const BorderSide(color: AppTheme.error),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: const Text('Eliminar Cuenta'),
-                      ),
-                    ),
+                    Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 24),
+                    _buildProfileForm(), // The rest of the profile form
                   ],
                 ),
               ),
             ),
           ),
         );
+      },
+    );
+  }
+
+  Widget _buildProfileForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _dobController,
+            readOnly: true,
+            onTap: () => _selectDate(context),
+            decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            _placeOfBirthController,
+            'Lugar de Nacimiento',
+            Icons.location_city,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(_rfcController, 'RFC', Icons.badge),
+          const SizedBox(height: 16),
+          _buildTextField(
+            _phoneNumberController,
+            'Número de Teléfono',
+            Icons.phone,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _saveUserData,
+            icon: const Icon(Icons.save),
+            label: const Text('Guardar Cambios'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: AppTheme.primary),
+      ),
+      validator: (value) {
+        return value!.isEmpty ? 'Por favor, introduce tu $label' : null;
       },
     );
   }

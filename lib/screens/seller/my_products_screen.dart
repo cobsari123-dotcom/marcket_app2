@@ -113,75 +113,66 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<ProductListProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoadingInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (provider.errorMessage != null) {
-            return Center(child: Text('Error: ${provider.errorMessage}'));
-          }
-          if (provider.products.isEmpty) {
-            return const Center(child: Text('No tienes productos aún.'));
-          }
-          
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: RefreshIndicator(
-                onRefresh: () => provider.refreshProducts(),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final screenWidth = constraints.maxWidth;
-                    int crossAxisCount;
-                    double childAspectRatio;
-                    if (screenWidth < 600) {
-                      crossAxisCount = 2;
-                      childAspectRatio = 0.75;
-                    } else if (screenWidth < 900) {
-                      crossAxisCount = 3;
-                      childAspectRatio = 0.8;
-                    } else {
-                      crossAxisCount = 4;
-                      childAspectRatio = 0.9;
-                    }
+    return Consumer<ProductListProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoadingInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (provider.errorMessage != null) {
+          return Center(child: Text('Error: ${provider.errorMessage}'));
+        }
+        if (provider.products.isEmpty) {
+          return const Center(child: Text('No tienes productos aún.'));
+        }
+        
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: RefreshIndicator(
+              onRefresh: () => provider.refreshProducts(),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final screenWidth = constraints.maxWidth;
+                  int crossAxisCount;
+                  double childAspectRatio;
+                  if (screenWidth < 600) {
+                    crossAxisCount = 2;
+                    childAspectRatio = 0.75;
+                  } else if (screenWidth < 900) {
+                    crossAxisCount = 3;
+                    childAspectRatio = 0.8;
+                  } else {
+                    crossAxisCount = 4;
+                    childAspectRatio = 0.9;
+                  }
 
-                    return GridView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(12.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: childAspectRatio,
-                        crossAxisSpacing: 12.0,
-                        mainAxisSpacing: 12.0,
-                      ),
-                      itemCount: provider.products.length + (provider.isLoadingMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == provider.products.length) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        final product = provider.products[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () => _showProductMenu(context, product),
-                        );
-                      },
-                    );
-                  },
-                ),
+                  return GridView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(12.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: childAspectRatio,
+                      crossAxisSpacing: 12.0,
+                      mainAxisSpacing: 12.0,
+                    ),
+                    itemCount: provider.products.length + (provider.isLoadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == provider.products.length) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final product = provider.products[index];
+                      return ProductCard(
+                        product: product,
+                        onTap: () => _showProductMenu(context, product),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add_edit_product').then((_) => _productListProvider.refreshProducts());
-        },
-        backgroundColor: AppTheme.secondary,
-        child: const Icon(Icons.add, color: AppTheme.onSecondary),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -11,7 +11,7 @@ import 'package:marcket_app/providers/admin_dashboard_provider.dart';
 import 'package:marcket_app/providers/user_management_provider.dart';
 import 'package:marcket_app/providers/admin_complaints_provider.dart';
 import 'package:marcket_app/providers/wishlist_provider.dart';
-import 'package:marcket_app/providers/notification_service.dart'; // Importar el nuevo NotificationService
+import 'package:marcket_app/providers/notification_service.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
 import 'package:marcket_app/screens/chat/chat_screen.dart';
@@ -28,14 +28,16 @@ import 'package:marcket_app/screens/seller/add_edit_product_screen.dart';
 import 'package:marcket_app/models/product.dart';
 import 'package:marcket_app/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; // Importar Firebase Messaging
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:marcket_app/screens/admin/admin_dashboard_screen.dart';
 import 'package:marcket_app/screens/admin/admin_home_screen.dart';
 import 'package:marcket_app/screens/seller/create_edit_publication_screen.dart';
-import 'package:marcket_app/screens/app_initializer.dart'; // Importar el nuevo archivo
+import 'package:marcket_app/screens/app_initializer.dart';
+import 'package:marcket_app/screens/complete_profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Handler para mensajes en segundo plano o cuando la app está terminada
 @pragma('vm:entry-point')
@@ -98,6 +100,10 @@ class MyApp extends StatelessWidget {
               '/seller_dashboard': (context) => const SellerDashboardScreen(),
               '/admin_dashboard': (context) => const AdminDashboardScreen(),
               '/admin_home': (context) => const AdminHomeScreen(),
+              '/complete_profile': (context) {
+                final user = ModalRoute.of(context)!.settings.arguments as User;
+                return CompleteProfileScreen(user: user);
+              },
               '/add_edit_product': (context) {
                 final product = ModalRoute.of(context)!.settings.arguments as Product?;
                 return AddEditProductScreen(product: product);

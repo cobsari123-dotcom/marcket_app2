@@ -8,6 +8,7 @@ class ResponsiveScaffold extends StatefulWidget {
   final int initialIndex;
   final ValueChanged<int> onIndexChanged;
   final List<Widget>? appBarActions;
+  final Widget? floatingActionButton;
 
   const ResponsiveScaffold({
     super.key,
@@ -18,6 +19,7 @@ class ResponsiveScaffold extends StatefulWidget {
     required this.initialIndex,
     required this.onIndexChanged,
     this.appBarActions,
+    this.floatingActionButton,
   });
 
   @override
@@ -56,6 +58,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
             ),
             drawer: widget.drawer,
             body: widget.pages[_selectedIndex],
+            floatingActionButton: widget.floatingActionButton,
           );
         } else {
           // Wide layout (desktop/tablet)
@@ -84,6 +87,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 ),
               ],
             ),
+            floatingActionButton: widget.floatingActionButton,
           );
         }
       },

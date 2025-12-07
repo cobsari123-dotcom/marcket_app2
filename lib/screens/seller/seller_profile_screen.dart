@@ -11,7 +11,7 @@ import 'package:marcket_app/widgets/publication_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
-import 'package:marcket_app/services/user_service.dart'; // Para _deleteProfilePicture y _updateProfile
+import 'package:marcket_app/services/user_service.dart';
 
 class SellerProfileScreen extends StatelessWidget {
   final VoidCallback onProfileUpdated;
@@ -20,12 +20,14 @@ class SellerProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SellerProfileTabView(); // onProfileUpdated ya no es necesario pasarlo
+    return SellerProfileTabView(onProfileUpdated: onProfileUpdated);
   }
 }
 
 class SellerProfileTabView extends StatefulWidget {
-  const SellerProfileTabView({super.key}); // onProfileUpdated ya no es necesario
+  final VoidCallback onProfileUpdated;
+
+  const SellerProfileTabView({super.key, required this.onProfileUpdated});
 
   @override
   State<SellerProfileTabView> createState() => SellerProfileTabViewState();
@@ -50,43 +52,37 @@ class SellerProfileTabViewState extends State<SellerProfileTabView>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          TabBar(
+    // This screen does not return a Scaffold directly,
+    // as it is intended to be used as a body within a ResponsiveScaffold.
+    return Column(
+      children: [
+        TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Mi Perfil'),
+            Tab(text: 'Mis Publicaciones'),
+          ],
+          labelColor: AppTheme.primary,
+          unselectedLabelColor: AppTheme.onBackground.withAlpha(153),
+          indicatorColor: AppTheme.primary,
+        ),
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            tabs: const [
-              Tab(text: 'Mi Perfil'),
-              Tab(text: 'Mis Publicaciones'),
+            children: [
+              ProfileForm(onProfileUpdated: widget.onProfileUpdated),
+              PublicationsList(),
             ],
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.onBackground.withAlpha(153),
-            indicatorColor: AppTheme.primary,
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                ProfileForm(),
-                PublicationsList(),
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/create_edit_publication'),
-              child: const Icon(Icons.add),
-            )
-          : null,
+        ),
+      ],
     );
   }
 }
 
 class ProfileForm extends StatefulWidget {
-  const ProfileForm({super.key});
+  final VoidCallback onProfileUpdated;
+  const ProfileForm({super.key, required this.onProfileUpdated});
 
   @override
   State<ProfileForm> createState() => ProfileFormState();
@@ -109,6 +105,7 @@ class ProfileFormState extends State<ProfileForm> {
   File? _imageFile;
   String? _networkImageUrl;
   bool _isGoogleUser = false;
+  bool _isLoadingImage = false; // New state for image loading
 
   @override
   void initState() {
@@ -143,9 +140,7 @@ class ProfileFormState extends State<ProfileForm> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -155,6 +150,11 @@ class ProfileFormState extends State<ProfileForm> {
   }
 
   Future<void> _pickAndUploadImage() async {
+    if (_isGoogleUser) { // User is Google user, should not pick and upload
+      _showSnackBar('Los usuarios de Google gestionan su foto desde su cuenta de Google.', isError: true);
+      return;
+    }
+    
     final pickedImage = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
@@ -163,6 +163,7 @@ class ProfileFormState extends State<ProfileForm> {
     
     setState(() {
       _imageFile = File(pickedImage.path);
+      _isLoadingImage = true;
     });
 
     try {
@@ -188,10 +189,19 @@ class ProfileFormState extends State<ProfileForm> {
     } catch (e) {
       if (!mounted) return;
       _showSnackBar('Error al subir la imagen: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoadingImage = false);
+      widget.onProfileUpdated(); // Notify parent to refresh user data
     }
   }
 
   Future<void> _syncPhotoFromGoogle() async {
+    if (!mounted) return;
+    if (!_isGoogleUser) { // User is not Google user, should not sync from Google
+      _showSnackBar('Esta opción es solo para usuarios registrados con Google.', isError: true);
+      return;
+    }
+    setState(() => _isLoadingImage = true);
     try {
       await _auth.currentUser?.reload();
       final newPhotoUrl = _auth.currentUser?.photoURL;
@@ -204,6 +214,9 @@ class ProfileFormState extends State<ProfileForm> {
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error al sincronizar la foto: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoadingImage = false);
+      widget.onProfileUpdated(); // Notify parent to refresh user data
     }
   }
 
@@ -218,6 +231,7 @@ class ProfileFormState extends State<ProfileForm> {
 
   Future<void> _deleteProfilePicture() async {
     if (_networkImageUrl == null) return;
+    
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -236,16 +250,17 @@ class ProfileFormState extends State<ProfileForm> {
 
     if (confirmed != true) return;
     
+    setState(() => _isLoadingImage = true);
+
     try {
-      if (!_isGoogleUser) {
+      if (!_isGoogleUser) { // Only delete from storage if not a Google user
         await FirebaseStorage.instance.refFromURL(_networkImageUrl!).delete();
       }
       await _userService.updateUserData(_auth.currentUser!.uid, {
         'profilePicture': null,
       });
-      if (!_isGoogleUser) {
-        await _auth.currentUser?.updatePhotoURL(null);
-      }
+      await _auth.currentUser?.updatePhotoURL(null); // Clear photo URL in Firebase Auth
+
       if (mounted) {
         setState(() {
           _networkImageUrl = null;
@@ -256,7 +271,8 @@ class ProfileFormState extends State<ProfileForm> {
     } catch (e) {
       if (mounted) _showSnackBar('Error al eliminar la foto: $e', isError: true);
     } finally {
-      // No hay estado de carga que desactivar aquí
+      if (mounted) setState(() => _isLoadingImage = false);
+      widget.onProfileUpdated(); // Notify parent to refresh user data
     }
   }
 
@@ -316,15 +332,16 @@ class ProfileFormState extends State<ProfileForm> {
                   _manageInGoogle();
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.sync),
-                title: const Text('Sincronizar con Google'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _syncPhotoFromGoogle();
-                },
-              ),
-            ] else ...[
+              if (_networkImageUrl != null)
+                ListTile(
+                  leading: const Icon(Icons.sync),
+                  title: const Text('Sincronizar con Google'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _syncPhotoFromGoogle();
+                  },
+                ),
+            ] else
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Cambiar Foto'),
@@ -333,7 +350,6 @@ class ProfileFormState extends State<ProfileForm> {
                   _pickAndUploadImage();
                 },
               ),
-            ],
             if (_networkImageUrl != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: AppTheme.error),
@@ -419,21 +435,26 @@ class ProfileFormState extends State<ProfileForm> {
                               : null)
                           as ImageProvider?,
                 backgroundColor: AppTheme.beigeArena,
-                child: _imageFile == null && _networkImageUrl == null
+                child: _imageFile == null && _networkImageUrl == null && _isLoadingImage == false
                     ? const Icon(
                         Icons.store, // Icono de tienda para vendedor
                         size: 80,
                         color: AppTheme.primary,
                       )
-                    : null,
+                    : (_isLoadingImage ? const CircularProgressIndicator() : null), // Show loading indicator
               ),
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: CircleAvatar(
-                  backgroundColor: AppTheme.secondary,
-                  child: const Icon(Icons.camera_alt, color: Colors.white),
-                ),
+                child: _isLoadingImage // Hide camera icon when loading
+                    ? const SizedBox.shrink()
+                    : CircleAvatar(
+                        backgroundColor: AppTheme.secondary,
+                        child: Icon(
+                          _isGoogleUser ? Icons.settings : Icons.camera_alt, // Different icon for Google vs Manual
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ],
           ),

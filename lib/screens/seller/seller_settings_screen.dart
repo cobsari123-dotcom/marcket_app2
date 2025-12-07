@@ -5,10 +5,8 @@ import 'package:marcket_app/providers/theme_provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
-import 'package:path_provider/path_provider.dart'; // Import path_provider
-import 'dart:io'; // Import for Directory
-import 'package:image_picker/image_picker.dart'; // For profile picture update
-import 'package:firebase_storage/firebase_storage.dart'; // For profile picture upload
+import 'package:path_provider/path_provider.dart';
+
 import 'package:provider/provider.dart';
 
 class SellerSettingsScreen extends StatefulWidget {
@@ -45,6 +43,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
   }
 
   void _populateControllers(UserModel? userModel) {
+    // Only populate business info related fields as general info is not editable here
     if (userModel != null) {
       _businessNameController.text = userModel.businessName ?? '';
       _businessAddressController.text = userModel.businessAddress ?? '';
@@ -378,70 +377,6 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     }
   }
 
-    Future<void> _updateProfilePicture(UserProfileProvider userProfileProvider) async {
-
-      final ImagePicker picker = ImagePicker();
-
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-  
-
-      if (image == null) return;
-
-  
-
-      userProfileProvider.setLoading(true);
-
-      try {
-
-        final String fileName = '${FirebaseAuth.instance.currentUser!.uid}_profile.jpg';
-
-        final Reference storageRef = FirebaseStorage.instance.ref().child('profile_pictures').child(fileName);
-
-        final UploadTask uploadTask = storageRef.putFile(File(image.path));
-
-        final TaskSnapshot snapshot = await uploadTask;
-
-        final String downloadUrl = await snapshot.ref.getDownloadURL();
-
-  
-
-        // Actualizar URL de la foto de perfil en Firebase Auth y Realtime Database
-
-        await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadUrl);
-
-        await userProfileProvider.updateProfile(
-
-          fullName: userProfileProvider.currentUserModel!.fullName, // Mantener los demás datos
-
-          profilePicture: downloadUrl,
-
-        );
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-
-          const SnackBar(content: Text('¡Foto de perfil actualizada!'), backgroundColor: AppTheme.success),
-
-        );
-
-      } catch (e) {
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-
-          SnackBar(content: Text('Error al actualizar foto de perfil: $e'), backgroundColor: AppTheme.error),
-
-        );
-
-      } finally {
-
-        userProfileProvider.setLoading(false);
-
-      }
-
-    }
-
   Future<void> _updateBusinessInfo(UserProfileProvider userProfileProvider) async {
     _populateControllers(userProfileProvider.currentUserModel); // Asegurar que los controladores tengan los valores actuales
 
@@ -498,8 +433,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al eliminar caché: $e'), backgroundColor: AppTheme.error, duration: Duration(seconds: 3)),
       );
-      }
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -530,47 +465,6 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 24.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Información General', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 20),
-                          Center(
-                            child: Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: userModel.profilePicture != null ? NetworkImage(userModel.profilePicture!) : null,
-                                  child: userModel.profilePicture == null ? const Icon(Icons.store, size: 60, color: AppTheme.onSecondary) : null,
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.camera_alt, color: AppTheme.primary),
-                                    onPressed: () => _updateProfilePicture(userProfileProvider),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ListTile(leading: const Icon(Icons.email), title: const Text('Correo Electrónico'), subtitle: Text(currentUser.email ?? 'N/A')),
-                          ListTile(leading: const Icon(Icons.person), title: const Text('Nombre Completo'), subtitle: Text(userModel.fullName)),
-                          ListTile(leading: const Icon(Icons.badge), title: const Text('Tipo de Usuario'), subtitle: Text(userModel.userType)),
-                          ListTile(leading: const Icon(Icons.phone), title: const Text('Número de Teléfono'), subtitle: Text(userModel.phoneNumber ?? 'N/A')),
-                          ListTile(leading: const Icon(Icons.cake), title: const Text('Fecha de Nacimiento'), subtitle: Text(userModel.dob ?? 'N/A')),
-                          ListTile(leading: const Icon(Icons.assignment_ind), title: const Text('RFC'), subtitle: Text(userModel.rfc ?? 'N/A')),
-                          ListTile(leading: const Icon(Icons.location_city), title: const Text('Lugar de Nacimiento'), subtitle: Text(userModel.placeOfBirth ?? 'N/A')),
-                          ListTile(leading: const Icon(Icons.home), title: const Text('Dirección Personal'), subtitle: Text(userModel.address ?? 'N/A')),
-                        ],
-                      ),
-                    ),
-                  ),
                   Card(
                     margin: const EdgeInsets.only(bottom: 24.0),
                     child: Padding(

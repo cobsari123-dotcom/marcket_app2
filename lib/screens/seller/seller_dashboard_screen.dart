@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:marcket_app/providers/product_list_provider.dart';
 import 'package:marcket_app/screens/seller/home_screen.dart';
 import 'package:marcket_app/screens/seller/my_products_screen.dart';
 import 'package:marcket_app/screens/seller/seller_orders_screen.dart';
@@ -201,6 +202,20 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       ),
     );
 
+    Widget? fab;
+    if (_selectedIndex == 1) { // Only show FAB for MyProductsScreen
+        fab = FloatingActionButton(
+        onPressed: () {
+            Navigator.pushNamed(context, '/add_edit_product').then((_) {
+                // Refresh the product list after adding/editing a product
+                Provider.of<ProductListProvider>(context, listen: false).refreshProducts();
+            });
+        },
+        backgroundColor: AppTheme.secondary,
+        child: const Icon(Icons.add, color: AppTheme.onSecondary),
+      );
+    }
+
     return ResponsiveScaffold(
         pages: widgetOptions,
         titles: _titles,
@@ -208,6 +223,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         drawer: drawer,
         initialIndex: _selectedIndex,
         onIndexChanged: _onItemTapped,
+        floatingActionButton: fab,
     );
   }
 

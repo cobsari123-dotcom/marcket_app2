@@ -79,14 +79,7 @@ class WelcomeScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Empezar'),
-                            SizedBox(width: 10),
-                            Icon(Icons.arrow_forward),
-                          ],
-                        ),
+                        child: const Text('Deseo ir a iniciar sesión'),
                       ).animate().scale(delay: 1200.ms, duration: 600.ms, curve: Curves.elasticOut),
                       SizedBox(height: size.height * 0.05),
                     ],

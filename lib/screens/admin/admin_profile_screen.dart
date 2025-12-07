@@ -121,59 +121,32 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 250.0,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: Text(_userModel?.fullName ?? 'Perfil de Admin', style: const TextStyle(shadows: [Shadow(blurRadius: 5)])),
-                    background: Stack(
-                      fit: StackFit.expand,
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          color: AppTheme.primary,
-                          child: Icon(Icons.shield, size: 100, color: Colors.white54),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black.withAlpha((255 * 0.7).round())],
-                            ),
-                          ),
-                        ),
+                        _buildStatsCard(),
+                        const SizedBox(height: 24),
+                        _buildProfileForm(),
+                        const SizedBox(height: 24),
+                        _buildSecurityCard(context),
+                        const SizedBox(height: 24),
+                        _buildInfoCard(),
                       ],
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildStatsCard(),
-                          const SizedBox(height: 24),
-                          _buildProfileForm(),
-                          const SizedBox(height: 24),
-                          _buildSecurityCard(context),
-                          const SizedBox(height: 24),
-                          _buildInfoCard(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-    );
+              ),
+            ],
+          );
   }
 
   Widget _buildSecurityCard(BuildContext context) {
