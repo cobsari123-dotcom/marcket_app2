@@ -37,6 +37,9 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
+-   **Corrección de Inicio de Sesión con Google en Web:**
+    *   Se ha implementado la configuración necesaria para el plugin `google_sign_in` en la plataforma web, utilizando el "ID de Cliente Web" provisto. Esto soluciona el problema donde el inicio de sesión con Google no funcionaba correctamente en navegadores.
+
 -   **Refactorización Completa de la Navegación (Diseño Adaptable):**
     *   Se ha introducido un diseño de navegación totalmente responsivo para mejorar drásticamente la experiencia de usuario en diferentes dispositivos (móviles, tabletas y escritorio).
     *   **Nuevo Widget Centralizado:** Se creó un nuevo widget reutilizable, `ResponsiveScaffold`, que gestiona la lógica de la navegación principal de la aplicación.

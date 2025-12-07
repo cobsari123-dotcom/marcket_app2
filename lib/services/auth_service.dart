@@ -7,7 +7,9 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
   // Usamos el alias 'google.' para asegurar que usamos la librería oficial
-  final google.GoogleSignIn _googleSignIn = google.GoogleSignIn();
+  final google.GoogleSignIn _googleSignIn = google.GoogleSignIn(
+    clientId: '766952734433-a2i9su93l8j9j1h2k8n5db0hgr1cbi7h.apps.googleusercontent.com',
+  );
 
   // Stream para escuchar los cambios de estado de autenticación
   Stream<User?> get authStateChanges => _auth.authStateChanges();
