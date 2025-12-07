@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -12,20 +13,19 @@ class AppInitializerState extends State<AppInitializer> {
   @override
   void initState() {
     super.initState();
-    _retrieveLostData();
+    _initialize();
   }
 
-  Future<void> _retrieveLostData() async {
-    final ImagePicker picker = ImagePicker();
-    final LostDataResponse response = await picker.retrieveLostData();
-    if (response.isEmpty) {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/splash');
+  Future<void> _initialize() async {
+    // retrieveLostData is not supported on web, so we bypass it.
+    if (!kIsWeb) {
+      final ImagePicker picker = ImagePicker();
+      final LostDataResponse response = await picker.retrieveLostData();
+      if (!response.isEmpty) {
+        // Logic for handling lost files can be added here if necessary.
       }
-      return;
     }
-    // Logic for handling lost files can be added here if necessary.
-    // For now, we navigate directly to splash.
+    
     if (mounted) {
       Navigator.of(context).pushReplacementNamed('/splash');
     }

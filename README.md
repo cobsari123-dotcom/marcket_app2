@@ -32,13 +32,14 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 
 ## 🚀 Mejoras Recientes
 
-## 🚀 Mejoras Recientes
-
 A continuación, se detallan las *últimas* mejoras y correcciones implementadas para optimizar la experiencia de usuario y la estabilidad de la aplicación.
-**Fecha de la Última Actualización:** viernes, 05 de diciembre de 2025
+**Fecha de la Última Actualización:** sábado, 06 de diciembre de 2025
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
+-   **Mejoras de UI y Compatibilidad Web:**
+    *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
+    *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
 -   **Panel de Administrador Mejorado:**
     *   La pantalla principal para administradores ahora es un feed de publicaciones completo.
     *   Implementado un modo de solo lectura para administradores en el feed, detalles de publicaciones y detalles de productos (sin opciones de compra, comentarios o calificaciones).
@@ -98,5 +99,3 @@ Para ejecutar este proyecto localmente, asegúrate de tener el [SDK de Flutter](
    ```sh
    flutter run
    ```
-
-"Actualizaci�n para forzar la recarga de GitHub" 

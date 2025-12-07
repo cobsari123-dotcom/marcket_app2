@@ -207,42 +207,14 @@ class LoginScreenState extends State<LoginScreen> {
   Widget _buildWideLayout() {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1000),
+        constraints: const BoxConstraints(maxWidth: 450),
         child: Card(
           margin: const EdgeInsets.all(24.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(32.0),
-                  color: AppTheme.primary,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/images/logoapp.jpg', width: 120),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Manos del Mar',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.onPrimary),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Conectando artesanos, inspirando al mundo.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.onPrimary.withAlpha(204)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
-                  child: _buildLoginForm(),
-                ),
-              ),
-            ],
+          elevation: 8,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+            child: _buildLoginForm(),
           ),
         ),
       ),
