@@ -34,7 +34,7 @@ class CartItem {
       name: map['name'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       price: (map['price'] ?? 0.0).toDouble(),
-      quantity: map['quantity'] ?? 0,
+      quantity: (map['quantity'] as num? ?? 0).toInt(),
       sellerId: map['sellerId'] ?? '',
     );
   }

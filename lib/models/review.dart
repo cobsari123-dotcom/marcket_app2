@@ -28,7 +28,7 @@ class Review {
       buyerName: map['buyerName'] ?? '',
       rating: (map['rating'] ?? 0.0).toDouble(),
       comment: map['comment'] ?? '',
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
     );
   }
 

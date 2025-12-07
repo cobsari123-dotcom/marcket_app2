@@ -38,13 +38,13 @@ class Product {
       name: map['name'] ?? '',
       description: map['description'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
-      stock: map['stock'] ?? 0,
+      stock: (map['stock'] as num? ?? 0).toInt(),
       imageUrls: imageUrls,
       category: map['category'] ?? '',
       isFeatured: map['isFeatured'] ?? false,
       sellerId: sellerIdParam ?? map['sellerId'] ?? '',
       averageRating: (map['averageRating'] ?? 0.0).toDouble(), // Added to fromMap
-      reviewCount: map['reviewCount'] ?? 0, // Added to fromMap
+      reviewCount: (map['reviewCount'] as num? ?? 0).toInt(), // Added to fromMap
     );
   }
 

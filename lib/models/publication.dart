@@ -61,11 +61,11 @@ class Publication {
       title: map['title'] ?? '',
       content: map['content'] ?? '',
       imageUrls: imageUrls,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
       ratings: ratings,
       comments: comments,
       modifiedTimestamp: map['modifiedTimestamp'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['modifiedTimestamp'])
+          ? DateTime.fromMillisecondsSinceEpoch((map['modifiedTimestamp'] as num).toInt())
           : null,
     );
   }

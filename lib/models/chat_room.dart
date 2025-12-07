@@ -32,8 +32,7 @@ class ChatRoom {
       id: id,
       participants: Map<String, bool>.from(map['participants'] ?? {}),
       lastMessage: map['lastMessage'] ?? '',
-      lastMessageTimestamp:
-          DateTime.fromMillisecondsSinceEpoch(map['lastMessageTimestamp'] ?? 0),
+      lastMessageTimestamp: DateTime.fromMillisecondsSinceEpoch((map['lastMessageTimestamp'] as num? ?? 0).toInt()),
       participantInfo: participantInfo,
     );
   }

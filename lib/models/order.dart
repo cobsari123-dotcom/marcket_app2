@@ -47,7 +47,7 @@ class Order {
         (e) => e.toString() == 'OrderStatus.${map['status']}',
         orElse: () => OrderStatus.pending,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt']),
+      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as num).toInt()),
       paymentReceiptUrl: map['paymentReceiptUrl'],
       trackingNumber: map['trackingNumber'],
       rejectionReason: map['rejectionReason'], // Add to fromMap

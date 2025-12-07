@@ -65,6 +65,8 @@ class SellerOrderListProvider with ChangeNotifier {
       }
       query = query.limitToFirst(10); // Límite por página
 
+      // Ensure previous subscription is cancelled before creating a new one
+      _ordersSubscription?.cancel();
       _ordersSubscription = query.onValue.listen((event) async {
         if (!hasListeners) return;
 

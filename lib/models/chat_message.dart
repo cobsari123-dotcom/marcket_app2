@@ -23,7 +23,7 @@ class ChatMessage {
       text: map['text'] ?? '',
       messageType: map['messageType'] ?? 'text',
       mediaUrl: map['mediaUrl'],
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
     );
   }
 

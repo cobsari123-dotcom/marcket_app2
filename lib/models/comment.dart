@@ -24,7 +24,7 @@ class Comment {
       userName: map['userName'] ?? '',
       userImageUrl: map['userImageUrl'] ?? '',
       comment: map['comment'] ?? '',
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
       imageUrl: map['imageUrl'], // Read from map
     );
   }

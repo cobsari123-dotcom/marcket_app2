@@ -37,6 +37,12 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
+-   **Mejoras de Estabilidad y Robustez del Código:**
+    *   **Corrección de `ClassCastException`:** Se resolvió un error crítico que causaba fallos en la aplicación al procesar datos numéricos (especialmente timestamps) desde Firebase Realtime Database en varios modelos (`Publication`, `CartItem`, `ChatMessage`, `ChatRoom`, `Comment`, `Order`, `Product`, `Review`). Ahora se realiza una conversión explícita a `int` o `double` para evitar crashes.
+    *   **Gestión Optimizada de Streams:** Se eliminó un `ConcurrentModificationException` que podía provocar cierres inesperados al finalizar la aplicación, asegurando que todas las suscripciones a streams de Firebase Realtime Database se cancelen correctamente en `providers` clave (`OrderListProvider`, `SellerOrderListProvider`).
+    *   **Resolución de Errores de UI:** Se corrigieron fallos de aserción (`child == _child`) y errores de `Duplicate GlobalKey` en los formularios de perfil (`BuyerProfileScreen`, `SellerProfileScreen`), garantizando una reconstrucción correcta y unificada de la interfaz de usuario.
+    *   **Código 100% Limpio:** Se abordaron y corrigieron todos los errores, advertencias y sugerencias (`lints`) restantes reportados por `flutter analyze`, logrando que la base de código esté completamente libre de problemas según el análisis estático.
+
 -   **Autenticación y Gestión de Roles Mejorada:**
     *   **Lógica de Administrador Unificada:** Se consolidó la creación de cuentas de administrador, requiriendo el código secreto (`12345678`) tanto para registros manuales como para nuevos inicios de sesión de Google (si el email está en la lista blanca).
     *   **Flujo de Primer Inicio de Sesión:** La pantalla "Completa tu Perfil" (para nuevos usuarios de Google) ahora es una pantalla completa y desplazable (`CompleteProfileScreen`) para una mejor experiencia y evitar desbordamientos.
@@ -57,9 +63,25 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
         *   **Administradores:** Solo ven un icono predeterminado.
     *   **Ubicación Consistente:** La gestión y visualización de la foto de perfil se limita exclusivamente a las pantallas de perfil.
 
--   **Estabilidad y Calidad del Código:**
-    *   Se resolvieron todos los errores, advertencias y sugerencias (`lints`) detectados por el analizador de Flutter (`flutter analyze`), asegurando un código limpio y robusto.
-    *   Se corrigieron errores de compilación (`UnimplementedError: getLostData`) y errores de interfaz de usuario (`RenderFlex overflowed`) previamente reportados.
+-   **Mejoras de UI y Compatibilidad Web:**
+    *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
+    *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
+-   **Panel de Administrador Mejorado:**
+    *   La pantalla principal para administradores ahora es un feed de publicaciones completo.
+    *   Implementado un modo de solo lectura para administradores en el feed, detalles de publicaciones y detalles de productos (sin opciones de compra, comentarios o calificaciones).
+    *   Pantalla de perfil de administrador completamente rediseñada con estadísticas, información extendida, y funciones de seguridad (cambio de contraseña).
+    *   Integrado el inicio de sesión con Google para administradores a través de una lista blanca de correos en Firebase (requiere configuración manual de emails en la base de datos).
+    *   Se eliminó la opción de que los administradores cambien su foto de perfil, manteniendo un ícono predeterminado.
+-   **Perfiles de Vendedor Detallados:**
+    *   Implementada una vista de perfil público de vendedor con 3 pestañas (Productos, Publicaciones, Información del perfil).
+    *   Esta vista es accesible tanto desde el feed principal como desde la gestión de usuarios, y opera en modo de solo lectura para administradores.
+-   **Gestión de Usuarios Optimizada:**
+    *   Al seleccionar un usuario en la pantalla de gestión, ahora se accede a su perfil público detallado (con las 3 pestañas).
+-   **Mejoras en el Chat de Soporte (Administradores):**
+    *   El listado de chats de soporte ahora muestra claramente el rol del usuario (Comprador/Vendedor) con etiquetas visuales (`Chips`).
+    *   Se confirmó la funcionalidad existente de envío de imágenes y archivos en el chat.
+-   **Correcciones de Estabilidad y Lints:**
+    *   Se corrigieron errores de sintaxis y lints para mejorar la calidad y estabilidad del código.
 
 ---
 

@@ -60,6 +60,8 @@ class OrderListProvider with ChangeNotifier {
         }).limitToFirst(10);
       }
 
+      // Ensure previous subscription is cancelled before creating a new one
+      _ordersSubscription?.cancel();
       _ordersSubscription = query.onValue.listen((event) {
         if (!hasListeners) return;
 

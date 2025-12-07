@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marcket_app/models/user.dart';
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,12 +26,6 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
 
-  // No longer needed for buyers based on new requirement:
-  // File? _imageFile;
-  // String? _networkImageUrl;
-  // bool _isGoogleUser = false;
-  // bool _isLoadingImage = false;
-
   @override
   void initState() {
     super.initState();
@@ -55,10 +50,6 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       _dobController.text = user.dob ?? '';
       _rfcController.text = user.rfc ?? '';
       _placeOfBirthController.text = user.placeOfBirth ?? '';
-      // _networkImageUrl = user.profilePicture; // No longer needed for buyers
-      // _isGoogleUser = _auth.currentUser?.providerData.any(
-      //   (p) => p.providerId == 'google.com',
-      // ) ?? false; // No longer needed for buyers
     }
   }
 
@@ -73,9 +64,6 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
     _placeOfBirthController.dispose();
     super.dispose();
   }
-
-  // Remove all photo management methods as buyers cannot manage their PP
-  // _showSnackBar, _pickAndUploadImage, _syncPhotoFromGoogle, _manageInGoogle, _deleteProfilePicture, _showProfilePictureMenu
 
   Future<void> _saveUserData() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -138,16 +126,16 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         if (user == null) {
           return const Center(child: Text('No se encontraron datos de usuario.'));
         }
-        _populateFields(); // Asegurarse de que los campos estén poblados con los datos más recientes
+        // _populateFields(); // Moved to initState and didChangeDependencies
 
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700), // Limit width for the form
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
-              child: Form(
+              child: Form( // Outer Form
                 key: _formKey,
-                child: Column(
+                child: Column( // Inner Column, now directly from _buildProfileForm
                   children: [
                     // Removed _buildProfileHeader() and its logic, replacing with simplified display
                     CircleAvatar(
@@ -171,7 +159,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
                     ),
                     Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
                     const SizedBox(height: 24),
-                    _buildProfileForm(), // The rest of the profile form
+                    _buildProfileForm(user), // Pass user to get current values
                   ],
                 ),
               ),
@@ -182,45 +170,42 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
     );
   }
 
-  Widget _buildProfileForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _dobController,
-            readOnly: true,
-            onTap: () => _selectDate(context),
-            decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
+  Widget _buildProfileForm(UserModel user) {
+    return Column( // Now a Column, not a Form
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _dobController,
+          readOnly: true,
+          onTap: () => _selectDate(context),
+          decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          _placeOfBirthController,
+          'Lugar de Nacimiento',
+          Icons.location_city,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(_rfcController, 'RFC', Icons.badge),
+        const SizedBox(height: 16),
+        _buildTextField(
+          _phoneNumberController,
+          'Número de Teléfono',
+          Icons.phone,
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton.icon(
+          onPressed: _saveUserData,
+          icon: const Icon(Icons.save),
+          label: const Text('Guardar Cambios'),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 50),
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _placeOfBirthController,
-            'Lugar de Nacimiento',
-            Icons.location_city,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(_rfcController, 'RFC', Icons.badge),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _phoneNumberController,
-            'Número de Teléfono',
-            Icons.phone,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _saveUserData,
-            icon: const Icon(Icons.save),
-            label: const Text('Guardar Cambios'),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
