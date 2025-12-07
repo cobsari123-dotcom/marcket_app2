@@ -1,31 +1,28 @@
 {
   "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+
     "users": {
-      ".read": "auth != null",
-      ".write": "auth != null",
-      ".indexOn": ["userType"]
+      ".indexOn": ["userType", "wishlist"]
     },
-    "chat_rooms": {
-      ".read": "auth != null",
-      ".write": "auth != null",
-      ".indexOn": ["participants"]
-    },
+    
     "publications": {
-      ".read": "auth != null",
-      ".write": "auth != null",
       ".indexOn": ["sellerId"]
     },
+
     "products": {
-      ".read": "auth != null",
-      ".write": "auth != null",
       ".indexOn": ["sellerId"]
     },
+    
     "orders": {
-      ".read": "auth != null",
-      ".write": "auth != null",
       ".indexOn": ["buyerId", "sellerId"]
     },
-    // Add other top-level nodes if they require specific indexing or access rules
+    
+    "chat_rooms": {
+      ".indexOn": "participants"
+    },
+
     "admin_emails": {
       ".read": "auth != null",
       ".write": "auth != null"

@@ -8,6 +8,7 @@ import 'package:marcket_app/utils/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/user_service.dart';
+import 'package:image_picker/image_picker.dart'; // Added missing import
 
 class SellerProfileScreen extends StatelessWidget {
   final VoidCallback onProfileUpdated;
