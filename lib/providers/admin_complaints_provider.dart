@@ -15,7 +15,7 @@ class AdminComplaintsProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   AdminComplaintsProvider() {
-    init();
+    // init(); // Removed init() from constructor
   }
 
   void init() {

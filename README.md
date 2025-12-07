@@ -41,6 +41,9 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
     *   **Corrección de `ClassCastException`:** Se resolvió un error crítico que causaba fallos en la aplicación al procesar datos numéricos (especialmente timestamps) desde Firebase Realtime Database en varios modelos (`Publication`, `CartItem`, `ChatMessage`, `ChatRoom`, `Comment`, `Order`, `Product`, `Review`). Ahora se realiza una conversión explícita a `int` o `double` para evitar crashes.
     *   **Gestión Optimizada de Streams:** Se eliminó un `ConcurrentModificationException` que podía provocar cierres inesperados al finalizar la aplicación, asegurando que todas las suscripciones a streams de Firebase Realtime Database se cancelen correctamente en `providers` clave (`OrderListProvider`, `SellerOrderListProvider`).
     *   **Resolución de Errores de UI:** Se corrigieron fallos de aserción (`child == _child`) y errores de `Duplicate GlobalKey` en los formularios de perfil (`BuyerProfileScreen`, `SellerProfileScreen`), garantizando una reconstrucción correcta y unificada de la interfaz de usuario.
+    *   **Corrección de `setState()` durante `build`:** Se resolvió este error en `AdminComplaintsProvider`, asegurando que el inicio del proveedor se realice después de que el widget consumidor haya terminado de construirse.
+    *   **Corrección de `Undefined class`:** Se añadió la importación faltante para `UserModel` en `BuyerProfileScreen`.
+    *   **Supresión de Advertencia de `clientId`:** Se modificó `AuthService` para que el `clientId` se pase condicionalmente solo a la plataforma web, eliminando una advertencia innecesaria en Android.
     *   **Código 100% Limpio:** Se abordaron y corrigieron todos los errores, advertencias y sugerencias (`lints`) restantes reportados por `flutter analyze`, logrando que la base de código esté completamente libre de problemas según el análisis estático.
 
 -   **Autenticación y Gestión de Roles Mejorada:**
@@ -80,8 +83,6 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 -   **Mejoras en el Chat de Soporte (Administradores):**
     *   El listado de chats de soporte ahora muestra claramente el rol del usuario (Comprador/Vendedor) con etiquetas visuales (`Chips`).
     *   Se confirmó la funcionalidad existente de envío de imágenes y archivos en el chat.
--   **Correcciones de Estabilidad y Lints:**
-    *   Se corrigieron errores de sintaxis y lints para mejorar la calidad y estabilidad del código.
 
 ---
 

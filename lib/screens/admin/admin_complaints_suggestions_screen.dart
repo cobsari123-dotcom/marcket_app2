@@ -22,7 +22,9 @@ class _AdminComplaintsSuggestionsScreenState
       context,
       listen: false,
     );
-    _adminComplaintsProvider.init(); // Cargar quejas al inicio
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _adminComplaintsProvider.init(); // Cargar quejas al inicio
+    });
   }
 
   void _showReplyDialog(
