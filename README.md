@@ -37,6 +37,14 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
+-   **Refactorización Completa de la Navegación (Diseño Adaptable):**
+    *   Se ha introducido un diseño de navegación totalmente responsivo para mejorar drásticamente la experiencia de usuario en diferentes dispositivos (móviles, tabletas y escritorio).
+    *   **Nuevo Widget Centralizado:** Se creó un nuevo widget reutilizable, `ResponsiveScaffold`, que gestiona la lógica de la navegación principal de la aplicación.
+    *   **Comportamiento en Escritorio/Tableta (Pantallas Anchas):** En pantallas con un ancho mayor a 800px, la aplicación ahora muestra un menú de navegación lateral fijo (`NavigationRail`). Esto permite un acceso rápido y visible a todas las secciones principales sin necesidad de abrir un menú.
+    *   **Comportamiento en Móvil (Pantallas Estrechas):** En pantallas pequeñas, la aplicación mantiene el tradicional menú de hamburguesa deslizable (`Drawer`), optimizando el espacio disponible.
+    *   **Aplicado a Todos los Roles:** Este nuevo sistema de navegación se ha implementado en los paneles de control de los tres roles de usuario: **Comprador, Vendedor y Administrador**, unificando y mejorando la coherencia de la interfaz en toda la aplicación.
+    *   **Corrección de Errores:** Durante el proceso, se corrigió el error que provocaba que el icono del menú de hamburguesa no apareciera en los paneles de Comprador y Administrador.
+
 -   **Mejoras de UI y Compatibilidad Web:**
     *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
     *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
@@ -76,6 +84,8 @@ La aplicación utiliza una arquitectura moderna y escalable, diseñada para ser 
 -   **Rendimiento y Escalabilidad:** Las listas principales (feed de publicaciones, lista de productos, historial de órdenes) implementan **paginación** (infinite scroll). Esto asegura que la aplicación cargue los datos en lotes, manteniendo un rendimiento alto y un bajo consumo de datos, sin importar la cantidad de información en la base de datos.
 
 -   **Notificaciones Push (FCM):** Se ha implementado la base para notificaciones push a través de Firebase Cloud Messaging (FCM). Una Cloud Function se encarga de enviar notificaciones a los usuarios cuando reciben nuevos mensajes de chat, asegurando una comunicación en tiempo real.
+
+-   **Diseño Adaptable (Responsive Design):** La navegación principal de la aplicación es totalmente adaptable. Utiliza un widget `ResponsiveScaffold` personalizado que muestra un `NavigationRail` (menú lateral fijo) en pantallas anchas como tabletas o computadoras, y un `Drawer` (menú de hamburguesa) en pantallas estrechas como las de los móviles. Esto asegura una experiencia de usuario óptima en cualquier dispositivo.
 
 ---
 

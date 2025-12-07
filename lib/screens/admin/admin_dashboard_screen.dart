@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart'; // Añadido
+import 'package:firebase_database/firebase_database.dart';
 import 'package:marcket_app/models/chat_room.dart';
 import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/providers/admin_dashboard_provider.dart';
@@ -8,10 +8,11 @@ import 'package:marcket_app/providers/theme_provider.dart';
 import 'package:marcket_app/screens/admin/admin_profile_screen.dart';
 import 'package:marcket_app/screens/admin/admin_complaints_suggestions_screen.dart';
 import 'package:marcket_app/screens/admin/user_management_screen.dart';
-import 'package:marcket_app/screens/admin/admin_feed_screen.dart'; // Import new screen
+import 'package:marcket_app/screens/admin/admin_feed_screen.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
-import 'package:intl/intl.dart'; // Añadido para formato de fecha
+import 'package:marcket_app/widgets/responsive_scaffold.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -22,8 +23,6 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  late PageController _pageController;
-
   static const List<String> _titles = <String>[
     'Soporte Técnico',
     'Quejas y Sugerencias',
@@ -33,22 +32,9 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-    // Inicializar el provider si es necesario aquí, o dejar que el constructor lo haga
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-            return Consumer2<AdminDashboardProvider, ThemeProvider>(
-          builder: (context, adminProvider, themeProvider, child) {
+    return Consumer2<AdminDashboardProvider, ThemeProvider>(
+      builder: (context, adminProvider, themeProvider, child) {
         final List<Widget> adminScreens = [
           const SupportChatList(),
           const AdminComplaintsSuggestionsScreen(),
@@ -57,123 +43,127 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const AdminFeedScreen(),
         ];
 
-        // Sincronizar el PageView con el selectedIndex del provider
-        if (_pageController.hasClients &&
-            _pageController.page?.round() != adminProvider.selectedIndex) {
-          _pageController.jumpToPage(adminProvider.selectedIndex);
-        }
-
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(_titles[adminProvider.selectedIndex]),
-            backgroundColor: AppTheme.primary,
-            automaticallyImplyLeading: false,
+        final List<NavigationRailDestination> destinations = [
+          const NavigationRailDestination(
+            icon: Icon(Icons.support_agent_outlined),
+            selectedIcon: Icon(Icons.support_agent),
+            label: Text('Soporte'),
           ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                _buildDrawerHeader(
-                  adminProvider.currentUserModel,
-                  adminProvider.isLoadingUserData,
-                ),
-                _buildDrawerItem(
-                  Icons.support_agent,
-                  'Soporte Técnico',
-                  0,
-                  adminProvider,
-                ),
-                _buildDrawerItem(
-                  Icons.feedback,
-                  'Quejas y Sugerencias',
-                  1,
-                  adminProvider,
-                ),
-                _buildDrawerItem(Icons.person, 'Mi Perfil', 2, adminProvider),
-                const Divider(),
-                _buildDrawerItem(
-                  Icons.people,
-                  'Gestión de Usuarios',
-                  3,
-                  adminProvider,
-                ),
-                _buildDrawerItem(
-                  Icons.dynamic_feed,
-                  'Feed de Publicaciones',
-                  4,
-                  adminProvider,
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: AppTheme.error),
-                  title: const Text('Cerrar Sesión'),
-                  onTap: () async {
-                    if (!mounted) return;
-                    
-                    final bool? confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (dialogContext) => AlertDialog( // Use dialogContext here
-                        title: const Text('Cerrar Sesión'),
-                        content: const Text(
-                          '¿Estás seguro de que quieres cerrar sesión?',
+          const NavigationRailDestination(
+            icon: Icon(Icons.feedback_outlined),
+            selectedIcon: Icon(Icons.feedback),
+            label: Text('Quejas'),
+          ),
+          const NavigationRailDestination(
+            icon: Icon(Icons.person_outlined),
+            selectedIcon: Icon(Icons.person),
+            label: Text('Perfil'),
+          ),
+          const NavigationRailDestination(
+            icon: Icon(Icons.people_outlined),
+            selectedIcon: Icon(Icons.people),
+            label: Text('Usuarios'),
+          ),
+          const NavigationRailDestination(
+            icon: Icon(Icons.dynamic_feed_outlined),
+            selectedIcon: Icon(Icons.dynamic_feed),
+            label: Text('Feed'),
+          ),
+        ];
+
+        final drawer = Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              _buildDrawerHeader(
+                adminProvider.currentUserModel,
+                adminProvider.isLoadingUserData,
+              ),
+              _buildDrawerItem(
+                Icons.support_agent,
+                'Soporte Técnico',
+                0,
+                adminProvider,
+              ),
+              _buildDrawerItem(
+                Icons.feedback,
+                'Quejas y Sugerencias',
+                1,
+                adminProvider,
+              ),
+              _buildDrawerItem(Icons.person, 'Mi Perfil', 2, adminProvider),
+              const Divider(),
+              _buildDrawerItem(
+                Icons.people,
+                'Gestión de Usuarios',
+                3,
+                adminProvider,
+              ),
+              _buildDrawerItem(
+                Icons.dynamic_feed,
+                'Feed de Publicaciones',
+                4,
+                adminProvider,
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: AppTheme.error),
+                title: const Text('Cerrar Sesión'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final bool? confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: const Text('Cerrar Sesión'),
+                      content:
+                          const Text('¿Estás seguro de que quieres cerrar sesión?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(false),
+                          child: const Text('Cancelar'),
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(dialogContext).pop(false),
-                            child: const Text('Cancelar'),
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(true),
+                          child: const Text(
+                            'Sí, Cerrar Sesión',
+                            style: TextStyle(color: AppTheme.error),
                           ),
-                          TextButton(
-                            onPressed: () => Navigator.of(dialogContext).pop(true),
-                            child: const Text(
-                              'Sí, Cerrar Sesión',
-                              style: TextStyle(color: AppTheme.error),
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true && mounted) {
+                    final authManagementService =
+                        Provider.of<AuthManagementService>(context,
+                            listen: false);
+                    await authManagementService.signOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Sesión cerrada correctamente.'),
+                        duration: const Duration(seconds: 3),
+                        backgroundColor: Theme.of(context).primaryColor,
                       ),
                     );
-                    
-                    if (!mounted) return; // Check after dialog might have closed
-                    if (confirmed == true) {
-                      final authManagementService = Provider.of<AuthManagementService>(context, listen: false); // Declare here only
+                    await Future.delayed(const Duration(milliseconds: 500));
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/', (route) => false);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
 
-                      await authManagementService.signOut();
-                      
-                      // Check mounted before using context for SnackBar
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Sesión cerrada correctamente.'),
-                          duration: const Duration(seconds: 3),
-                          backgroundColor: Theme.of(context).primaryColor,
-                        ),
-                      );
-                      
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      
-                      // Use addPostFrameCallback for navigation to ensure context is stable
-                      if (!mounted) return; // Final check before navigation
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return; // Re-check mounted within the callback
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/',
-                          (route) => false,
-                        );
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          body: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              adminProvider.setSelectedIndex(index);
-            },
-            children: adminScreens,
-          ),
+        return ResponsiveScaffold(
+          pages: adminScreens,
+          titles: _titles,
+          destinations: destinations,
+          drawer: drawer,
+          initialIndex: adminProvider.selectedIndex,
+          onIndexChanged: (index) {
+            adminProvider.setSelectedIndex(index);
+          },
         );
       },
     );
@@ -230,7 +220,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
         icon,
         color: isSelected
             ? AppTheme.primary
-            : AppTheme.onBackground.withAlpha((255 * 0.7).round()),
+            : AppTheme.onBackground.withAlpha(180),
       ),
       title: Text(
         title,
@@ -240,7 +230,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
       ),
       selected: isSelected,
-      selectedTileColor: AppTheme.primary.withAlpha((255 * 0.1).round()),
+      selectedTileColor: AppTheme.primary.withAlpha(25),
       onTap: () {
         adminProvider.setSelectedIndex(index);
         Navigator.pop(context); // Cerrar el Drawer

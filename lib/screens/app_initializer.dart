@@ -26,9 +26,11 @@ class AppInitializerState extends State<AppInitializer> {
       }
     }
     
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/splash');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/splash');
+      }
+    });
   }
 
   @override

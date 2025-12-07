@@ -11,6 +11,7 @@ import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
 import 'package:marcket_app/screens/common/contact_support_screen.dart';
 import 'package:marcket_app/screens/common/notifications_screen.dart';
+import 'package:marcket_app/widgets/responsive_scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 
@@ -32,9 +33,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     'Mis Ventas',
     'Mensajes',
     'Mi Perfil',
-    'Configuración',
-    'Notificaciones',
-    'Soporte Técnico',
   ];
 
   @override
@@ -69,6 +67,12 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+  
+  void _onDrawerItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
     Navigator.pop(context); // Close the drawer
   }
 
@@ -81,86 +85,129 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       const MyProductsScreen(),
       const SellerOrdersScreen(),
       const ChatListScreen(),
-      SellerProfileScreen(onProfileUpdated: _loadUserData), // Pass callback
-      const SellerSettingsScreen(),
-      const NotificationsScreen(), // Added
-      const ContactSupportScreen(), // Added
+      SellerProfileScreen(onProfileUpdated: _loadUserData),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            _buildDrawerHeader(),
-            _buildDrawerItem(Icons.home, 'Inicio', 0),
-            _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
-            _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 2),
-            _buildDrawerItem(Icons.chat, 'Mensajes', 3),
-            _buildDrawerItem(Icons.person, 'Perfil', 4),
-            _buildDrawerItem(Icons.settings, 'Configuración', 5),
-            const Divider(),
-            _buildDrawerItem(Icons.notifications, 'Notificaciones', 6), // New index
-            _buildDrawerItem(Icons.support_agent, 'Soporte Técnico', 7), // New index
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: AppTheme.error),
-              title: Text(
-                'Cerrar Sesión',
-                style: textTheme.bodyMedium?.copyWith(color: AppTheme.error),
-              ),
-                            onTap: () async {
-                              if (!mounted) return; // Guard for context in Provider.of
-                              final authManagementService = Provider.of<AuthManagementService>(context, listen: false);
-                              if (!mounted) return; // Guard for context in Navigator.pop
-                              Navigator.pop(context); // Close the drawer first
-                              if (!mounted) return; // Guard for context in showDialog
-                              final bool? confirmLogout = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Confirmar Cierre de Sesión'),
-                                  content: const Text('¿Estás seguro de que quieres cerrar tu sesión?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      child: const Text('Cerrar Sesión'),
-                                    ),
-                                  ],
-                                ),
-                              );
-              
-                              if (confirmLogout == true) { // Removed '&& mounted' here as a mounted check is done before.
-                                await authManagementService.signOut();
-                                if (!mounted) return; // Guard for context in ScaffoldMessenger
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text('Sesión cerrada correctamente.'),
-                                    duration: const Duration(seconds: 3),
-                                    backgroundColor: Theme.of(context).primaryColor,
-                                  ),
-                                );
-                                // Allow time for SnackBar to show before navigating
-                                await Future.delayed(const Duration(milliseconds: 500));
-                                if (!mounted) return; // Guard for context in Navigator.pushNamedAndRemoveUntil
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/',
-                                  (route) => false,
-                                );
-                              }
-                            },            ),
-          ],
+    final List<NavigationRailDestination> destinations = [
+        const NavigationRailDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: Text('Inicio'),
         ),
+        const NavigationRailDestination(
+            icon: Icon(Icons.shopping_bag_outlined),
+            selectedIcon: Icon(Icons.shopping_bag),
+            label: Text('Productos'),
+        ),
+        const NavigationRailDestination(
+            icon: Icon(Icons.point_of_sale_outlined),
+            selectedIcon: Icon(Icons.point_of_sale),
+            label: Text('Ventas'),
+        ),
+        const NavigationRailDestination(
+            icon: Icon(Icons.chat_outlined),
+            selectedIcon: Icon(Icons.chat),
+            label: Text('Mensajes'),
+        ),
+        const NavigationRailDestination(
+            icon: Icon(Icons.person_outlined),
+            selectedIcon: Icon(Icons.person),
+            label: Text('Perfil'),
+        ),
+    ];
+
+    final drawer = Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _buildDrawerHeader(),
+          _buildDrawerItem(Icons.home, 'Inicio', 0),
+          _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
+          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 2),
+          _buildDrawerItem(Icons.chat, 'Mensajes', 3),
+          _buildDrawerItem(Icons.person, 'Perfil', 4),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Configuración'),
+            onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SellerSettingsScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notificaciones'),
+            onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.support_agent),
+            title: const Text('Soporte Técnico'),
+            onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactSupportScreen()));
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: AppTheme.error),
+            title: Text(
+              'Cerrar Sesión',
+              style: textTheme.bodyMedium?.copyWith(color: AppTheme.error),
+            ),
+            onTap: () async {
+              final authManagementService = Provider.of<AuthManagementService>(context, listen: false);
+              Navigator.pop(context);
+              final bool? confirmLogout = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Confirmar Cierre de Sesión'),
+                  content: const Text('¿Estás seguro de que quieres cerrar tu sesión?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Cerrar Sesión'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmLogout == true && mounted) {
+                await authManagementService.signOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Sesión cerrada correctamente.'),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).primaryColor,
+                  ),
+                );
+                await Future.delayed(const Duration(milliseconds: 500));
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              }
+            },
+          ),
+        ],
       ),
-      body: widgetOptions.elementAt(_selectedIndex),
+    );
+
+    return ResponsiveScaffold(
+        pages: widgetOptions,
+        titles: _titles,
+        destinations: destinations,
+        drawer: drawer,
+        initialIndex: _selectedIndex,
+        onIndexChanged: _onItemTapped,
     );
   }
 
@@ -202,12 +249,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   Widget _buildDrawerItem(IconData icon, String title, int index) {
     final isSelected = _selectedIndex == index;
     return ListTile(
-      // CORREGIDO: .withOpacity() -> .withValues(alpha: )
       leading: Icon(
         icon,
         color: isSelected
             ? AppTheme.primary
-            : AppTheme.onBackground.withValues(alpha: 0.7),
+            : AppTheme.onBackground.withAlpha(180),
       ),
       title: Text(
         title,
@@ -217,10 +263,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         ),
       ),
       selected: isSelected,
-      // CORREGIDO: .withOpacity() -> .withValues(alpha: )
-      selectedTileColor: AppTheme.primary.withValues(alpha: 0.1),
+      selectedTileColor: AppTheme.primary.withAlpha(25),
       onTap: () {
-        _onItemTapped(index);
+        _onDrawerItemTapped(index);
       },
     );
   }

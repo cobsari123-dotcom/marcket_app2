@@ -14,6 +14,7 @@ import 'package:marcket_app/screens/buyer/seller_search_screen.dart';
 import 'package:marcket_app/services/cart_service.dart';
 import 'package:marcket_app/screens/buyer/favorites_screen.dart';
 import 'package:marcket_app/models/cart_item.dart';
+import 'package:marcket_app/widgets/responsive_scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 
@@ -62,7 +63,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    if (mounted) Navigator.pop(context); // Close the drawer
+  }
+
+  void _onDrawerItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    Navigator.pop(context); // Close the drawer
   }
 
   @override
@@ -75,212 +82,232 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       const BuyerOrdersScreen(),
       BuyerProfileScreen(onProfileUpdated: _loadUserData),
       const ChatListScreen(),
-      const FavoritesScreen(), // Añadido
+      const FavoritesScreen(),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-        automaticallyImplyLeading: false,
-        actions: _selectedIndex == 0
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SellerSearchScreen(),
-                      ),
-                    );
-                  },
-                ),
-                StreamBuilder<List<CartItem>>(
-                  stream: CartService().getCartStream(),
-                  builder: (context, snapshot) {
-                    int totalItems = 0;
-                    if (snapshot.hasData) {
-                      totalItems = snapshot.data!.fold<int>(
-                        0,
-                        (sum, item) => sum + item.quantity,
-                      );
-                    }
-                    return Stack(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.shopping_cart),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CartScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        if (totalItems > 0)
-                          Positioned(
-                            right: 5,
-                            top: 5,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                '$totalItems',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-              ]
-            : null, // No actions for other tabs
+    final List<NavigationRailDestination> destinations = [
+      const NavigationRailDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: Text('Inicio'),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text(
-                _currentUserModel?.fullName ?? user?.displayName ?? 'Comprador',
-                style: textTheme.titleLarge?.copyWith(
-                  color: AppTheme.onPrimary,
+      const NavigationRailDestination(
+        icon: Icon(Icons.shopping_bag_outlined),
+        selectedIcon: Icon(Icons.shopping_bag),
+        label: Text('Pedidos'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.person_outlined),
+        selectedIcon: Icon(Icons.person),
+        label: Text('Perfil'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.chat_outlined),
+        selectedIcon: Icon(Icons.chat),
+        label: Text('Mensajes'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.favorite_border),
+        selectedIcon: Icon(Icons.favorite),
+        label: Text('Favoritos'),
+      ),
+    ];
+    
+    final drawer = Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              _currentUserModel?.fullName ?? user?.displayName ?? 'Comprador',
+              style: textTheme.titleLarge?.copyWith(
+                color: AppTheme.onPrimary,
+              ),
+            ),
+            accountEmail: Text(
+              user?.email ?? 'comprador@ejemplo.com',
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppTheme.onPrimary.withAlpha((255 * 0.8).round()),
+              ),
+            ),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: AppTheme.secondary,
+              backgroundImage: _currentUserModel?.profilePicture != null
+                  ? NetworkImage(_currentUserModel!.profilePicture!)
+                  : null,
+              child: _currentUserModel?.profilePicture == null
+                  ? const Icon(
+                      Icons.person,
+                      size: 40,
+                      color: AppTheme.onSecondary,
+                    )
+                  : null,
+            ),
+            decoration: const BoxDecoration(color: AppTheme.primary),
+          ),
+          _buildDrawerItem(Icons.home, 'Inicio', 0),
+          _buildDrawerItem(Icons.shopping_bag, 'Mis Pedidos', 1),
+          _buildDrawerItem(Icons.person, 'Mi Perfil', 2),
+          _buildDrawerItem(Icons.chat, 'Mensajes', 3),
+          _buildDrawerItem(Icons.favorite, 'Favoritos', 4),
+          const Divider(),
+          ListTile(
+            leading: const Icon(
+              Icons.notifications,
+              color: AppTheme.secondary,
+            ),
+            title: Text('Notificaciones', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
                 ),
-              ),
-              accountEmail: Text(
-                user?.email ?? 'comprador@ejemplo.com',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.onPrimary.withAlpha((255 * 0.8).round()),
-                ), // Fixed deprecated
-              ),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: AppTheme.secondary,
-                backgroundImage: _currentUserModel?.profilePicture != null
-                    ? NetworkImage(_currentUserModel!.profilePicture!)
-                    : null,
-                child: _currentUserModel?.profilePicture == null
-                    ? const Icon(
-                        Icons.person,
-                        size: 40,
-                        color: AppTheme.onSecondary,
-                      )
-                    : null,
-              ),
-              decoration: const BoxDecoration(color: AppTheme.primary),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.support_agent,
+              color: AppTheme.secondary,
             ),
-            _buildDrawerItem(Icons.home, 'Inicio', 0),
-            _buildDrawerItem(Icons.shopping_bag, 'Mis Pedidos', 1),
-            _buildDrawerItem(Icons.person, 'Mi Perfil', 2),
-            _buildDrawerItem(Icons.chat, 'Mensajes', 3),
-            _buildDrawerItem(Icons.favorite, 'Favoritos', 4), // Añadido
-            const Divider(),
-            ListTile(
-              leading: const Icon(
-                Icons.notifications,
-                color: AppTheme.secondary,
-              ),
-              title: Text('Notificaciones', style: textTheme.bodyMedium),
-              onTap: () {
-                if (!mounted) return; // Added mounted check
-                Navigator.pop(context); // Close drawer first
-                if (!mounted) return; // Added mounted check
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationsScreen(),
-                  ),
-                );
-              },
+            title: Text('Soporte Técnico', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ContactSupportScreen(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: AppTheme.error),
+            title: Text(
+              'Cerrar Sesión',
+              style: textTheme.bodyMedium?.copyWith(color: AppTheme.error),
             ),
-            ListTile(
-              leading: const Icon(
-                Icons.support_agent,
-                color: AppTheme.secondary,
-              ),
-              title: Text('Soporte Técnico', style: textTheme.bodyMedium),
-              onTap: () {
-                if (!mounted) return; // Added mounted check
-                Navigator.pop(context); // Close drawer first
-                if (!mounted) return; // Added mounted check
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ContactSupportScreen(),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: AppTheme.error),
-              title: Text(
-                'Cerrar Sesión',
-                style: textTheme.bodyMedium?.copyWith(color: AppTheme.error),
-              ),
-              onTap: () async {
-                if (!mounted) return; // Guard for context in Provider.of
-                final authManagementService =
-                    Provider.of<AuthManagementService>(context, listen: false);
-                if (!mounted) return; // Guard for context in Navigator.pop
-                Navigator.pop(context); // Close the drawer first
-                if (!mounted) return; // Guard for context in showDialog
+            onTap: () async {
+              final authManagementService =
+                  Provider.of<AuthManagementService>(context, listen: false);
+              Navigator.pop(context);
 
-                final bool? confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Confirmar Cierre de Sesión'),
-                    content: const Text('¿Estás seguro de que quieres cerrar tu sesión?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancelar'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Cerrar Sesión'),
-                      ),
-                    ],
+              final bool? confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Confirmar Cierre de Sesión'),
+                  content: const Text('¿Estás seguro de que quieres cerrar tu sesión?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Cerrar Sesión'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true && mounted) {
+                await authManagementService.signOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Sesión cerrada correctamente.'),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).primaryColor,
                   ),
                 );
+                await Future.delayed(const Duration(milliseconds: 500));
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
 
-                if (confirmed == true) { // Removed '&& mounted' here as a mounted check is done before.
-                  await authManagementService.signOut();
-                  if (!mounted) return; // Guard for context in ScaffoldMessenger
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Sesión cerrada correctamente.'),
-                      duration: const Duration(seconds: 3),
-                      backgroundColor: Theme.of(context).primaryColor,
+    return ResponsiveScaffold(
+      pages: buyerContent,
+      titles: _titles,
+      destinations: destinations,
+      drawer: drawer,
+      initialIndex: _selectedIndex,
+      onIndexChanged: _onItemTapped,
+      appBarActions: _selectedIndex == 0
+          ? [
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SellerSearchScreen(),
                     ),
                   );
-                  // Allow time for SnackBar to show before navigating
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  if (!mounted) return; // Guard for context in Navigator.pushNamedAndRemoveUntil
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/',
-                    (route) => false,
+                },
+              ),
+              StreamBuilder<List<CartItem>>(
+                stream: CartService().getCartStream(),
+                builder: (context, snapshot) {
+                  int totalItems = 0;
+                  if (snapshot.hasData) {
+                    totalItems = snapshot.data!.fold<int>(
+                      0,
+                      (sum, item) => sum + item.quantity,
+                    );
+                  }
+                  return Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.shopping_cart),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CartScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      if (totalItems > 0)
+                        Positioned(
+                          right: 5,
+                          top: 5,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              '$totalItems',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
                   );
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-      body: buyerContent[_selectedIndex],
+                },
+              ),
+            ]
+          : null,
     );
   }
 
@@ -293,7 +320,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         color: isSelected
             ? AppTheme.primary
             : AppTheme.onBackground.withAlpha((255 * 0.7).round()),
-      ), // Fixed deprecated
+      ),
       title: Text(
         title,
         style: textTheme.bodyMedium?.copyWith(
@@ -304,9 +331,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       selected: isSelected,
       selectedTileColor: AppTheme.primary.withAlpha(
         (255 * 0.1).round(),
-      ), // Fixed deprecated
+      ),
       onTap: () {
-        _onItemTapped(index);
+        _onDrawerItemTapped(index);
       },
     );
   }
