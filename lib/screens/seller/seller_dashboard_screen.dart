@@ -7,6 +7,7 @@ import 'package:marcket_app/screens/seller/my_products_screen.dart';
 import 'package:marcket_app/screens/seller/seller_orders_screen.dart';
 import 'package:marcket_app/screens/seller/seller_profile_screen.dart';
 import 'package:marcket_app/screens/seller/seller_settings_screen.dart';
+import 'package:marcket_app/screens/seller/seller_publications_screen.dart'; // Import the new screen
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
@@ -28,9 +29,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   UserModel? _currentUserModel;
   bool _isLoading = true;
 
+  // Updated _titles list to include 'Mis Publicaciones'
   static const List<String> _titles = <String>[
     'Inicio',
     'Mis Productos',
+    'Mis Publicaciones', // New entry
     'Mis Ventas',
     'Mensajes',
     'Mi Perfil',
@@ -81,14 +84,17 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
+    // Updated widgetOptions list to include SellerPublicationsScreen
     final List<Widget> widgetOptions = <Widget>[
       const SellerHomeScreen(),
       const MyProductsScreen(),
+      const SellerPublicationsScreen(), // New entry
       const SellerOrdersScreen(),
       const ChatListScreen(),
       SellerProfileScreen(onProfileUpdated: _loadUserData),
     ];
 
+    // Updated destinations list to include 'Publicaciones'
     final List<NavigationRailDestination> destinations = [
         const NavigationRailDestination(
             icon: Icon(Icons.home_outlined),
@@ -99,6 +105,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             icon: Icon(Icons.shopping_bag_outlined),
             selectedIcon: Icon(Icons.shopping_bag),
             label: Text('Productos'),
+        ),
+        const NavigationRailDestination( // New entry
+            icon: Icon(Icons.article_outlined),
+            selectedIcon: Icon(Icons.article),
+            label: Text('Publicaciones'),
         ),
         const NavigationRailDestination(
             icon: Icon(Icons.point_of_sale_outlined),
@@ -124,9 +135,10 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           _buildDrawerHeader(),
           _buildDrawerItem(Icons.home, 'Inicio', 0),
           _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
-          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 2),
-          _buildDrawerItem(Icons.chat, 'Mensajes', 3),
-          _buildDrawerItem(Icons.person, 'Perfil', 4),
+          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 2), // New entry
+          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 3),
+          _buildDrawerItem(Icons.chat, 'Mensajes', 4),
+          _buildDrawerItem(Icons.person, 'Mi Perfil', 5),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
@@ -203,13 +215,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     );
 
     Widget? fab;
-    if (_selectedIndex == 1) { // Only show FAB for MyProductsScreen
+    if (_selectedIndex == 1) { // FAB for MyProductsScreen
         fab = FloatingActionButton(
         onPressed: () {
             Navigator.pushNamed(context, '/add_edit_product').then((_) {
                 // Refresh the product list after adding/editing a product
                 Provider.of<ProductListProvider>(context, listen: false).refreshProducts();
             });
+        },
+        backgroundColor: AppTheme.secondary,
+        child: const Icon(Icons.add, color: AppTheme.onSecondary),
+      );
+    } else if (_selectedIndex == 2) { // FAB for SellerPublicationsScreen (new)
+        fab = FloatingActionButton(
+        onPressed: () {
+            Navigator.pushNamed(context, '/create_edit_publication');
         },
         backgroundColor: AppTheme.secondary,
         child: const Icon(Icons.add, color: AppTheme.onSecondary),
@@ -262,6 +282,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     );
   }
 
+  // Ensure index is correctly handled in _buildDrawerItem
   Widget _buildDrawerItem(IconData icon, String title, int index) {
     final isSelected = _selectedIndex == index;
     return ListTile(

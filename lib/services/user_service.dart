@@ -93,7 +93,12 @@ class UserService {
   Stream<List<String>> getWishlistStream(String userId) {
     return _usersRef.child(userId).child('wishlist').onValue.map((event) {
       if (event.snapshot.exists && event.snapshot.value is Map) {
-        final wishlistData = Map<String, dynamic>.from(event.snapshot.value as Map);
+        final Map<String, dynamic> wishlistData = {};
+        (event.snapshot.value as Map).forEach((key, value) {
+          if (key is String) { // Ensure keys are strings
+            wishlistData[key] = value;
+          }
+        });
         return wishlistData.keys.toList();
       }
       return [];

@@ -2,13 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:marcket_app/models/publication.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:marcket_app/screens/full_screen_image_viewer.dart';
 import 'package:marcket_app/utils/theme.dart';
-import 'package:marcket_app/widgets/publication_card.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/user_service.dart';
@@ -20,63 +16,8 @@ class SellerProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SellerProfileTabView(onProfileUpdated: onProfileUpdated);
-  }
-}
-
-class SellerProfileTabView extends StatefulWidget {
-  final VoidCallback onProfileUpdated;
-
-  const SellerProfileTabView({super.key, required this.onProfileUpdated});
-
-  @override
-  State<SellerProfileTabView> createState() => SellerProfileTabViewState();
-}
-
-class SellerProfileTabViewState extends State<SellerProfileTabView>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This screen does not return a Scaffold directly,
-    // as it is intended to be used as a body within a ResponsiveScaffold.
-    return Column(
-      children: [
-        TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Mi Perfil'),
-            Tab(text: 'Mis Publicaciones'),
-          ],
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: AppTheme.onBackground.withAlpha(153),
-          indicatorColor: AppTheme.primary,
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              ProfileForm(onProfileUpdated: widget.onProfileUpdated),
-              PublicationsList(),
-            ],
-          ),
-        ),
-      ],
-    );
+    // Directly return ProfileForm as SellerProfileTabView is removed
+    return ProfileForm(onProfileUpdated: onProfileUpdated);
   }
 }
 
@@ -548,145 +489,6 @@ class ProfileFormState extends State<ProfileForm> {
         }
         return value!.isEmpty ? 'Por favor, introduce tu $label' : null;
       },
-    );
-  }
-}
-
-class PublicationsList extends StatefulWidget {
-  final String? title;
-  const PublicationsList({super.key, this.title});
-
-  @override
-  PublicationsListState createState() => PublicationsListState();
-}
-
-class PublicationsListState extends State<PublicationsList> {
-  final _database = FirebaseDatabase.instance.ref();
-  final _userId = FirebaseAuth.instance.currentUser!.uid;
-  String _sellerName = 'Mi Perfil';
-  String? _sellerProfilePicture;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSellerData();
-  }
-
-  Future<void> _loadSellerData() async {
-    final snapshot = await _database.child('users/$_userId').get();
-    if (snapshot.exists && mounted) {
-      final data = Map<String, dynamic>.from(snapshot.value as Map);
-      setState(() {
-        _sellerName = data['fullName'] ?? 'Mi Perfil';
-        _sellerProfilePicture = data['profilePicture'];
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.title != null)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              widget.title!,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-        Expanded(
-          child: StreamBuilder(
-            stream: _database
-                .child('publications')
-                .orderByChild('sellerId')
-                .equalTo(_userId)
-                .onValue,
-            builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
-              if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.article_outlined,
-                        size: 80,
-                        color: AppTheme.primary,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Aún no tienes publicaciones.',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Usa el botón "+" para crear una nueva historia.',
-                        style: TextStyle(color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final data = Map<String, dynamic>.from(
-                snapshot.data!.snapshot.value as Map,
-              );
-              final publications = data.entries.map((entry) {
-                return Publication.fromMap(
-                  Map<String, dynamic>.from(entry.value as Map),
-                  entry.key,
-                );
-              }).toList();
-
-              publications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final screenWidth = constraints.maxWidth;
-                  int crossAxisCount;
-                  if (screenWidth > 1200) {
-                    crossAxisCount = 5;
-                  } else if (screenWidth > 900) {
-                    crossAxisCount = 4;
-                  } else if (screenWidth > 600) {
-                    crossAxisCount = 3;
-                  } else {
-                    crossAxisCount = 2;
-                  }
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 0.70,
-                    ),
-                    itemCount: publications.length,
-                    itemBuilder: (context, index) {
-                      final publication = publications[index];
-                      return PublicationCard(
-                        publication: publication,
-                        sellerName: _sellerName,
-                        sellerProfilePicture: _sellerProfilePicture,
-                        onSellerTap: () {},
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }
