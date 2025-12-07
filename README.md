@@ -64,9 +64,14 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
         *   **Vendedores:** Pueden gestionar (subir/cambiar/eliminar) su foto de perfil en `SellerProfileScreen`.
         *   **Compradores:** Solo pueden *ver* su foto de perfil en `BuyerProfileScreen`, sin opciones de edición.
         *   **Administradores:** Solo ven un icono predeterminado.
-    *   **Ubicación Consistente:** La gestión y visualización de la foto de perfil se limita exclusivamente a las pantallas de perfil.
-
--   **Mejoras de UI y Compatibilidad Web:**
+        *   **Ubicación Consistente:** La gestión y visualización de la foto de perfil se limita exclusivamente a las pantallas de perfil.
+    -   **Nuevas Funcionalidades en Perfiles y Ajustes:**
+        *   **Perfiles de Usuario Extendidos (Admin, Comprador, Vendedor):** Se ha enriquecido la información personal de todos los roles de usuario. Ahora los perfiles incluyen campos editables para `biografía`, `dirección`, y `enlaces a redes sociales`. La visualización y edición de estos campos se ha integrado en `AdminProfileScreen`, `BuyerProfileScreen`, y `SellerProfileScreen`.
+        *   **Configuración de la Aplicación (Admin, Comprador, Vendedor):** Se ha añadido una sección de 'Configuración' dedicada en los menús de navegación (Drawer) de los Dashboards de Administrador y Comprador. Estas pantallas de configuración incluyen nuevas opciones para gestionar:
+            *   `Preferencias de Notificación`: Una pantalla dedicada para controlar los tipos de notificaciones recibidas.
+            *   `Configuración de Privacidad`: Una pantalla dedicada para gestionar la visibilidad del perfil y otras opciones de privacidad.
+        *   **Optimización de Flujo de Navegación en Ajustes:** Se corrigió el comportamiento de navegación y visualización en las pantallas de 'Notificaciones', 'Soporte Técnico' y 'Configuración de Vendedor' para asegurar que siempre se muestre un `AppBar` con un botón de retroceso funcional y un fondo correcto, eliminando fondos negros inesperados y la imposibilidad de usar el menú del dashboard.
+    -   **Mejoras de UI y Compatibilidad Web:**
     *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
     *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
 -   **Panel de Administrador Mejorado:**

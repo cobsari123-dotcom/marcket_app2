@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:marcket_app/models/user.dart';
-import 'package:marcket_app/screens/recover_password_screen.dart';
+import 'package:marcket_app/screens/admin/admin_settings_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
 
 class AdminProfileScreen extends StatefulWidget {
@@ -21,7 +21,10 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
   UserModel? _userModel;
 
   final _fullNameController = TextEditingController();
-  
+  final _phoneNumberController = TextEditingController(); // New
+  final _bioController = TextEditingController(); // New
+  final _addressController = TextEditingController(); // New
+
   bool _isLoading = true;
   int _totalUsers = 0;
   int _totalPublications = 0;
@@ -49,6 +52,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
   @override
   void dispose() {
     _fullNameController.dispose();
+    _phoneNumberController.dispose(); // Dispose new controller
+    _bioController.dispose(); // Dispose new controller
+    _addressController.dispose(); // Dispose new controller
     _animationController.dispose();
     super.dispose();
   }
@@ -66,10 +72,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
           if (userSnapshot.exists) {
             _userModel = UserModel.fromMap(Map<String, dynamic>.from(userSnapshot.value as Map), _user!.uid);
             _fullNameController.text = _userModel?.fullName ?? '';
+            _phoneNumberController.text = _userModel?.phoneNumber ?? ''; // Populate new controller
+            _bioController.text = _userModel?.bio ?? ''; // Populate new controller
+            _addressController.text = _userModel?.address ?? ''; // Populate new controller
           }
           _totalUsers = usersCountSnapshot.children.length;
           _totalPublications = publicationsCountSnapshot.children.length;
-          
+
           int productCount = 0;
           if (productsCountSnapshot.exists) {
             final productsData = Map<String, dynamic>.from(productsCountSnapshot.value as Map);
@@ -95,13 +104,16 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
 
   Future<void> _updateProfile() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       await _user?.updateDisplayName(_fullNameController.text);
       await _database.child('users/${_user!.uid}').update({
         'fullName': _fullNameController.text,
+        'phoneNumber': _phoneNumberController.text.isEmpty ? null : _phoneNumberController.text, // Save new field
+        'bio': _bioController.text.isEmpty ? null : _bioController.text, // Save new field
+        'address': _addressController.text.isEmpty ? null : _addressController.text, // Save new field
       });
 
       if (!mounted) return;
@@ -162,11 +174,11 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.lock, color: AppTheme.secondary),
-              title: const Text('Cambiar Contraseña'),
+              title: const Text('Configuración de Seguridad'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RecoverPasswordScreen()),
+                  MaterialPageRoute(builder: (context) => const AdminSettingsScreen()), // Changed navigation
                 );
               },
             ),
@@ -216,6 +228,36 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
                 ),
                 validator: (value) => (value?.isEmpty ?? true) ? 'Por favor, introduce tu nombre' : null,
               ),
+              const SizedBox(height: 16), // New
+              TextFormField( // New
+                controller: _phoneNumberController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Número de Teléfono',
+                  prefixIcon: Icon(Icons.phone, color: AppTheme.primary),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16), // New
+              TextFormField( // New
+                controller: _bioController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Biografía',
+                  prefixIcon: Icon(Icons.info, color: AppTheme.primary),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16), // New
+              TextFormField( // New
+                controller: _addressController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Dirección',
+                  prefixIcon: Icon(Icons.location_on, color: AppTheme.primary),
+                  border: OutlineInputBorder(),
+                ),
+              ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _updateProfile,
@@ -232,7 +274,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
       ),
     );
   }
-  
+
   Widget _buildInfoCard() {
     return Card(
       elevation: 4,
@@ -253,12 +295,29 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
               title: const Text('Rol'),
               subtitle: Text(_userModel?.userType ?? 'Admin'),
             ),
+            if (_userModel?.phoneNumber != null && _userModel!.phoneNumber!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.phone, color: AppTheme.secondary),
+                title: Text(_userModel!.phoneNumber!),
+              ),
+            if (_userModel?.bio != null && _userModel!.bio!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.info_outline, color: AppTheme.secondary),
+                title: const Text('Biografía'),
+                subtitle: Text(_userModel!.bio!),
+              ),
+            if (_userModel?.address != null && _userModel!.address!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.location_on_outlined, color: AppTheme.secondary),
+                title: const Text('Dirección'),
+                subtitle: Text(_userModel!.address!),
+              ),
             ListTile(
               leading: const Icon(Icons.date_range, color: AppTheme.secondary),
               title: const Text('Miembro desde'),
               subtitle: Text(
-                _user?.metadata.creationTime != null 
-                ? DateFormat('dd MMMM, yyyy', 'es_ES').format(_user!.metadata.creationTime!) 
+                _user?.metadata.creationTime != null
+                ? DateFormat('dd MMMM, yyyy', 'es_ES').format(_user!.metadata.creationTime!)
                 : 'No disponible'
               ),
             ),

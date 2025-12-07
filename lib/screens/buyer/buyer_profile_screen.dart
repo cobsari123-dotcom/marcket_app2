@@ -25,6 +25,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController(); // New
+  final TextEditingController _socialMediaLinkController = TextEditingController(); // New for a single social media link
 
   @override
   void initState() {
@@ -50,6 +52,13 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       _dobController.text = user.dob ?? '';
       _rfcController.text = user.rfc ?? '';
       _placeOfBirthController.text = user.placeOfBirth ?? '';
+      _bioController.text = user.bio ?? ''; // Populate new controller
+      // For socialMediaLinks, we'll just get the first one if it exists
+      if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) {
+        _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
+      } else {
+        _socialMediaLinkController.text = '';
+      }
     }
   }
 
@@ -62,6 +71,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
     _dobController.dispose();
     _rfcController.dispose();
     _placeOfBirthController.dispose();
+    _bioController.dispose(); // Dispose new controller
+    _socialMediaLinkController.dispose(); // Dispose new controller
     super.dispose();
   }
 
@@ -70,6 +81,12 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
 
     final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
     try {
+      // For socialMediaLinks, if the text field is not empty, we'll store it as 'default'
+      Map<String, String>? socialMediaLinksToSave;
+      if (_socialMediaLinkController.text.isNotEmpty) {
+        socialMediaLinksToSave = {'default': _socialMediaLinkController.text};
+      }
+
       await userProfileProvider.updateProfile(
         fullName: _fullNameController.text,
         phoneNumber: _phoneNumberController.text,
@@ -77,6 +94,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         dob: _dobController.text,
         rfc: _rfcController.text,
         placeOfBirth: _placeOfBirthController.text,
+        bio: _bioController.text, // Save new field
+        socialMediaLinks: socialMediaLinksToSave, // Save new field
       );
       if (mounted) {
         if (userProfileProvider.errorMessage == null) {
@@ -195,6 +214,26 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
           _phoneNumberController,
           'Número de Teléfono',
           Icons.phone,
+        ),
+        const SizedBox(height: 16), // New
+        _buildTextField( // New
+          _addressController,
+          'Dirección',
+          Icons.location_on,
+          maxLines: 2,
+        ),
+        const SizedBox(height: 16), // New
+        _buildTextField( // New
+          _bioController,
+          'Biografía',
+          Icons.info,
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16), // New
+        _buildTextField( // New
+          _socialMediaLinkController,
+          'Enlace de Red Social (Ej. Facebook, Instagram)',
+          Icons.link,
         ),
         const SizedBox(height: 24),
         ElevatedButton.icon(

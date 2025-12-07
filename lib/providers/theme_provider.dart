@@ -11,6 +11,16 @@ class ThemeProvider with ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
 
+  // --- CORRECCIÓN: Getter agregado para usar en los Switches ---
+  bool get isDarkMode {
+    if (_themeMode == ThemeMode.system) {
+      // Si es sistema, asumimos light por defecto o podrías checar el brillo del sistema
+      // Pero para el switch, es mejor devolver true si está explícitamente en dark.
+      return false; 
+    }
+    return _themeMode == ThemeMode.dark;
+  }
+
   ThemeProvider() {
     _listenToThemeChanges();
   }
@@ -39,6 +49,22 @@ class ThemeProvider with ChangeNotifier {
         _resetTheme();
       }
     });
+  }
+
+  // --- CORRECCIÓN: Método agregado para cambiar el tema ---
+  Future<void> toggleTheme() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      bool currentStatus = isDarkMode;
+      // Actualizamos Firebase, el listener _listenToThemeChanges se encargará de actualizar la UI
+      await FirebaseDatabase.instance.ref('users/${user.uid}').update({
+        'isDarkModeEnabled': !currentStatus
+      });
+    } else {
+      // Si no hay usuario (caso raro en esta app), cambiamos localmente
+      _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+      notifyListeners();
+    }
   }
 
   void _resetTheme() {

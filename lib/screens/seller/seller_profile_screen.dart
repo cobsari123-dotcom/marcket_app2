@@ -43,6 +43,8 @@ class ProfileFormState extends State<ProfileForm> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _businessAddressController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController(); // New
+  final TextEditingController _socialMediaLinkController = TextEditingController(); // New
 
   File? _imageFile;
   String? _networkImageUrl;
@@ -75,6 +77,12 @@ class ProfileFormState extends State<ProfileForm> {
       _phoneNumberController.text = user.phoneNumber ?? '';
       _businessNameController.text = user.businessName ?? '';
       _businessAddressController.text = user.businessAddress ?? '';
+      _bioController.text = user.bio ?? ''; // Populate new controller
+      if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) { // Populate new controller
+        _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
+      } else {
+        _socialMediaLinkController.text = '';
+      }
       _isGoogleUser = _auth.currentUser?.providerData.any(
         (p) => p.providerId == 'google.com',
       ) ?? false;
@@ -223,6 +231,11 @@ class ProfileFormState extends State<ProfileForm> {
     
     final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
     try {
+      Map<String, String>? socialMediaLinksToSave;
+      if (_socialMediaLinkController.text.isNotEmpty) {
+        socialMediaLinksToSave = {'default': _socialMediaLinkController.text};
+      }
+
       await userProfileProvider.updateProfile(
         fullName: _fullNameController.text,
         dob: _dobController.text,
@@ -232,6 +245,8 @@ class ProfileFormState extends State<ProfileForm> {
         phoneNumber: _phoneNumberController.text,
         businessName: _businessNameController.text,
         businessAddress: _businessAddressController.text,
+        bio: _bioController.text, // New
+        socialMediaLinks: socialMediaLinksToSave, // New
       );
       if (mounted) {
         if (userProfileProvider.errorMessage == null) {
@@ -335,6 +350,12 @@ class ProfileFormState extends State<ProfileForm> {
         _businessNameController.text = user.businessName ?? '';
         _businessAddressController.text = user.businessAddress ?? '';
         _networkImageUrl = user.profilePicture;
+        _bioController.text = user.bio ?? ''; // Populate new controller
+        if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) { // Populate new controller
+          _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
+        } else {
+          _socialMediaLinkController.text = '';
+        }
         _isGoogleUser = _auth.currentUser?.providerData.any(
           (p) => p.providerId == 'google.com',
         ) ?? false;
@@ -449,6 +470,19 @@ class ProfileFormState extends State<ProfileForm> {
             _businessAddressController,
             'Dirección del Negocio',
             Icons.location_on,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField( // New
+            _bioController,
+            'Biografía',
+            Icons.info,
+            maxLines: 3,
+          ),
+          const SizedBox(height: 16), // New
+          _buildTextField( // New
+            _socialMediaLinkController,
+            'Enlace de Red Social (Ej. Facebook, Instagram)',
+            Icons.link,
           ),
           const SizedBox(height: 16),
           _buildTextField(

@@ -120,14 +120,25 @@ class MyApp extends StatelessWidget {
               },
               '/chat_list': (context) => const ChatListScreen(),
               '/chat': (context) {
-                final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
-                if (args != null) {
-                  return ChatScreen(
-                    chatRoomId: args['chatRoomId']!,
-                    otherUserName: args['otherUserName']!,
-                  );
+                final arguments = ModalRoute.of(context)!.settings.arguments;
+                Map<String, String>? chatArgs;
+
+                if (arguments is Map &&
+                    arguments.containsKey('chatRoomId') &&
+                    arguments.containsKey('otherUserName') &&
+                    arguments['chatRoomId'] is String &&
+                    arguments['otherUserName'] is String) {
+                  chatArgs = Map<String, String>.from(arguments);
+                } else {
+                  // Log the unexpected argument type for debugging
+                  debugPrint('Error: /chat route received unexpected arguments type or format. Received: $arguments (Type: ${arguments.runtimeType})');
+                  return const Scaffold(body: Center(child: Text("Error: Argumentos de chat inválidos.")));
                 }
-                return const Scaffold(body: Center(child: Text("Error: Chat room details not provided.")));
+
+                return ChatScreen(
+                  chatRoomId: chatArgs['chatRoomId']!,
+                  otherUserName: chatArgs['otherUserName']!,
+                );
               },
               '/public_seller_profile': (context) {
                 final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;

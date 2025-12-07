@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marcket_app/models/user.dart';
-import 'package:marcket_app/providers/theme_provider.dart';
+import 'package:marcket_app/providers/theme_provider.dart'; 
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:marcket_app/screens/common/notification_preferences_screen.dart'; 
+import 'package:marcket_app/screens/common/privacy_settings_screen.dart'; 
 import 'package:provider/provider.dart';
 
+// --- CORRECCIÓN: Se agregó la definición de la clase que faltaba ---
 class SellerSettingsScreen extends StatefulWidget {
   const SellerSettingsScreen({super.key});
 
@@ -43,7 +45,6 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
   }
 
   void _populateControllers(UserModel? userModel) {
-    // Only populate business info related fields as general info is not editable here
     if (userModel != null) {
       _businessNameController.text = userModel.businessName ?? '';
       _businessAddressController.text = userModel.businessAddress ?? '';
@@ -113,10 +114,10 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     if (currentUser == null || userProfileProvider.currentUserModel?.userType == 'Google') {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('No puedes cambiar la contraseña para usuarios de Google.'),
+        const SnackBar(
+          content: Text('No puedes cambiar la contraseña para usuarios de Google.'),
           backgroundColor: AppTheme.error,
-          duration: const Duration(seconds: 3),
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -128,95 +129,99 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
 
     _newPasswordController.clear();
     _confirmNewPasswordController.clear();
+    
+    if(!mounted) return;
+
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Actualizar Contraseña'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _newPasswordController,
-              obscureText: _obscureNewPassword,
-              decoration: InputDecoration(
-                labelText: 'Nueva Contraseña',
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () {
-                    setState(() => _obscureNewPassword = !_obscureNewPassword);
-                  },
-                ),
-              ),
-            ),
-            TextField(
-              controller: _confirmNewPasswordController,
-              obscureText: _obscureConfirmNewPassword,
-              decoration: InputDecoration(
-                labelText: 'Confirmar Nueva Contraseña',
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirmNewPassword ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () {
-                    setState(() => _obscureConfirmNewPassword = !_obscureConfirmNewPassword);
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () async {
-              if (_newPasswordController.text.length < 6) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('La contraseña debe tener al menos 6 caracteres.'),
-                    backgroundColor: AppTheme.error,
-                    duration: const Duration(seconds: 3),
+      builder: (context) => StatefulBuilder( 
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text('Actualizar Contraseña'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _newPasswordController,
+                  obscureText: _obscureNewPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Nueva Contraseña',
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setStateDialog(() => _obscureNewPassword = !_obscureNewPassword);
+                      },
+                    ),
                   ),
-                );
-                return;
-              }
-              if (_newPasswordController.text != _confirmNewPasswordController.text) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Las contraseñas no coinciden.'),
-                    backgroundColor: AppTheme.error,
-                    duration: const Duration(seconds: 3),
+                ),
+                TextField(
+                  controller: _confirmNewPasswordController,
+                  obscureText: _obscureConfirmNewPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Confirmar Nueva Contraseña',
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmNewPassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setStateDialog(() => _obscureConfirmNewPassword = !_obscureConfirmNewPassword);
+                      },
+                    ),
                   ),
-                );
-                return;
-              }
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_newPasswordController.text.length < 6) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('La contraseña debe tener al menos 6 caracteres.'),
+                        backgroundColor: AppTheme.error,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    return;
+                  }
+                  if (_newPasswordController.text != _confirmNewPasswordController.text) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Las contraseñas no coinciden.'),
+                        backgroundColor: AppTheme.error,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    return;
+                  }
 
-              try {
-                await authManagementService.updatePassword(_newPasswordController.text);
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contraseña actualizada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
-                );
-                if (!mounted) return;
-                Navigator.of(context).pop();
-              } on FirebaseAuthException catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('Error al actualizar contraseña: ${e.message}'),
-                  backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
-                ));
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('Error desconocido al actualizar contraseña: $e'),
-                  backgroundColor: AppTheme.error,
-                  duration: const Duration(seconds: 3),
-                ));
-              }
-            },
-            child: const Text('Actualizar'),
-          ),
-        ],
+                  try {
+                    await authManagementService.updatePassword(_newPasswordController.text);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Contraseña actualizada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+                    );
+                    Navigator.of(context).pop();
+                  } on FirebaseAuthException catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Error al actualizar contraseña: ${e.message}'),
+                      backgroundColor: AppTheme.error,
+                      duration: const Duration(seconds: 3),
+                    ));
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Error desconocido al actualizar contraseña: $e'),
+                      backgroundColor: AppTheme.error,
+                      duration: const Duration(seconds: 3),
+                    ));
+                  }
+                },
+                child: const Text('Actualizar'),
+              ),
+            ],
+          );
+        }
       ),
     );
   }
@@ -226,10 +231,10 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     if (currentUser == null || userProfileProvider.currentUserModel?.userType == 'Google') {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('No puedes cambiar el email para usuarios de Google.'),
+        const SnackBar(
+          content: Text('No puedes cambiar el email para usuarios de Google.'),
           backgroundColor: AppTheme.error,
-          duration: const Duration(seconds: 3),
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -241,6 +246,9 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
 
     _newEmailController.clear();
     _confirmNewEmailController.clear();
+    
+    if(!mounted) return;
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -265,23 +273,21 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           ElevatedButton(
             onPressed: () async {
               if (_newEmailController.text.isEmpty || !_newEmailController.text.contains('@')) {
-                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Por favor, ingresa un correo electrónico válido.'),
+                  const SnackBar(
+                    content: Text('Por favor, ingresa un correo electrónico válido.'),
                     backgroundColor: AppTheme.error,
-                    duration: const Duration(seconds: 3),
+                    duration: Duration(seconds: 3),
                   ),
                 );
                 return;
               }
               if (_newEmailController.text != _confirmNewEmailController.text) {
-                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Los correos electrónicos no coinciden.'),
+                  const SnackBar(
+                    content: Text('Los correos electrónicos no coinciden.'),
                     backgroundColor: AppTheme.error,
-                    duration: const Duration(seconds: 3),
+                    duration: Duration(seconds: 3),
                   ),
                 );
                 return;
@@ -289,12 +295,10 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
 
               try {
                 await authManagementService.updateEmail(_newEmailController.text);
-
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Se ha enviado un enlace de verificación a tu nuevo correo.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
                 );
-                if (!mounted) return;
                 Navigator.of(context).pop();
               } on FirebaseAuthException catch (e) {
                 if (!mounted) return;
@@ -324,10 +328,10 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     if (currentUser == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('No hay usuario autenticado.'),
+        const SnackBar(
+          content: Text('No hay usuario autenticado.'),
           backgroundColor: AppTheme.error,
-          duration: const Duration(seconds: 3),
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -353,13 +357,14 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
 
     try {
       await authManagementService.deleteAccount();
-
       if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cuenta eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
       );
-      if (!mounted) return;
+      
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -378,7 +383,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
   }
 
   Future<void> _updateBusinessInfo(UserProfileProvider userProfileProvider) async {
-    _populateControllers(userProfileProvider.currentUserModel); // Asegurar que los controladores tengan los valores actuales
+    _populateControllers(userProfileProvider.currentUserModel); 
 
     await showDialog(
       context: context,
@@ -401,7 +406,7 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           ElevatedButton(
             onPressed: () async {
               await userProfileProvider.updateProfile(
-                fullName: userProfileProvider.currentUserModel!.fullName, // Mantener los demás datos
+                fullName: userProfileProvider.currentUserModel!.fullName, 
                 businessName: _businessNameController.text.trim(),
                 businessAddress: _businessAddressController.text.trim(),
                 paymentInstructions: _paymentInstructionsController.text.trim(),
@@ -416,14 +421,12 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
   }
 
   Future<void> _clearCache() async {
-    // La lógica de caché no usa Provider, se mantiene
     try {
       final cacheDir = await getTemporaryDirectory();
       if (cacheDir.existsSync()) {
         cacheDir.deleteSync(recursive: true);
       }
       if (mounted) {
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Caché eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
         );
@@ -438,146 +441,115 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<UserProfileProvider, ThemeProvider>(
-      builder: (context, userProfileProvider, themeProvider, child) {
-        final userModel = userProfileProvider.currentUserModel;
-        final currentUser = FirebaseAuth.instance.currentUser;
+    // Obtener los providers necesarios
+    final authService = Provider.of<AuthManagementService>(context, listen: false);
+    final userProfileProvider = Provider.of<UserProfileProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
-        if (userProfileProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (userProfileProvider.errorMessage != null) {
-          return Center(child: Text('Error: ${userProfileProvider.errorMessage}'));
-        }
-        if (userModel == null || currentUser == null) {
-          return const Center(child: Text('No hay datos de usuario.'));
-        }
-
-        _populateControllers(userModel); // Actualizar controladores con datos del provider
-
-        final authManagementService = Provider.of<AuthManagementService>(context, listen: false);
-
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800), // Limit width for settings content
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 24.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Seguridad', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed: () => _updatePassword(authManagementService, userProfileProvider),
-                            icon: const Icon(Icons.lock),
-                            label: const Text('Actualizar Contraseña'),
-                            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: Theme.of(context).textTheme.titleMedium),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () => _updateEmail(authManagementService, userProfileProvider),
-                            icon: const Icon(Icons.mail),
-                            label: const Text('Actualizar Correo Electrónico'),
-                            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: Theme.of(context).textTheme.titleMedium),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () => _deleteAccount(authManagementService),
-                            icon: const Icon(Icons.delete),
-                            label: const Text('Eliminar Cuenta'),
-                            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15), textStyle: Theme.of(context).textTheme.titleMedium),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 24.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Información del Negocio', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 20),
-                          ListTile(
-                            leading: const Icon(Icons.business_center),
-                            title: const Text('Nombre del Negocio'),
-                            subtitle: Text(userModel.businessName ?? 'N/A'),
-                            trailing: IconButton(icon: const Icon(Icons.edit), onPressed: () => _updateBusinessInfo(userProfileProvider)),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.location_on),
-                            title: const Text('Dirección del Negocio'),
-                            subtitle: Text(userModel.businessAddress ?? 'N/A'),
-                            trailing: IconButton(icon: const Icon(Icons.edit), onPressed: () => _updateBusinessInfo(userProfileProvider)),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.payment),
-                            title: const Text('Instrucciones de Pago'),
-                            subtitle: Text(userModel.paymentInstructions ?? 'N/A'),
-                            trailing: IconButton(icon: const Icon(Icons.edit), onPressed: () => _updateBusinessInfo(userProfileProvider)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 24.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Preferencias', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 20),
-                          SwitchListTile(
-                            title: const Text('Modo Oscuro'),
-                            value: userModel.isDarkModeEnabled ?? false,
-                            onChanged: (bool value) async {
-                              await userProfileProvider.updateProfile(
-                                fullName: userModel.fullName, // Se requiere para el método updateProfile
-                                isDarkModeEnabled: value,
-                              );
-                            },
-                            secondary: const Icon(Icons.dark_mode),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 24.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Utilidades', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed: _clearCache,
-                            icon: const Icon(Icons.cleaning_services),
-                            label: const Text('Eliminar Caché'),
-                            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: Theme.of(context).textTheme.titleMedium),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Configuración del Vendedor'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          // Sección de Cuenta
+          _buildSectionHeader('Cuenta'),
+          ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: const Text('Cambiar Contraseña'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => _updatePassword(authService, userProfileProvider),
           ),
-        );
-      },
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.email_outlined),
+            title: const Text('Cambiar Correo Electrónico'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => _updateEmail(authService, userProfileProvider),
+          ),
+
+          const SizedBox(height: 24),
+          
+          // Sección de Negocio
+          _buildSectionHeader('Negocio'),
+          ListTile(
+            leading: const Icon(Icons.store_mall_directory_outlined),
+            title: const Text('Información del Negocio'),
+            subtitle: const Text('Editar nombre, dirección e instrucciones de pago'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => _updateBusinessInfo(userProfileProvider),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Sección de Preferencias
+          _buildSectionHeader('Preferencias'),
+          SwitchListTile(
+            secondary: const Icon(Icons.dark_mode_outlined),
+            title: const Text('Modo Oscuro'),
+            // Ahora esto funcionará gracias a la corrección en ThemeProvider
+            value: themeProvider.isDarkMode,
+            onChanged: (bool value) {
+              themeProvider.toggleTheme();
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: const Text('Notificaciones'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationPreferencesScreen()),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacidad'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PrivacySettingsScreen()),
+              );
+            },
+          ),
+
+          const SizedBox(height: 24),
+
+          // Sección de Sistema y Peligro
+          _buildSectionHeader('Sistema'),
+          ListTile(
+            leading: const Icon(Icons.cleaning_services_outlined),
+            title: const Text('Limpiar Caché'),
+            onTap: _clearCache,
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: AppTheme.error),
+            title: const Text('Eliminar Cuenta', style: TextStyle(color: AppTheme.error)),
+            onTap: () => _deleteAccount(authService),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+        ),
+      ),
     );
   }
 }

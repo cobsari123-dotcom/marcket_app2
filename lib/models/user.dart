@@ -13,7 +13,9 @@ class UserModel {
   final String? address;
   final String? paymentInstructions;
   final bool? receiveEmailNotifications; // New field
-  final bool? isDarkModeEnabled; // New field
+  final bool? isDarkModeEnabled;
+  final String? bio; // New field
+  final Map<String, String>? socialMediaLinks; // New field
 
   const UserModel({
     required this.id,
@@ -29,8 +31,10 @@ class UserModel {
     this.businessAddress,
     this.address,
     this.paymentInstructions,
-    this.receiveEmailNotifications, // Added to constructor
-    this.isDarkModeEnabled, // Added to constructor
+    this.receiveEmailNotifications,
+    this.isDarkModeEnabled,
+    this.bio, // Added to constructor
+    this.socialMediaLinks, // Added to constructor
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -48,8 +52,10 @@ class UserModel {
       businessAddress: map['businessAddress'],
       address: map['address'],
       paymentInstructions: map['paymentInstructions'],
-      receiveEmailNotifications: map['receiveEmailNotifications'] ?? true, // Default to true
-      isDarkModeEnabled: map['isDarkModeEnabled'] ?? false, // Default to false
+      receiveEmailNotifications: map['receiveEmailNotifications'] ?? true,
+      isDarkModeEnabled: map['isDarkModeEnabled'] ?? false,
+      bio: map['bio'], // Added to fromMap
+      socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)?.map((key, value) => MapEntry(key, value as String)), // Added to fromMap
     );
   }
 
@@ -69,6 +75,8 @@ class UserModel {
       'paymentInstructions': paymentInstructions,
       'receiveEmailNotifications': receiveEmailNotifications,
       'isDarkModeEnabled': isDarkModeEnabled,
+      'bio': bio, // Added to toMap
+      'socialMediaLinks': socialMediaLinks, // Added to toMap
     };
   }
 
@@ -86,8 +94,10 @@ class UserModel {
     String? businessAddress,
     String? address,
     String? paymentInstructions,
-    bool? receiveEmailNotifications, // Added to copyWith
-    bool? isDarkModeEnabled, // Added to copyWith
+    bool? receiveEmailNotifications,
+    bool? isDarkModeEnabled,
+    String? bio, // Added to copyWith
+    Map<String, String>? socialMediaLinks, // Added to copyWith
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -105,6 +115,8 @@ class UserModel {
       paymentInstructions: paymentInstructions ?? this.paymentInstructions,
       receiveEmailNotifications: receiveEmailNotifications ?? this.receiveEmailNotifications,
       isDarkModeEnabled: isDarkModeEnabled ?? this.isDarkModeEnabled,
+      bio: bio ?? this.bio, // Added to copyWith
+      socialMediaLinks: socialMediaLinks ?? this.socialMediaLinks, // Added to copyWith
     );
   }
 }

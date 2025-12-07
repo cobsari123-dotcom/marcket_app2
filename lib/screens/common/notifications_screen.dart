@@ -110,93 +110,98 @@ class NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _userId == null
-        ? Center(
-            child: Text('Inicia sesión para ver tus notificaciones.',
-                style: Theme.of(context).textTheme.titleMedium))
-        : Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: StreamBuilder<DatabaseEvent>(
-                stream: _notificationsRef.child(_userId).onValue,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: Theme.of(context).textTheme.titleMedium));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
-                    return Center(
-                        child: Text('No tienes notificaciones.',
-                            style: Theme.of(context).textTheme.titleMedium));
-                  }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Notificaciones'),
+      ),
+      body: _userId == null
+          ? Center(
+              child: Text('Inicia sesión para ver tus notificaciones.',
+                  style: Theme.of(context).textTheme.titleMedium))
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: StreamBuilder<DatabaseEvent>(
+                  stream: _notificationsRef.child(_userId).onValue,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                          child: Text('Error: ${snapshot.error}',
+                              style: Theme.of(context).textTheme.titleMedium));
+                    }
+                    if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+                      return Center(
+                          child: Text('No tienes notificaciones.',
+                              style: Theme.of(context).textTheme.titleMedium));
+                    }
 
-                  final notificationsMap = Map<String, dynamic>.from(
-                      snapshot.data!.snapshot.value as Map);
-                  final notifications = notificationsMap.entries.map((entry) {
-                    final notification =
-                        Map<String, dynamic>.from(entry.value as Map);
-                    notification['id'] = entry.key;
-                    return notification;
-                  }).toList();
+                    final notificationsMap = Map<String, dynamic>.from(
+                        snapshot.data!.snapshot.value as Map);
+                    final notifications = notificationsMap.entries.map((entry) {
+                      final notification =
+                          Map<String, dynamic>.from(entry.value as Map);
+                      notification['id'] = entry.key;
+                      return notification;
+                    }).toList();
 
-                  notifications.sort(
-                      (a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
+                    notifications.sort(
+                        (a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      final timestamp = notification['timestamp'] != null
-                          ? DateTime.fromMillisecondsSinceEpoch(
-                              notification['timestamp'])
-                          : null;
-                      final formattedDate = timestamp != null
-                          ? DateFormat('dd/MM/yyyy HH:mm').format(timestamp)
-                          : 'Fecha desconocida';
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: notifications.length,
+                      itemBuilder: (context, index) {
+                        final notification = notifications[index];
+                        final timestamp = notification['timestamp'] != null
+                            ? DateTime.fromMillisecondsSinceEpoch(
+                                notification['timestamp'])
+                            : null;
+                        final formattedDate = timestamp != null
+                            ? DateFormat('dd/MM/yyyy HH:mm').format(timestamp)
+                            : 'Fecha desconocida';
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                notification['message'] ?? 'Sin mensaje.',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    formattedDate,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(fontStyle: FontStyle.italic),
-                                  ),
-                                  const Spacer(),
-                                  if (_currentUserModel != null)
-                                    OutlinedButton(
-                                      onPressed: _navigateToSupportChat,
-                                      child: const Text('Responder'),
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  notification['message'] ?? 'Sin mensaje.',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      formattedDate,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(fontStyle: FontStyle.italic),
                                     ),
-                                ],
-                              ),
-                            ],
+                                    const Spacer(),
+                                    if (_currentUserModel != null)
+                                      OutlinedButton(
+                                        onPressed: _navigateToSupportChat,
+                                        child: const Text('Responder'),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           );

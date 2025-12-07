@@ -62,7 +62,10 @@ class UserProfileProvider with ChangeNotifier {
     String? businessAddress,
     String? paymentInstructions,
     bool? isDarkModeEnabled,
-    String? profilePicture, // Nuevo parámetro
+    String? profilePicture,
+    String? bio, // New parameter
+    Map<String, String>? socialMediaLinks, // New parameter
+    bool? receiveEmailNotifications, // New parameter
   }) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) {
@@ -86,6 +89,9 @@ class UserProfileProvider with ChangeNotifier {
         'paymentInstructions': paymentInstructions,
         'isDarkModeEnabled': isDarkModeEnabled,
         'profilePicture': profilePicture,
+        'bio': bio, // New field to update
+        'socialMediaLinks': socialMediaLinks, // New field to update
+        'receiveEmailNotifications': receiveEmailNotifications, // New field to update
       };
       
       // Eliminar nulos para que no se sobrescriban campos existentes si no se proveen

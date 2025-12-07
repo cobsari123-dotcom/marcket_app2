@@ -56,8 +56,11 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // CORRECCIÓN AQUI: Usamos _isLoading para decidir qué mostrar
-    return _isLoading
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Soporte Técnico'),
+      ),
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Center(
               child: ConstrainedBox(
@@ -307,7 +310,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                   ),
                 ),
               ),
-            );
+            ),
+    );
   }
 
   Widget _buildSupportCard(

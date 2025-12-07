@@ -6,6 +6,7 @@ import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/providers/admin_dashboard_provider.dart';
 import 'package:marcket_app/providers/theme_provider.dart';
 import 'package:marcket_app/screens/admin/admin_profile_screen.dart';
+import 'package:marcket_app/screens/admin/admin_settings_screen.dart';
 import 'package:marcket_app/screens/admin/admin_complaints_suggestions_screen.dart';
 import 'package:marcket_app/screens/admin/user_management_screen.dart';
 import 'package:marcket_app/screens/admin/admin_feed_screen.dart';
@@ -104,6 +105,14 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Feed de Publicaciones',
                 4,
                 adminProvider,
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Configuración'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
+                },
               ),
               const Divider(),
               ListTile(

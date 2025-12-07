@@ -5,6 +5,7 @@ import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/providers/feed_provider.dart';
 import 'package:marcket_app/screens/buyer/buyer_orders_screen.dart';
 import 'package:marcket_app/screens/buyer/buyer_profile_screen.dart';
+import 'package:marcket_app/screens/buyer/buyer_settings_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/screens/buyer/feed_screen.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
@@ -231,6 +232,22 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           _buildDrawerItem(Icons.chat, 'Mensajes', 3),
           _buildDrawerItem(Icons.favorite, 'Favoritos', 4),
           const Divider(),
+          ListTile(
+            leading: const Icon(
+              Icons.settings,
+              color: AppTheme.secondary,
+            ),
+            title: Text('Configuración', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BuyerSettingsScreen(),
+                ),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(
               Icons.notifications,

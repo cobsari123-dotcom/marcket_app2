@@ -7,7 +7,7 @@ import 'package:marcket_app/screens/seller/my_products_screen.dart';
 import 'package:marcket_app/screens/seller/seller_orders_screen.dart';
 import 'package:marcket_app/screens/seller/seller_profile_screen.dart';
 import 'package:marcket_app/screens/seller/seller_settings_screen.dart';
-import 'package:marcket_app/screens/seller/seller_publications_screen.dart'; // Import the new screen
+import 'package:marcket_app/screens/seller/seller_publications_screen.dart'; 
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
@@ -29,11 +29,10 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   UserModel? _currentUserModel;
   bool _isLoading = true;
 
-  // Updated _titles list to include 'Mis Publicaciones'
   static const List<String> _titles = <String>[
     'Inicio',
     'Mis Productos',
-    'Mis Publicaciones', // New entry
+    'Mis Publicaciones', 
     'Mis Ventas',
     'Mensajes',
     'Mi Perfil',
@@ -77,24 +76,22 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pop(context); // Close the drawer
+    Navigator.pop(context); 
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    // Updated widgetOptions list to include SellerPublicationsScreen
     final List<Widget> widgetOptions = <Widget>[
       const SellerHomeScreen(),
       const MyProductsScreen(),
-      const SellerPublicationsScreen(), // New entry
+      const SellerPublicationsScreen(),
       const SellerOrdersScreen(),
       const ChatListScreen(),
       SellerProfileScreen(onProfileUpdated: _loadUserData),
     ];
 
-    // Updated destinations list to include 'Publicaciones'
     final List<NavigationRailDestination> destinations = [
         const NavigationRailDestination(
             icon: Icon(Icons.home_outlined),
@@ -106,7 +103,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             selectedIcon: Icon(Icons.shopping_bag),
             label: Text('Productos'),
         ),
-        const NavigationRailDestination( // New entry
+        const NavigationRailDestination( 
             icon: Icon(Icons.article_outlined),
             selectedIcon: Icon(Icons.article),
             label: Text('Publicaciones'),
@@ -135,7 +132,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           _buildDrawerHeader(),
           _buildDrawerItem(Icons.home, 'Inicio', 0),
           _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
-          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 2), // New entry
+          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 2), 
           _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 3),
           _buildDrawerItem(Icons.chat, 'Mensajes', 4),
           _buildDrawerItem(Icons.person, 'Mi Perfil', 5),

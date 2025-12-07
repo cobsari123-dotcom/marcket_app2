@@ -75,12 +75,14 @@ class PublicationCard extends StatelessWidget {
                   onTap: () {
                     // Removed direct navigation to FullScreenImageViewer as it's not imported
                     // The route '/publication_details' should handle image viewing if needed
-                    Navigator.pushNamed(
-                      context,
-                      '/publication_details',
-                      arguments: publication,
-                    );
-                  },
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/publication_details',
+                                        arguments: {
+                                          'publication': publication,
+                                          'isAdmin': isAdmin,
+                                        },
+                                      );                  },
                   child: Image.network(
                     publication.imageUrls.first,
                     width: double.infinity,
