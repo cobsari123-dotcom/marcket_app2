@@ -25,13 +25,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _businessAddressController = TextEditingController();
+  final TextEditingController _businessAddressController =
+      TextEditingController();
   final TextEditingController _adminKeyController = TextEditingController();
   String? _selectedGender;
 
@@ -60,7 +62,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -103,11 +106,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               .ref()
               .child('profile_pictures')
               .child('${userCredential.user!.uid}.jpg');
-          
+
           final Uint8List imageData = await _image!.readAsBytes();
           final metadata = SettableMetadata(contentType: "image/jpeg");
           UploadTask uploadTask = storageRef.putData(imageData, metadata);
-          
+
           final snapshot = await uploadTask.whenComplete(() => {});
           imageUrl = await snapshot.ref.getDownloadURL();
         }
@@ -137,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         await _userService.setUserData(userCredential.user!.uid, userData);
 
-        if(mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('¡Registro exitoso! Ahora puedes iniciar sesión.'),
@@ -147,7 +150,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           );
           Navigator.pushReplacementNamed(context, '/login');
         }
-
       } on FirebaseAuthException catch (e) {
         String message;
         switch (e.code) {
@@ -160,7 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           default:
             message = 'Ocurrió un error de registro. Inténtalo de nuevo.';
         }
-        if(mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),
@@ -238,31 +240,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           else
                             _buildUserTypeSelector(),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
+                          _buildTextField(_fullNameController,
+                              'Nombre Completo', Icons.person),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_emailController, 'Correo Electrónico', Icons.email, keyboardType: TextInputType.emailAddress),
+                          _buildTextField(_emailController,
+                              'Correo Electrónico', Icons.email,
+                              keyboardType: TextInputType.emailAddress),
                           const SizedBox(height: 20.0),
-                          _buildPasswordField(_passwordController, 'Contraseña', isConfirm: false),
+                          _buildPasswordField(_passwordController, 'Contraseña',
+                              isConfirm: false),
                           const SizedBox(height: 20.0),
-                          _buildPasswordField(_confirmPasswordController, 'Confirmar Contraseña', isConfirm: true),
+                          _buildPasswordField(_confirmPasswordController,
+                              'Confirmar Contraseña',
+                              isConfirm: true),
                           if (!_isRegisteringAsAdmin) ...[
                             const SizedBox(height: 20.0),
                             _buildDateField(),
                             const SizedBox(height: 20.0),
                             _buildTextField(_rfcController, 'RFC', Icons.badge),
                             const SizedBox(height: 20.0),
-                            _buildTextField(_phoneNumberController, 'Número de Teléfono', Icons.phone, keyboardType: TextInputType.phone),
+                            _buildTextField(_phoneNumberController,
+                                'Número de Teléfono', Icons.phone,
+                                keyboardType: TextInputType.phone),
                             const SizedBox(height: 20.0),
-                            _buildTextField(_placeOfBirthController, 'Lugar de Nacimiento', Icons.location_city),
+                            _buildTextField(_placeOfBirthController,
+                                'Lugar de Nacimiento', Icons.location_city),
                             const SizedBox(height: 20.0),
                             _buildGenderSelector(),
                             const SizedBox(height: 20.0),
                           ],
-                          if (_selectedUserType == 'Seller' && !_isRegisteringAsAdmin) ...[
+                          if (_selectedUserType == 'Seller' &&
+                              !_isRegisteringAsAdmin) ...[
                             const SizedBox(height: 20.0),
-                            _buildTextField(_businessNameController, 'Nombre del Negocio', Icons.business),
+                            _buildTextField(_businessNameController,
+                                'Nombre del Negocio', Icons.business),
                             const SizedBox(height: 20.0),
-                            _buildTextField(_businessAddressController, 'Dirección del Negocio', Icons.location_on),
+                            _buildTextField(_businessAddressController,
+                                'Dirección del Negocio', Icons.location_on),
                           ],
                           const SizedBox(height: 20.0),
                           _buildRegisterButton(),
@@ -366,7 +380,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType}) {
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData icon,
+      {TextInputType? keyboardType}) {
     bool isOptional = _isRegisteringAsAdmin &&
         label != 'Nombre Completo' &&
         label != 'Correo Electrónico';
@@ -384,7 +400,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (value == null || value.isEmpty) {
           return 'Por favor ingresa $label';
         }
-        if (label == 'Correo Electrónico' && !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+        if (label == 'Correo Electrónico' &&
+            !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
           return 'Por favor ingresa un correo electrónico válido';
         }
         return null;
@@ -392,7 +409,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildPasswordField(TextEditingController controller, String label, {required bool isConfirm}) {
+  Widget _buildPasswordField(TextEditingController controller, String label,
+      {required bool isConfirm}) {
     return TextFormField(
       controller: controller,
       obscureText: isConfirm ? _obscureConfirmPassword : _obscurePassword,
@@ -401,7 +419,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         prefixIcon: const Icon(Icons.lock, color: AppTheme.primary),
         suffixIcon: IconButton(
           icon: Icon(
-            (isConfirm ? _obscureConfirmPassword : _obscurePassword) ? Icons.visibility : Icons.visibility_off,
+            (isConfirm ? _obscureConfirmPassword : _obscurePassword)
+                ? Icons.visibility
+                : Icons.visibility_off,
             color: AppTheme.primary,
           ),
           onPressed: () {
@@ -478,7 +498,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       items: const [
         DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
         DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
-        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+        DropdownMenuItem(
+            value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
       ],
       onChanged: (value) {
         setState(() {

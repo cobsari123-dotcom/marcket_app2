@@ -16,14 +16,16 @@ class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final bool isAdmin;
 
-  const ProductDetailsScreen({super.key, required this.product, this.isAdmin = false});
+  const ProductDetailsScreen(
+      {super.key, required this.product, this.isAdmin = false});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  final DatabaseReference _reviewsRef = FirebaseDatabase.instance.ref('reviews');
+  final DatabaseReference _reviewsRef =
+      FirebaseDatabase.instance.ref('reviews');
   int _currentImageIndex = 0;
 
   @override
@@ -38,7 +40,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              Share.share('¡Mira este producto en Manos del Mar! ${widget.product.name}: ${widget.product.description}');
+              Share.share(
+                  '¡Mira este producto en Manos del Mar! ${widget.product.name}: ${widget.product.description}');
             },
           ),
           IconButton(
@@ -56,7 +59,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit width for product details content
+          constraints: const BoxConstraints(
+              maxWidth: 800), // Limit width for product details content
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +91,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     return Container(
                                       height: 300,
                                       color: AppTheme.background,
-                                      child: const Icon(Icons.broken_image, size: 80, color: AppTheme.marronClaro),
+                                      child: const Icon(Icons.broken_image,
+                                          size: 80,
+                                          color: AppTheme.marronClaro),
                                     );
                                   },
                                 );
@@ -100,11 +106,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: widget.product.imageUrls.map((url) {
-                                  int index = widget.product.imageUrls.indexOf(url);
+                                  int index =
+                                      widget.product.imageUrls.indexOf(url);
                                   return Container(
                                     width: 8.0,
                                     height: 8.0,
-                                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 2.0),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: _currentImageIndex == index
@@ -120,7 +128,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       : Container(
                           height: 300,
                           color: AppTheme.background,
-                          child: const Icon(Icons.image_not_supported, size: 80, color: AppTheme.marronClaro),
+                          child: const Icon(Icons.image_not_supported,
+                              size: 80, color: AppTheme.marronClaro),
                         ),
                 ),
                 Padding(
@@ -159,7 +168,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           Expanded(
                             child: Text(
                               'Precio: \$${widget.product.price.toStringAsFixed(2)}',
-                              style: textTheme.titleLarge?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                              style: textTheme.titleLarge?.copyWith(
+                                  color: AppTheme.primary,
+                                  fontWeight: FontWeight.bold),
                               softWrap: true,
                             ),
                           ),
@@ -168,7 +179,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             child: Text(
                               'Stock: ${widget.product.stock}',
                               textAlign: TextAlign.end,
-                              style: textTheme.titleLarge?.copyWith(color: AppTheme.secondary),
+                              style: textTheme.titleLarge
+                                  ?.copyWith(color: AppTheme.secondary),
                               softWrap: true,
                             ),
                           ),
@@ -202,38 +214,41 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       floatingActionButton: widget.isAdmin
           ? const SizedBox.shrink()
           : FloatingActionButton.extended(
-        onPressed: () async {
-          int? selectedQuantity = await showDialog<int>(
-            context: context,
-            builder: (context) => QuantitySelectionDialog(product: widget.product),
-          );
+              onPressed: () async {
+                int? selectedQuantity = await showDialog<int>(
+                  context: context,
+                  builder: (context) =>
+                      QuantitySelectionDialog(product: widget.product),
+                );
 
-          if (selectedQuantity != null && selectedQuantity > 0) {
-            try {
-              await CartService().addToCart(widget.product, selectedQuantity);
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${widget.product.name} añadido al carrito (x$selectedQuantity).'),
-                  backgroundColor: AppTheme.success,
-                ),
-              );
-            } catch (e) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error al añadir al carrito: $e'),
-                  backgroundColor: AppTheme.error,
-                ),
-              );
-            }
-          }
-        },
-        icon: const Icon(Icons.add_shopping_cart),
-        label: const Text('Añadir al Carrito'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-      ),
+                if (selectedQuantity != null && selectedQuantity > 0) {
+                  try {
+                    await CartService()
+                        .addToCart(widget.product, selectedQuantity);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            '${widget.product.name} añadido al carrito (x$selectedQuantity).'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al añadir al carrito: $e'),
+                        backgroundColor: AppTheme.error,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.add_shopping_cart),
+              label: const Text('Añadir al Carrito'),
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -249,19 +264,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
-          return const Center(child: Text('Aún no hay reseñas para este producto.'));
+          return const Center(
+              child: Text('Aún no hay reseñas para este producto.'));
         }
 
-        final reviewsMap = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+        final reviewsMap =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
         final reviews = reviewsMap.entries.map((entry) {
-          return Review.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
+          return Review.fromMap(
+              Map<String, dynamic>.from(entry.value as Map), entry.key);
         }).toList();
 
-        reviews.sort((a, b) => b.timestamp.compareTo(a.timestamp)); // Newest reviews first
+        reviews.sort((a, b) =>
+            b.timestamp.compareTo(a.timestamp)); // Newest reviews first
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(), // To allow SingleChildScrollView to work
+          physics:
+              const NeverScrollableScrollPhysics(), // To allow SingleChildScrollView to work
           itemCount: reviews.length,
           itemBuilder: (context, index) {
             final review = reviews[index];
@@ -294,7 +314,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     const SizedBox(height: 4),
                     Text(
                       DateFormat('dd/MM/yyyy').format(review.timestamp),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
                     Text(review.comment),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:marcket_app/providers/user_management_provider.dart';
-import 'package:marcket_app/screens/admin/user_detail_screen.dart';
+import 'package:marcket_app/screens/admin/admin_user_detail_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +17,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<UserManagementProvider>(context, listen: false);
+    final provider =
+        Provider.of<UserManagementProvider>(context, listen: false);
     provider.fetchUsers(); // Initial fetch
 
     _searchController.addListener(() {
@@ -88,21 +89,24 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   ? const Icon(Icons.person, color: AppTheme.onSecondary)
                   : null,
             ),
-            title: Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(user.fullName,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(user.email),
             trailing: Chip(
               label: Text(
                 user.userType,
                 style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
-              backgroundColor: user.userType == 'Seller' ? AppTheme.primary : AppTheme.secondary,
+              backgroundColor: user.userType == 'Seller'
+                  ? AppTheme.primary
+                  : AppTheme.secondary,
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
             ),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserDetailScreen(user: user),
+                  builder: (context) => AdminUserDetailScreen(userId: user.id),
                 ),
               );
             },

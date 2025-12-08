@@ -19,10 +19,13 @@ class AppTheme {
   static const Color turquesaClaro = Color(0xFF55CBCD);
 
   // Dark Theme Colors
-  static const Color darkPrimary = Color(0xFF7B9EBF); // Lighter blue for dark mode
-  static const Color darkSecondary = Color(0xFFF7C27D); // Lighter ocre for dark mode
+  static const Color darkPrimary =
+      Color(0xFF7B9EBF); // Lighter blue for dark mode
+  static const Color darkSecondary =
+      Color(0xFFF7C27D); // Lighter ocre for dark mode
   static const Color darkBackground = Color(0xFF121212); // Very dark grey
-  static const Color darkSurface = Color(0xFF1E1E1E); // Slightly lighter dark grey for surfaces
+  static const Color darkSurface =
+      Color(0xFF1E1E1E); // Slightly lighter dark grey for surfaces
   static const Color onDarkPrimary = Colors.black;
   static const Color onDarkSecondary = Colors.black; // If secondary is light
   static const Color onDarkBackground = Colors.white;
@@ -54,7 +57,8 @@ class AppTheme {
           color: onPrimary,
         ),
       ),
-      textTheme: TextTheme( // Ensure all text colors are dynamic based on ColorScheme
+      textTheme: TextTheme(
+        // Ensure all text colors are dynamic based on ColorScheme
         displayLarge: const TextStyle(
           fontSize: 57.0,
           fontWeight: FontWeight.bold,
@@ -153,7 +157,8 @@ class AppTheme {
         surface: darkSurface, // Use surface instead of deprecated background
         onPrimary: onDarkPrimary,
         onSecondary: onDarkSecondary,
-        onSurface: onDarkSurface, // Use onSurface instead of deprecated onBackground
+        onSurface:
+            onDarkSurface, // Use onSurface instead of deprecated onBackground
         error: error, // Error color can remain the same
         onError: Colors.white,
         brightness: Brightness.dark,
@@ -170,7 +175,8 @@ class AppTheme {
           color: onDarkPrimary,
         ),
       ),
-      textTheme: TextTheme( // Ensure all text colors are dynamic based on ColorScheme
+      textTheme: TextTheme(
+        // Ensure all text colors are dynamic based on ColorScheme
         displayLarge: const TextStyle(
           fontSize: 57.0,
           fontWeight: FontWeight.bold,
@@ -207,15 +213,20 @@ class AppTheme {
           fontSize: 14.0,
           fontWeight: FontWeight.w500,
         ).apply(color: onDarkBackground),
-        bodyLarge: const TextStyle(fontSize: 16.0).apply(color: onDarkBackground),
-        bodyMedium: const TextStyle(fontSize: 14.0).apply(color: onDarkBackground),
-        bodySmall: const TextStyle(fontSize: 12.0).apply(color: onDarkBackground),
+        bodyLarge:
+            const TextStyle(fontSize: 16.0).apply(color: onDarkBackground),
+        bodyMedium:
+            const TextStyle(fontSize: 14.0).apply(color: onDarkBackground),
+        bodySmall:
+            const TextStyle(fontSize: 12.0).apply(color: onDarkBackground),
         labelLarge: const TextStyle(
           fontSize: 14.0,
           fontWeight: FontWeight.bold,
         ).apply(color: onDarkPrimary),
-        labelMedium: const TextStyle(fontSize: 12.0).apply(color: onDarkBackground),
-        labelSmall: const TextStyle(fontSize: 11.0).apply(color: onDarkBackground),
+        labelMedium:
+            const TextStyle(fontSize: 12.0).apply(color: onDarkBackground),
+        labelSmall:
+            const TextStyle(fontSize: 11.0).apply(color: onDarkBackground),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -231,13 +242,15 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: marronClaro), // Keep original or dark variant
+          borderSide: const BorderSide(
+              color: marronClaro), // Keep original or dark variant
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: darkPrimary, width: 2),
         ),
-        labelStyle: const TextStyle(color: marronClaro), // Keep original or dark variant
+        labelStyle: const TextStyle(
+            color: marronClaro), // Keep original or dark variant
         contentPadding: const EdgeInsets.symmetric(
           vertical: 15,
           horizontal: 20,
@@ -252,7 +265,8 @@ class AppTheme {
         color: darkSurface, // Use dark surface for cards
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: darkSecondary, // Use dark secondary or a suitable dark chip color
+        backgroundColor:
+            darkSecondary, // Use dark secondary or a suitable dark chip color
         selectedColor: darkPrimary,
         labelStyle: const TextStyle(color: onDarkPrimary),
         secondaryLabelStyle: const TextStyle(color: onDarkPrimary),

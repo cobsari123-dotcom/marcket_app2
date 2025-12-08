@@ -12,59 +12,58 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Feed de Productos y Publicaciones:** Explora un flujo constante de productos auténticos y publicaciones de diferentes vendedores, con paginación para un rendimiento óptimo.
 - **Filtros y Ordenamiento:** Filtra las publicaciones por categoría y ordénalas por fecha o título para encontrar exactamente lo que buscas.
 - **Lista de Deseos (Favoritos):** Guarda tus productos preferidos en una lista de favoritos para acceder a ellos fácilmente.
-- **Carrito de Compras y Pedidos:** Añade productos al carrito, realiza pedidos y lleva un seguimiento de su estado en tu historial.
-- **Chat Directo con Vendedores:** Comunícate directamente con artesanos y pescadores locales.
+- **Gestión de Carrito y Compras Avanzada:** Añade productos al carrito, selecciona métodos de pago (transferencia bancaria o pago contra entrega), proporciona dirección de envío detallada y sube comprobantes de pago.
+- **Seguimiento de Pedidos Detallado:** Rastrea el estado de tus pedidos, visualiza códigos de entrega, tiempos estimados y números de seguimiento.
+- **Chat Directo con Vendedores y Soporte:** Comunícate directamente con artesanos, pescadores locales y con el equipo de soporte para cualquier incidencia.
 - **Reseñas y Calificaciones:** Valora los productos y vendedores después de una compra.
 
 ### Para Vendedores 🧑‍💼
 - **Dashboard de Vendedor:** Un panel de control intuitivo para gestionar tu tienda.
 - **Gestión de Productos y Publicaciones:** Añade, edita y elimina productos y publicaciones promocionales de forma sencilla.
-- **Gestión de Pedidos:** Revisa y gestiona los pedidos realizados por los clientes.
-- **Perfil de Vendedor Personalizado:** Personaliza tu perfil público con tu historia y la información de tu negocio.
+- **Gestión de Pedidos Avanzada:** Revisa y gestiona los pedidos, verifica comprobantes de pago, actualiza estados (preparación, enviado, entregado), genera códigos de entrega seguros y proporciona información de seguimiento.
+- **Perfil de Vendedor Personalizado:** Personaliza tu perfil público con tu historia, información de tu negocio y enlaces a redes sociales.
+- **Chat Directo con Compradores y Soporte:** Comunícate directamente con tus clientes y con el equipo de soporte para cualquier incidencia.
 
 ### Para Administradores 👮
 - **Dashboard de Administrador:** Un panel central para supervisar y gestionar la plataforma.
-- **Gestión de Usuarios:** Busca, visualiza y elimina cuentas de compradores o vendedores.
+- **Gestión de Usuarios Detallada:** Busca usuarios por ID público, nombre o correo electrónico. Visualiza perfiles completos de compradores y vendedores, incluyendo productos y publicaciones de estos últimos.
 - **Soporte Centralizado:** Atiende consultas y gestiona quejas de los usuarios a través de un chat y un sistema de tickets.
 - **Notificaciones a Usuarios:** Envía avisos y notificaciones directamente a los usuarios.
+- **Control Total de Cuentas:** Supervisa y gestiona la actividad de vendedores, incluyendo la verificación de comprobantes de pago y la resolución de disputas.
 
 ---
 
 ## 🚀 Mejoras Recientes
 
-A continuación, se detallan las *últimas* mejoras y correcciones implementadas para optimizar la experiencia de usuario y la estabilidad de la aplicación.
-**Fecha de la Última Actualización:** domingo, 07 de diciembre de 2025
+Hemos realizado una serie de mejoras significativas en la aplicación para ofrecer una experiencia más completa, segura y eficiente:
 
-### Actualizaciones Recientes (Diciembre 2025)
+### **Sistema Integral de Pedidos y Pagos**
+*   **Modelo de Orden Expandido:** El modelo de orden (`Order`) ha sido completamente reestructurado para incluir detalles de dirección de entrega (calle, colonia, código postal, ciudad, estado), número de teléfono, correo electrónico del comprador, método de pago, fecha y ventana de tiempo de entrega estimada, y un **código de seguridad para la entrega (`deliveryCode`)**.
+*   **Checkout Avanzado para Compradores:**
+    *   **Selección de Método de Pago:** El comprador puede elegir entre "Transferencia Bancaria" y "Pago contra Entrega".
+    *   **Formulario de Dirección de Envío:** Se recopila información detallada de la dirección de entrega durante el proceso de compra.
+    *   **Carga de Comprobante de Pago:** Para transferencias bancarias, el comprador puede subir una imagen de su comprobante, que se almacena en Firebase Storage.
+*   **Gestión Detallada de Órdenes para Vendedores:**
+    *   **Verificación de Pagos:** El vendedor puede visualizar el comprobante de pago subido por el comprador y tiene opciones para "Confirmar Pago" (cambiando el estado a "En Preparación") o "Rechazar Pago" (revirtiendo el estado a "Pendiente de Pago" y solicitando un motivo de rechazo).
+    *   **Generación de Códigos de Entrega Seguros:** Al confirmar un pago, se genera automáticamente un `deliveryCode` único para el pedido, que se utiliza para verificar la entrega al cliente.
+    *   **Actualizaciones de Estado y Logística:** El vendedor puede actualizar el estado del pedido a "Enviado" (ingresando un número de seguimiento y estableciendo una fecha y ventana de tiempo de entrega estimada) y "Entregado" (confirmando la entrega con el `deliveryCode`).
+*   **Notificaciones de Entrega en Tiempo Real:**
+    *   Se ha implementado una **Función de Nube de Firebase (`sendDeliveryNotification`)** que envía notificaciones push al comprador cada vez que el estado de su pedido cambia (enviado, entregado, cancelado o pago rechazado).
 
-*   **Perfiles y Registro:**
-    *   La selección de género y el calendario para la fecha de nacimiento funcionan correctamente.
-    *   Añadidos mensajes de confirmación de 3 segundos al guardar cambios en las pantallas de perfil.
-*   **Auditoría de UI/UX:**
-    *   Se realizó una auditoría completa de la UI/UX, confirmando que no hay títulos duplicados ni errores de navegación que redirijan al login o cierren la app inesperadamente.
-*   **Subida de Imágenes Mejorada:**
-    *   Tanto para **Productos** como para **Publicaciones**, ahora puedes añadir imágenes desde:
-        1.  **Galería**
-        2.  **Cámara** del teléfono
-        3.  Una **URL** de internet
-*   **Gestión de Usuarios (Administrador):**
-    *   Nueva pantalla "Gestión de Usuarios" en el panel de administrador.
-    *   Permite buscar, ver detalles y **eliminar permanentemente** cuentas de usuarios, junto con sus productos y publicaciones.
-*   **Sistema de Alertas Administrador-Usuario:**
-    *   Los administradores pueden enviar **alertas** a usuarios desde la pantalla de detalle.
-    *   Los usuarios (Compradores y Vendedores) tienen una nueva sección "Alertas de Administrador" para ver y **responder** a estos mensajes.
-*   **Feed de Publicaciones Estilo TikTok:**
-    *   Las pantallas de inicio de todos los roles (Comprador, Vendedor y Administrador) ahora son un **feed de publicaciones a pantalla completa** con desplazamiento vertical.
-    *   Implementada funcionalidad de **"Me Gusta"**, con actualización de contador en base de datos y UI.
-    *   Funcionalidad de **Comentarios** que permite ver, añadir nuevos comentarios, y **subir imágenes** en ellos.
-    *   Botón para **Compartir** publicaciones en redes sociales o mediante URL.
-    *   Restricciones de rol: Administradores pueden ver pero no interactuar (dar "me gusta", comentar, compartir).
-*   **Perfil Público de Vendedor Detallado:**
-    *   La pantalla de perfil público de vendedor ahora cuenta con 3 pestañas: **Perfil**, **Publicaciones** y **Productos**.
-    *   **Enlaces a Redes Sociales:** Integración de campos para Facebook, Instagram, TikTok, WhatsApp y sitio web en el perfil de edición del vendedor. Estos enlaces se muestran en el perfil público con iconos y acceso directo.
-*   **Compartir Productos y Perfiles de Vendedor:**
-    *   Añadida la función de **Compartir** para productos individuales desde su pantalla de detalles.
-    *   Añadida la función de **Compartir** para el perfil público de los vendedores.
+### **Mejoras en Perfiles y Administración**
+*   **ID Público para Usuarios:** Todos los usuarios (compradores y vendedores) ahora tienen un `publicId` único generado automáticamente al completar su perfil, facilitando su identificación.
+*   **Pantalla de Detalle de Usuario para Administradores:** Nueva interfaz que permite a los administradores buscar usuarios por `publicId`, nombre o correo electrónico y visualizar un perfil completo. Para vendedores, esto incluye acceso directo a sus productos y publicaciones.
+*   **Resolución de Disputas y Contacto con Soporte:**
+    *   Se ha añadido un botón "Contactar a Soporte" en la pantalla de detalles de cada pedido (visible para compradores y vendedores).
+    *   Al activarlo, inicia un chat directo con el equipo de soporte, pre-llenando automáticamente los detalles del `orderId` para una asistencia rápida y contextualizada.
+*   **Pantalla "Sobre Nosotros":** Nueva sección informativa accesible desde el menú lateral de todos los roles, explicando la génesis de la app por estudiantes de la UTC y facilitando diversos canales de contacto.
+
+### **UI/UX y Rendimiento**
+*   **Feed de Publicaciones Estilo TikTok Unificado:** La pantalla principal de "Inicio" para todos los roles (Comprador, Vendedor, Administrador) ahora presenta un feed de publicaciones a pantalla completa con desplazamiento vertical, incluyendo funciones de "Me Gusta", "Comentarios" (con carga de imágenes) y "Compartir".
+*   **Pulido Visual y Animaciones:**
+    *   **Iconografía Mejorada:** Utilización de `FontAwesomeIcons` para un aspecto más moderno y profesional en el feed de publicaciones.
+    *   **Animaciones Sutiles:** Incorporación de animaciones `fade` y `slideY` en los elementos del menú lateral de los dashboards para una experiencia de navegación más fluida y atractiva.
+    *   **Diseño Profesional:** Mejoras en el layout del perfil de edición de vendedor y en la `FullScreenPublicationView` para una apariencia más cuidada y consistente.
 
 ---
 
@@ -73,7 +72,7 @@ A continuación, se detallan las *últimas* mejoras y correcciones implementadas
 ### Stack Tecnológico
 - **Framework:** [Flutter](https://flutter.dev/)
 - **Backend:** [Firebase](https://firebase.google.com/) (Authentication, Realtime Database, Storage, Cloud Functions, Cloud Messaging)
-- **Pasarela de Pagos:** Integración con [Mercado Pago](https://www.mercadopago.com.mx/) a través de Cloud Functions.
+- **Pasarela de Pagos:** Integración con [Mercado Pago](https://www.mercadopago.com.mx/) a través de Cloud Functions (aunque la implementación actual prioriza la transferencia bancaria y pago contra entrega).
 
 ### Arquitectura de Software
 La aplicación utiliza una arquitectura moderna y escalable, diseñada para ser mantenible y robusta:
@@ -84,7 +83,7 @@ La aplicación utiliza una arquitectura moderna y escalable, diseñada para ser 
 
 -   **Rendimiento y Escalabilidad:** Las listas principales (feed de publicaciones, lista de productos, historial de órdenes) implementan **paginación** (infinite scroll). Esto asegura que la aplicación cargue los datos en lotes, manteniendo un rendimiento alto y un bajo consumo de datos, sin importar la cantidad de información en la base de datos.
 
--   **Notificaciones Push (FCM):** Se ha implementado la base para notificaciones push a través de Firebase Cloud Messaging (FCM). Una Cloud Function se encarga de enviar notificaciones a los usuarios cuando reciben nuevos mensajes de chat, asegurando una comunicación en tiempo real.
+-   **Notificaciones Push (FCM):** Se ha implementado la base para notificaciones push a través de Firebase Cloud Messaging (FCM). Una Cloud Function se encarga de enviar notificaciones a los usuarios cuando reciben nuevos mensajes de chat y ahora también para **actualizaciones de estado de pedidos**, asegurando una comunicación en tiempo real y contextualizada.
 
 -   **Diseño Adaptable (Responsive Design):** La navegación principal de la aplicación es totalmente adaptable. Utiliza un widget `ResponsiveScaffold` personalizado que muestra un `NavigationRail` (menú lateral fijo) en pantallas anchas como tabletas o computadoras, y un `Drawer` (menú de hamburguesa) en pantallas estrechas como las de los móviles. Esto asegura una experiencia de usuario óptima en cualquier dispositivo.
 

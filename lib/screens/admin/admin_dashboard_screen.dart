@@ -9,12 +9,14 @@ import 'package:marcket_app/screens/admin/admin_profile_screen.dart';
 import 'package:marcket_app/screens/admin/admin_settings_screen.dart';
 import 'package:marcket_app/screens/admin/admin_complaints_suggestions_screen.dart';
 import 'package:marcket_app/screens/admin/user_management_screen.dart';
-import 'package:marcket_app/screens/admin/admin_feed_screen.dart';
+import 'package:marcket_app/screens/buyer/feed_screen.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/widgets/responsive_scaffold.dart';
+import 'package:marcket_app/screens/common/about_us_screen.dart'; // Added import
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -41,7 +43,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const AdminComplaintsSuggestionsScreen(),
           const AdminProfileScreen(),
           const UserManagementScreen(),
-          const AdminFeedScreen(),
+          const FeedScreen(isAdmin: true),
         ];
 
         final List<NavigationRailDestination> destinations = [
@@ -111,7 +113,23 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: const Text('Configuración'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AdminSettingsScreen()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('Sobre Nosotros'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutUsScreen(),
+                    ),
+                  );
                 },
               ),
               const Divider(),
@@ -124,15 +142,17 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     context: context,
                     builder: (dialogContext) => AlertDialog(
                       title: const Text('Cerrar Sesión'),
-                      content:
-                          const Text('¿Estás seguro de que quieres cerrar sesión?'),
+                      content: const Text(
+                          '¿Estás seguro de que quieres cerrar sesión?'),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(false),
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
                           child: const Text('Cancelar'),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(true),
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
                           child: const Text(
                             'Sí, Cerrar Sesión',
                             style: TextStyle(color: AppTheme.error),
@@ -244,7 +264,10 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
         adminProvider.setSelectedIndex(index);
         Navigator.pop(context); // Cerrar el Drawer
       },
-    );
+    )
+        .animate()
+        .fade(duration: 300.ms, delay: (50 * index).ms)
+        .slideY(begin: 0.1, end: 0, duration: 300.ms, delay: (50 * index).ms);
   }
 }
 
@@ -377,13 +400,17 @@ class SupportChatListState extends State<SupportChatList> {
                   const SizedBox(width: 8),
                   Chip(
                     label: Text(userType),
-                    labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white),
+                    labelStyle: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white),
                     backgroundColor: userType.toLowerCase() == 'seller'
                         ? AppTheme.primary
                         : userType.toLowerCase() == 'buyer'
-                        ? AppTheme.secondary
-                        : Colors.grey,
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0),
+                            ? AppTheme.secondary
+                            : Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0, vertical: 0),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
@@ -394,11 +421,11 @@ class SupportChatListState extends State<SupportChatList> {
                 overflow: TextOverflow.ellipsis,
               ),
               trailing: Text(
-                    _formatTimestamp(
-                      room.lastMessageTimestamp,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                _formatTimestamp(
+                  room.lastMessageTimestamp,
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               onTap: () {
                 if (!mounted) return;
                 Navigator.pushNamed(

@@ -8,7 +8,8 @@ class ComplaintSuggestionScreen extends StatefulWidget {
   const ComplaintSuggestionScreen({super.key});
 
   @override
-  State<ComplaintSuggestionScreen> createState() => _ComplaintSuggestionScreenState();
+  State<ComplaintSuggestionScreen> createState() =>
+      _ComplaintSuggestionScreenState();
 }
 
 class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
@@ -34,9 +35,11 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null && !_isAnonymous) {
         if (mounted) {
-
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Debes iniciar sesión para enviar una queja/sugerencia no anónima.'), backgroundColor: AppTheme.error),
+            SnackBar(
+                content: Text(
+                    'Debes iniciar sesión para enviar una queja/sugerencia no anónima.'),
+                backgroundColor: AppTheme.error),
           );
         }
         setState(() {
@@ -46,7 +49,8 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
       }
 
       try {
-        final databaseRef = FirebaseDatabase.instance.ref('complaints_suggestions');
+        final databaseRef =
+            FirebaseDatabase.instance.ref('complaints_suggestions');
         await databaseRef.push().set({
           'userId': _isAnonymous ? 'anonimo' : user?.uid,
           'userEmail': _isAnonymous ? 'anonimo' : user?.email,
@@ -58,14 +62,20 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Queja/Sugerencia enviada con éxito.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+            const SnackBar(
+                content: Text('Queja/Sugerencia enviada con éxito.'),
+                backgroundColor: AppTheme.success,
+                duration: Duration(seconds: 3)),
           );
           Navigator.pop(context); // Go back after submission
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppTheme.error, duration: Duration(seconds: 3)),
+            SnackBar(
+                content: Text('Error al enviar: $e'),
+                backgroundColor: AppTheme.error,
+                duration: Duration(seconds: 3)),
           );
         }
       } finally {
@@ -86,8 +96,10 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 700), // Limit width for the form
-          child: SingleChildScrollView( // Ensure scrolling if content overflows
+          constraints:
+              const BoxConstraints(maxWidth: 700), // Limit width for the form
+          child: SingleChildScrollView(
+            // Ensure scrolling if content overflows
             padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
@@ -134,13 +146,18 @@ class _ComplaintSuggestionScreenState extends State<ComplaintSuggestionScreen> {
                         _isAnonymous = value;
                       });
                     },
-                    secondary: const Icon(Icons.privacy_tip_outlined, color: AppTheme.primary),
+                    secondary: const Icon(Icons.privacy_tip_outlined,
+                        color: AppTheme.primary),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _isSending ? null : _submitComplaintSuggestion,
-                    icon: _isSending ? const SizedBox.shrink() : const Icon(Icons.send),
-                    label: _isSending ? const CircularProgressIndicator(color: Colors.white) : const Text('Enviar'),
+                    icon: _isSending
+                        ? const SizedBox.shrink()
+                        : const Icon(Icons.send),
+                    label: _isSending
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Enviar'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,

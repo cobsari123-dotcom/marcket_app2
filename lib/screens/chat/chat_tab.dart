@@ -30,25 +30,32 @@ class ChatTabState extends State<ChatTab> with AutomaticKeepAliveClientMixin {
           return const Center(child: Text('No tienes mensajes.'));
         }
 
-        final chatRoomsData = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+        final chatRoomsData =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
         final allChatRooms = chatRoomsData.entries.map((entry) {
-          return ChatRoom.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
+          return ChatRoom.fromMap(
+              Map<String, dynamic>.from(entry.value as Map), entry.key);
         }).toList();
-        
+
         // Filter out support chats, they are handled in a different section
-        final filteredChatRooms = allChatRooms.where((cr) => !cr.id.contains('support_admin_user')).toList();
+        final filteredChatRooms = allChatRooms
+            .where((cr) => !cr.id.contains('support_admin_user'))
+            .toList();
 
         if (filteredChatRooms.isEmpty) {
-          return const Center(child: Text('No tienes conversaciones con otros usuarios.'));
+          return const Center(
+              child: Text('No tienes conversaciones con otros usuarios.'));
         }
 
-        filteredChatRooms.sort((a, b) => b.lastMessageTimestamp.compareTo(a.lastMessageTimestamp));
+        filteredChatRooms.sort(
+            (a, b) => b.lastMessageTimestamp.compareTo(a.lastMessageTimestamp));
 
         return ListView.builder(
           itemCount: filteredChatRooms.length,
           itemBuilder: (context, index) {
             final chatRoom = filteredChatRooms[index];
-            return ChatListItem(chatRoom: chatRoom, currentUserId: widget.currentUserId);
+            return ChatListItem(
+                chatRoom: chatRoom, currentUserId: widget.currentUserId);
           },
         );
       },

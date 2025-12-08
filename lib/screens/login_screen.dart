@@ -57,9 +57,10 @@ class LoginScreenState extends State<LoginScreen> {
         if (mounted) setState(() => _isLoading = false);
         return;
       }
-      
+
       if (mounted && userCredential.user != null) {
-        await _handleSuccessfulLogin(userCredential.user!, isGoogleSignIn: true);
+        await _handleSuccessfulLogin(userCredential.user!,
+            isGoogleSignIn: true);
       }
     } catch (e) {
       if (mounted) {
@@ -73,7 +74,8 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleSuccessfulLogin(User user, {bool isGoogleSignIn = false}) async {
+  Future<void> _handleSuccessfulLogin(User user,
+      {bool isGoogleSignIn = false}) async {
     final userModel = await _userService.getUserById(user.uid);
 
     if (userModel != null) {
@@ -114,7 +116,8 @@ class LoginScreenState extends State<LoginScreen> {
         await _authService.signOut();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Este usuario no está registrado. Por favor, regístrese o contacte a soporte.'),
+            content: Text(
+                'Este usuario no está registrado. Por favor, regístrese o contacte a soporte.'),
             backgroundColor: AppTheme.error,
           ));
         }
@@ -209,7 +212,9 @@ class LoginScreenState extends State<LoginScreen> {
 
   void _handleAuthError(FirebaseAuthException e) {
     String errorMessage = 'Ocurrió un error';
-    if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
+    if (e.code == 'user-not-found' ||
+        e.code == 'wrong-password' ||
+        e.code == 'invalid-credential') {
       errorMessage = 'Correo electrónico o contraseña incorrectos.';
     } else {
       errorMessage = e.message ?? errorMessage;
@@ -265,7 +270,8 @@ class LoginScreenState extends State<LoginScreen> {
         child: Card(
           margin: const EdgeInsets.all(24.0),
           elevation: 8,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
             child: _buildLoginForm(),
@@ -298,7 +304,10 @@ class LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 40.0),
           _buildEmailField().animate().fade(delay: 400.ms).slideY(begin: 0.2),
           const SizedBox(height: 20.0),
-          _buildPasswordField().animate().fade(delay: 500.ms).slideY(begin: 0.2),
+          _buildPasswordField()
+              .animate()
+              .fade(delay: 500.ms)
+              .slideY(begin: 0.2),
           const SizedBox(height: 16.0),
           _buildForgotPasswordLink().animate().fade(delay: 600.ms),
           const SizedBox(height: 24.0),
@@ -306,7 +315,10 @@ class LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 20.0),
           _buildOrDivider().animate().fade(delay: 800.ms),
           const SizedBox(height: 20.0),
-          _buildGoogleSignInButton().animate().fade(delay: 900.ms).slideY(begin: 0.2),
+          _buildGoogleSignInButton()
+              .animate()
+              .fade(delay: 900.ms)
+              .slideY(begin: 0.2),
           const SizedBox(height: 32.0),
           _buildRegisterLink().animate().fade(delay: 1000.ms),
           TextButton(
@@ -320,9 +332,12 @@ class LoginScreenState extends State<LoginScreen> {
 
   Widget _buildEmailField() => TextFormField(
         controller: _emailController,
-        decoration: const InputDecoration(labelText: 'Correo Electrónico', prefixIcon: Icon(Icons.email_outlined)),
+        decoration: const InputDecoration(
+            labelText: 'Correo Electrónico',
+            prefixIcon: Icon(Icons.email_outlined)),
         keyboardType: TextInputType.emailAddress,
-        validator: (v) => (v?.isEmpty ?? true) ? 'Por favor ingresa tu correo' : null,
+        validator: (v) =>
+            (v?.isEmpty ?? true) ? 'Por favor ingresa tu correo' : null,
       );
 
   Widget _buildPasswordField() => TextFormField(
@@ -332,11 +347,14 @@ class LoginScreenState extends State<LoginScreen> {
           labelText: 'Contraseña',
           prefixIcon: const Icon(Icons.lock_outline),
           suffixIcon: IconButton(
-            icon: Icon(_obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+            icon: Icon(_obscureText
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined),
             onPressed: () => setState(() => _obscureText = !_obscureText),
           ),
         ),
-        validator: (v) => (v?.isEmpty ?? true) ? 'Por favor ingresa tu contraseña' : null,
+        validator: (v) =>
+            (v?.isEmpty ?? true) ? 'Por favor ingresa tu contraseña' : null,
       );
 
   Widget _buildForgotPasswordLink() => Align(
@@ -359,7 +377,8 @@ class LoginScreenState extends State<LoginScreen> {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 48),
           foregroundColor: Theme.of(context).colorScheme.onSurface,
-          side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withAlpha(51)),
+          side: BorderSide(
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(51)),
         ),
       );
 

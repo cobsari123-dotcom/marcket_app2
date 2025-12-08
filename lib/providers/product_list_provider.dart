@@ -60,7 +60,8 @@ class ProductListProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final userId = _auth.currentUser?.uid; // Obtener el userId del usuario actual
+      final userId =
+          _auth.currentUser?.uid; // Obtener el userId del usuario actual
       if (userId == null) {
         _errorMessage = 'Usuario no autenticado.';
         _isLoadingMore = false;

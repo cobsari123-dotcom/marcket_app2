@@ -23,7 +23,7 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
 
   Future<void> _sendResetEmail() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    
+
     if (mounted) setState(() => _isLoading = true);
 
     try {
@@ -34,7 +34,8 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('¡Enlace de restablecimiento de contraseña enviado a tu correo electrónico!'),
+          content: Text(
+              '¡Enlace de restablecimiento de contraseña enviado a tu correo electrónico!'),
           duration: Duration(seconds: 3),
           backgroundColor: AppTheme.success,
         ),
@@ -42,7 +43,6 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
 
       if (!mounted) return;
       Navigator.pop(context);
-
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +80,9 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                 constraints: const BoxConstraints(maxWidth: 500),
                 child: Card(
                   elevation: isSmallScreen ? 0 : 8,
-                  color: isSmallScreen ? Colors.transparent : Theme.of(context).cardColor,
+                  color: isSmallScreen
+                      ? Colors.transparent
+                      : Theme.of(context).cardColor,
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Form(
@@ -93,31 +95,42 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                             'Restablece tu Contraseña',
                             textAlign: TextAlign.center,
                             style: textTheme.headlineLarge,
-                          ).animate().fade(duration: 500.ms).slideY(begin: -0.5, end: 0),
+                          )
+                              .animate()
+                              .fade(duration: 500.ms)
+                              .slideY(begin: -0.5, end: 0),
                           const SizedBox(height: 20.0),
                           Text(
                             'Ingresa tu correo electrónico a continuación y te enviaremos un enlace para restablecer tu contraseña.',
                             textAlign: TextAlign.center,
                             style: textTheme.bodyLarge,
-                          ).animate().fade(duration: 500.ms, delay: 200.ms).slideY(begin: -0.5, end: 0),
+                          )
+                              .animate()
+                              .fade(duration: 500.ms, delay: 200.ms)
+                              .slideY(begin: -0.5, end: 0),
                           const SizedBox(height: 30.0),
                           TextFormField(
                             controller: _emailController,
                             decoration: const InputDecoration(
                               labelText: 'Correo Electrónico',
-                              prefixIcon: Icon(Icons.email, color: AppTheme.primary),
+                              prefixIcon:
+                                  Icon(Icons.email, color: AppTheme.primary),
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Por favor ingresa tu correo electrónico';
                               }
-                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                  .hasMatch(value)) {
                                 return 'Por favor ingresa un correo electrónico válido';
                               }
                               return null;
                             },
-                          ).animate().fade(duration: 500.ms, delay: 400.ms).slideY(begin: -0.5, end: 0),
+                          )
+                              .animate()
+                              .fade(duration: 500.ms, delay: 400.ms)
+                              .slideY(begin: -0.5, end: 0),
                           const SizedBox(height: 30.0),
                           ElevatedButton(
                             onPressed: _isLoading ? null : _sendResetEmail,
@@ -125,7 +138,10 @@ class RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                               minimumSize: const Size(double.infinity, 50),
                             ),
                             child: const Text('Enviar Enlace'),
-                          ).animate().fade(duration: 500.ms, delay: 600.ms).slideY(begin: 0.5, end: 0),
+                          )
+                              .animate()
+                              .fade(duration: 500.ms, delay: 600.ms)
+                              .slideY(begin: 0.5, end: 0),
                           const SizedBox(height: 20),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),

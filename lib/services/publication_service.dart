@@ -7,16 +7,20 @@ import 'package:marcket_app/models/publication.dart';
 import 'package:marcket_app/services/user_service.dart';
 
 class PublicationService {
-  final DatabaseReference _publicationsRef = FirebaseDatabase.instance.ref('publications');
-  final DatabaseReference _commentsRef = FirebaseDatabase.instance.ref('comments');
+  final DatabaseReference _publicationsRef =
+      FirebaseDatabase.instance.ref('publications');
+  final DatabaseReference _commentsRef =
+      FirebaseDatabase.instance.ref('comments');
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final UserService _userService = UserService();
 
   // Obtener un stream de publicaciones con paginación, filtro y ordenamiento
   Stream<List<Publication>> getPublicationsStream({
     int pageSize = 10,
-    String? startAfterKey, // La última clave de la publicación para la paginación
-    String? startAfterValue, // El valor de ordenamiento de la última publicación
+    String?
+        startAfterKey, // La última clave de la publicación para la paginación
+    String?
+        startAfterValue, // El valor de ordenamiento de la última publicación
     String? category,
     String sortBy = 'timestamp', // Campo por el que ordenar
     bool descending = true, // true para más nuevas primero
@@ -39,10 +43,12 @@ class PublicationService {
       if (snapshot.value == null) {
         return [];
       }
-      final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> data =
+          snapshot.value as Map<dynamic, dynamic>;
       List<Publication> publications = [];
       data.forEach((key, value) {
-        publications.add(Publication.fromMap(Map<String, dynamic>.from(value), key));
+        publications
+            .add(Publication.fromMap(Map<String, dynamic>.from(value), key));
       });
 
       // Ordenar si es necesario
@@ -76,11 +82,13 @@ class PublicationService {
       return; // No se puede dar like si no está logueado
     }
 
-    final DatabaseReference likesRef = _publicationsRef.child(publicationId).child('likes');
+    final DatabaseReference likesRef =
+        _publicationsRef.child(publicationId).child('likes');
 
     await likesRef.runTransaction((Object? data) {
-      Map<String, dynamic> likes = data == null ? {} : Map<String, dynamic>.from(data as Map);
-      
+      Map<String, dynamic> likes =
+          data == null ? {} : Map<String, dynamic>.from(data as Map);
+
       if (likes.containsKey(userId)) {
         // El usuario ya dio like, se quita
         likes.remove(userId);
@@ -99,9 +107,11 @@ class PublicationService {
       if (!event.snapshot.exists) {
         return [];
       }
-      final commentsMap = Map<String, dynamic>.from(event.snapshot.value as Map);
+      final commentsMap =
+          Map<String, dynamic>.from(event.snapshot.value as Map);
       final comments = commentsMap.entries.map((entry) {
-        return Comment.fromMap(Map<String, dynamic>.from(entry.value), entry.key);
+        return Comment.fromMap(
+            Map<String, dynamic>.from(entry.value), entry.key);
       }).toList();
       comments.sort((a, b) => a.timestamp.compareTo(b.timestamp));
       return comments;
@@ -126,11 +136,9 @@ class PublicationService {
 
     String? imageUrl;
     if (imageFile != null) {
-      final storageRef = _storage
-          .ref()
-          .child('comment_images')
-          .child('${publicationId}_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      
+      final storageRef = _storage.ref().child('comment_images').child(
+          '${publicationId}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+
       await storageRef.putFile(imageFile);
       imageUrl = await storageRef.getDownloadURL();
     }

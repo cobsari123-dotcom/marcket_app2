@@ -17,10 +17,12 @@ class PublicationDetailsScreen extends StatefulWidget {
   final Publication publication;
   final bool isAdmin;
 
-  const PublicationDetailsScreen({super.key, required this.publication, this.isAdmin = false});
+  const PublicationDetailsScreen(
+      {super.key, required this.publication, this.isAdmin = false});
 
   @override
-  State<PublicationDetailsScreen> createState() => _PublicationDetailsScreenState();
+  State<PublicationDetailsScreen> createState() =>
+      _PublicationDetailsScreenState();
 }
 
 class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
@@ -28,7 +30,7 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
   final _auth = FirebaseAuth.instance;
   final _commentController = TextEditingController();
   final _pageController = PageController();
-  
+
   int _currentPage = 0;
   File? _commentImage;
   bool _isPickingCommentImage = false;
@@ -42,10 +44,15 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
 
   Future<void> _ratePublication(double rating) async {
     try {
+      // CORRECCIÓN: Se eliminó await de .child y se agregó .set(rating) para guardar el dato
       await _database
-          .child('publications/${widget.publication.id}/ratings/${_auth.currentUser!.uid}')
+          .child(
+              'publications/${widget.publication.id}/ratings/${_auth.currentUser!.uid}')
           .set(rating);
-      if (!mounted) return;
+
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('¡Gracias por tu calificación!'),
@@ -53,7 +60,9 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
         ),
       );
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al guardar la calificación: $e'),
@@ -64,13 +73,20 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
   }
 
   Future<void> _pickCommentImage() async {
-    if (_isPickingCommentImage) return;
+    if (_isPickingCommentImage) {
+      return;
+    }
     try {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _isPickingCommentImage = true);
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 70);
+      final pickedFile = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 70);
       if (pickedFile != null) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setState(() {
           _commentImage = File(pickedFile.path);
         });
@@ -81,24 +97,34 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.trim().isEmpty && _commentImage == null) return;
-    
+    if (_commentController.text.trim().isEmpty && _commentImage == null) {
+      return;
+    }
+
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      return;
+    }
 
     final userSnapshot = await _database.child('users/${user.uid}').get();
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     if (!userSnapshot.exists) {
-      if (!mounted) return; // Add mounted check here
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Error: No se pudo obtener la información del usuario.'),
+          content:
+              Text('Error: No se pudo obtener la información del usuario.'),
           backgroundColor: AppTheme.error,
         ),
       );
       return;
     }
-    final currentUserModel = UserModel.fromMap(Map<String, dynamic>.from(userSnapshot.value as Map), user.uid);
+    final currentUserModel = UserModel.fromMap(
+        Map<String, dynamic>.from(userSnapshot.value as Map), user.uid);
 
     try {
       String? imageUrl;
@@ -106,12 +132,15 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('comment_images')
-            .child('${widget.publication.id}_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+            .child(
+                '${widget.publication.id}_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg');
         await storageRef.putFile(_commentImage!);
         imageUrl = await storageRef.getDownloadURL();
       }
 
-      final newCommentRef = _database.child('publications/${widget.publication.id}/comments').push();
+      final newCommentRef = _database
+          .child('publications/${widget.publication.id}/comments')
+          .push();
       final comment = Comment(
         id: newCommentRef.key!,
         userId: user.uid,
@@ -122,16 +151,17 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
         imageUrl: imageUrl,
       );
       await newCommentRef.set(comment.toMap());
-      
+
       if (!mounted) return;
       setState(() {
         _commentController.clear();
         _commentImage = null;
       });
       FocusScope.of(context).unfocus();
-
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al agregar el comentario: $e'),
@@ -168,15 +198,23 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Confirmar Eliminación'),
-                    content: const Text('¿Estás seguro de que quieres eliminar esta publicación?'),
+                    content: const Text(
+                        '¿Estás seguro de que quieres eliminar esta publicación?'),
                     actions: [
-                      TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-                      TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Eliminar', style: TextStyle(color: AppTheme.error))),
+                      TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancelar')),
+                      TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Eliminar',
+                              style: TextStyle(color: AppTheme.error))),
                     ],
                   ),
                 );
                 if (confirmed == true) {
-                  await _database.child('publications/${widget.publication.id}').remove();
+                  await _database
+                      .child('publications/${widget.publication.id}')
+                      .remove();
                   if (!mounted) return;
                   Navigator.pop(context);
                 }
@@ -190,7 +228,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit width for publication details content
+          constraints: const BoxConstraints(
+              maxWidth: 800), // Limit width for publication details content
           child: Column(
             children: [
               Expanded(
@@ -204,7 +243,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.publication.title, style: textTheme.headlineMedium),
+                            Text(widget.publication.title,
+                                style: textTheme.headlineMedium),
                             const SizedBox(height: 8),
                             Text(
                               'Publicado el ${DateFormat('dd/MM/yyyy HH:mm').format(widget.publication.timestamp)}',
@@ -216,7 +256,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                                 style: textTheme.bodySmall,
                               ),
                             const Divider(height: 32),
-                            Text(widget.publication.content, style: textTheme.bodyLarge),
+                            Text(widget.publication.content,
+                                style: textTheme.bodyLarge),
                             const Divider(height: 32),
                             _buildRatingSection(),
                             const Divider(height: 32),
@@ -241,11 +282,11 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
   Widget _buildImageCarousel() {
     final imageUrls = widget.publication.imageUrls;
     if (imageUrls.isEmpty) {
-
       return Container(
         height: 300,
         color: AppTheme.background,
-        child: const Icon(Icons.broken_image, size: 80, color: AppTheme.marronClaro),
+        child: const Icon(Icons.broken_image,
+            size: 80, color: AppTheme.marronClaro),
       );
     }
 
@@ -265,7 +306,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: AppTheme.background,
-                  child: const Icon(Icons.broken_image, size: 80, color: AppTheme.marronClaro),
+                  child: const Icon(Icons.broken_image,
+                      size: 80, color: AppTheme.marronClaro),
                 ),
               );
             },
@@ -283,7 +325,9 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _currentPage == index ? Colors.white : Colors.white.withAlpha(128), // Fixed deprecated
+                    color: _currentPage == index
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.5), // Actualizado
                   ),
                 );
               }),
@@ -300,7 +344,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Calificaciones', style: Theme.of(context).textTheme.titleLarge),
+            Text('Calificaciones',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -312,23 +357,34 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                   itemCount: 5,
                   itemSize: isSmallScreen ? 30 : 40,
                   itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  itemBuilder: (context, _) => const Icon(Icons.star, color: AppTheme.secondary),
-                  onRatingUpdate: widget.isAdmin ? (rating) {} : (rating) {
-                    if (widget.publication.sellerId == _auth.currentUser!.uid) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No puedes calificar tu propia publicación.'), backgroundColor: AppTheme.error),
-                      );
-                    } else {
-                      _ratePublication(rating);
-                    }
-                  },
+                  itemBuilder: (context, _) =>
+                      const Icon(Icons.star, color: AppTheme.secondary),
+                  onRatingUpdate: widget.isAdmin
+                      ? (rating) {}
+                      : (rating) {
+                          if (widget.publication.sellerId ==
+                              _auth.currentUser!.uid) {
+                            if (!mounted) {
+                              return;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'No puedes calificar tu propia publicación.'),
+                                  backgroundColor: AppTheme.error),
+                            );
+                          } else {
+                            _ratePublication(rating);
+                          }
+                        },
                 ),
                 const SizedBox(width: 16),
                 Flexible(
                   child: Text(
                     '${widget.publication.averageRating.toStringAsFixed(1)} (${widget.publication.ratings.length} calificaciones)',
-                    style: isSmallScreen ? Theme.of(context).textTheme.bodySmall : Theme.of(context).textTheme.bodyMedium,
+                    style: isSmallScreen
+                        ? Theme.of(context).textTheme.bodySmall
+                        : Theme.of(context).textTheme.bodyMedium,
                     softWrap: true,
                   ),
                 ),
@@ -342,7 +398,9 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
 
   Widget _buildCommentsList() {
     return StreamBuilder(
-      stream: _database.child('publications/${widget.publication.id}/comments').onValue,
+      stream: _database
+          .child('publications/${widget.publication.id}/comments')
+          .onValue,
       builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -351,9 +409,11 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
           return const Center(child: Text('Sé el primero en comentar.'));
         }
 
-        final commentsData = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+        final commentsData =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
         final comments = commentsData.entries.map((entry) {
-          return Comment.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
+          return Comment.fromMap(
+              Map<String, dynamic>.from(entry.value as Map), entry.key);
         }).toList();
         comments.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
@@ -366,24 +426,38 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
             return FutureBuilder<DataSnapshot>(
               future: _database.child('users/${comment.userId}').get(),
               builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) return const SizedBox.shrink();
-                if (!userSnapshot.hasData || !userSnapshot.data!.exists) return const SizedBox.shrink();
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox.shrink();
+                }
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                  return const SizedBox.shrink();
+                }
 
-                final userData = Map<String, dynamic>.from(userSnapshot.data!.value as Map);
-                final commenterUserModel = UserModel.fromMap(userData, comment.userId);
-                final isSeller = commenterUserModel.id == widget.publication.sellerId;
+                final userData = Map<String, dynamic>.from(
+                    userSnapshot.data!.value as Map);
+                final commenterUserModel =
+                    UserModel.fromMap(userData, comment.userId);
+                final isSeller =
+                    commenterUserModel.id == widget.publication.sellerId;
 
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: commenterUserModel.profilePicture != null ? NetworkImage(commenterUserModel.profilePicture!) : null,
-                    child: commenterUserModel.profilePicture == null ? const Icon(Icons.person, color: AppTheme.onSecondary) : null,
+                    backgroundImage: commenterUserModel.profilePicture != null
+                        ? NetworkImage(commenterUserModel.profilePicture!)
+                        : null,
+                    child: commenterUserModel.profilePicture == null
+                        ? const Icon(Icons.person, color: AppTheme.onSecondary)
+                        : null,
                   ),
                   title: Row(
                     children: [
                       Expanded(child: Text(commenterUserModel.fullName)),
                       if (isSeller) ...[
                         const SizedBox(width: 8),
-                        const Chip(label: Text('Vendedor'), backgroundColor: AppTheme.secondary, labelStyle: TextStyle(color: Colors.white)),
+                        const Chip(
+                            label: Text('Vendedor'),
+                            backgroundColor: AppTheme.secondary,
+                            labelStyle: TextStyle(color: Colors.white)),
                       ],
                     ],
                   ),
@@ -393,11 +467,16 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                       if (comment.comment.isNotEmpty)
                         ParsedText(
                           text: comment.comment,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.onBackground),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: AppTheme.onBackground),
                           parse: <MatchText>[
                             MatchText(
                               pattern: r'@[a-zA-Z0-9_]+',
-                              style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  color: AppTheme.primary,
+                                  fontWeight: FontWeight.bold),
                               onTap: (username) {},
                             ),
                           ],
@@ -408,7 +487,8 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                       ]
                     ],
                   ),
-                  trailing: Text(DateFormat('dd/MM/yy HH:mm').format(comment.timestamp)),
+                  trailing: Text(
+                      DateFormat('dd/MM/yy HH:mm').format(comment.timestamp)),
                 );
               },
             );
@@ -425,7 +505,7 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(25), // Fixed deprecated
+            color: Colors.black.withValues(alpha: 0.1), // Actualizado
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -457,7 +537,9 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
               Expanded(
                 child: TextField(
                   controller: _commentController,
-                  decoration: const InputDecoration(hintText: 'Escribe un comentario...', border: InputBorder.none),
+                  decoration: const InputDecoration(
+                      hintText: 'Escribe un comentario...',
+                      border: InputBorder.none),
                 ),
               ),
               IconButton(

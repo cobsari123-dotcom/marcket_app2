@@ -48,12 +48,15 @@ class UserDetailScreen extends StatelessWidget {
                   final adminId = FirebaseAuth.instance.currentUser?.uid;
                   if (adminId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Error: Administrador no autenticado.'), backgroundColor: AppTheme.error),
+                      const SnackBar(
+                          content: Text('Error: Administrador no autenticado.'),
+                          backgroundColor: AppTheme.error),
                     );
                     return;
                   }
 
-                  final newAlertRef = FirebaseDatabase.instance.ref('alerts').push();
+                  final newAlertRef =
+                      FirebaseDatabase.instance.ref('alerts').push();
                   try {
                     await newAlertRef.set({
                       'userId': user.id,
@@ -62,15 +65,18 @@ class UserDetailScreen extends StatelessWidget {
                       'timestamp': DateTime.now().millisecondsSinceEpoch,
                       'status': 'sent', // 'sent', 'replied'
                     });
-                    
+
                     Navigator.of(context).pop(); // Close the dialog
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Alerta enviada con éxito.'), backgroundColor: AppTheme.success),
+                      const SnackBar(
+                          content: Text('Alerta enviada con éxito.'),
+                          backgroundColor: AppTheme.success),
                     );
-
                   } catch (e) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error al enviar la alerta: $e'), backgroundColor: AppTheme.error),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Error al enviar la alerta: $e'),
+                          backgroundColor: AppTheme.error),
                     );
                   }
                 }
@@ -122,8 +128,11 @@ class UserDetailScreen extends StatelessWidget {
           Text(user.fullName, style: Theme.of(context).textTheme.headlineSmall),
           Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
           Chip(
-            label: Text(user.userType, style: const TextStyle(color: Colors.white)),
-            backgroundColor: user.userType == 'Seller' ? AppTheme.primary : AppTheme.secondary,
+            label: Text(user.userType,
+                style: const TextStyle(color: Colors.white)),
+            backgroundColor: user.userType == 'Seller'
+                ? AppTheme.primary
+                : AppTheme.secondary,
           ),
         ],
       ),
@@ -138,22 +147,29 @@ class UserDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Información del Usuario', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Información del Usuario',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
             _buildInfoRow('UID:', user.id),
-            if (user.phoneNumber != null) _buildInfoRow('Teléfono:', user.phoneNumber!),
-            if (user.dob != null) _buildInfoRow('Fecha de Nacimiento:', user.dob!),
+            if (user.phoneNumber != null)
+              _buildInfoRow('Teléfono:', user.phoneNumber!),
+            if (user.dob != null)
+              _buildInfoRow('Fecha de Nacimiento:', user.dob!),
             if (user.rfc != null) _buildInfoRow('RFC:', user.rfc!),
-            if (user.placeOfBirth != null) _buildInfoRow('Lugar de Nacimiento:', user.placeOfBirth!),
+            if (user.placeOfBirth != null)
+              _buildInfoRow('Lugar de Nacimiento:', user.placeOfBirth!),
             if (user.gender != null) _buildInfoRow('Sexo:', user.gender!),
-            if (user.address != null) _buildInfoRow('Dirección:', user.address!),
+            if (user.address != null)
+              _buildInfoRow('Dirección:', user.address!),
             if (user.bio != null) _buildInfoRow('Biografía:', user.bio!),
             if (user.businessName != null) ...[
               const SizedBox(height: 16),
-              const Text('Información del Negocio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text('Información del Negocio',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const Divider(),
               _buildInfoRow('Nombre del Negocio:', user.businessName!),
-              if (user.businessAddress != null) _buildInfoRow('Dirección del Negocio:', user.businessAddress!),
+              if (user.businessAddress != null)
+                _buildInfoRow('Dirección del Negocio:', user.businessAddress!),
             ],
           ],
         ),
@@ -192,7 +208,8 @@ class UserDetailScreen extends StatelessWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Confirmar Eliminación'),
-                content: Text('¿Estás seguro de que quieres eliminar la cuenta de ${user.fullName}? Esta acción no se puede deshacer.'),
+                content: Text(
+                    '¿Estás seguro de que quieres eliminar la cuenta de ${user.fullName}? Esta acción no se puede deshacer.'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -200,24 +217,31 @@ class UserDetailScreen extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Eliminar', style: TextStyle(color: AppTheme.error)),
+                    child: const Text('Eliminar',
+                        style: TextStyle(color: AppTheme.error)),
                   ),
                 ],
               ),
             );
 
             if (confirmed == true && context.mounted) {
-              final provider = Provider.of<UserManagementProvider>(context, listen: false);
+              final provider =
+                  Provider.of<UserManagementProvider>(context, listen: false);
               await provider.deleteUser(user);
-              
+
               if (context.mounted) {
                 if (provider.errorMessage != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al eliminar: ${provider.errorMessage}'), backgroundColor: AppTheme.error),
+                    SnackBar(
+                        content:
+                            Text('Error al eliminar: ${provider.errorMessage}'),
+                        backgroundColor: AppTheme.error),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Usuario ${user.fullName} eliminado.'), backgroundColor: AppTheme.success),
+                    SnackBar(
+                        content: Text('Usuario ${user.fullName} eliminado.'),
+                        backgroundColor: AppTheme.success),
                   );
                   Navigator.of(context).pop();
                 }

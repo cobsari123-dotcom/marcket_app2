@@ -15,11 +15,12 @@ class PublicationCardSkeleton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-                                children: [                ShimmerLoading.circular(width: 40, height: 40),
+              children: [
+                ShimmerLoading.circular(width: 40, height: 40),
                 SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
+                  children: [
                     ShimmerLoading.rectangular(height: 16, width: 150),
                     SizedBox(height: 4),
                     ShimmerLoading.rectangular(height: 12, width: 100),

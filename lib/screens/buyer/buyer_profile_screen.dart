@@ -25,7 +25,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
-  final TextEditingController _socialMediaLinkController = TextEditingController();
+  final TextEditingController _socialMediaLinkController =
+      TextEditingController();
   String? _selectedGender;
 
   @override
@@ -41,7 +42,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   }
 
   void _populateFields() {
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     final user = userProfileProvider.currentUserModel;
 
     if (user != null) {
@@ -54,7 +56,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       _placeOfBirthController.text = user.placeOfBirth ?? '';
       _bioController.text = user.bio ?? '';
       _selectedGender = user.gender;
-      
+
       if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) {
         _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
       } else {
@@ -80,7 +82,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   Future<void> _saveUserData() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     try {
       Map<String, String>? socialMediaLinksToSave;
       if (_socialMediaLinkController.text.isNotEmpty) {
@@ -98,7 +101,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         gender: _selectedGender,
         socialMediaLinks: socialMediaLinksToSave,
       );
-      
+
       if (mounted) {
         if (userProfileProvider.errorMessage == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -111,9 +114,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${userProfileProvider.errorMessage}'),
-              backgroundColor: AppTheme.error
-            ),
+                content: Text('Error: ${userProfileProvider.errorMessage}'),
+                backgroundColor: AppTheme.error),
           );
         }
       }
@@ -121,9 +123,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error inesperado al actualizar: $e'),
-            backgroundColor: AppTheme.error
-          ),
+              content: Text('Error inesperado al actualizar: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
     }
@@ -151,11 +152,13 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (userProfileProvider.errorMessage != null) {
-          return Center(child: Text('Error: ${userProfileProvider.errorMessage}'));
+          return Center(
+              child: Text('Error: ${userProfileProvider.errorMessage}'));
         }
         final user = userProfileProvider.currentUserModel;
         if (user == null) {
-          return const Center(child: Text('No se encontraron datos de usuario.'));
+          return const Center(
+              child: Text('No se encontraron datos de usuario.'));
         }
 
         return Center(
@@ -186,7 +189,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
                       user.fullName,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
+                    Text(user.email,
+                        style: Theme.of(context).textTheme.bodyLarge),
                     const SizedBox(height: 24),
                     _buildProfileForm(user),
                   ],
@@ -290,14 +294,16 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       items: const [
         DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
         DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
-        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+        DropdownMenuItem(
+            value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
       ],
       onChanged: (value) {
         setState(() {
           _selectedGender = value;
         });
       },
-      validator: (value) => value == null ? 'Por favor selecciona tu sexo' : null,
+      validator: (value) =>
+          value == null ? 'Por favor selecciona tu sexo' : null,
     );
   }
 }

@@ -12,7 +12,11 @@ class ProductCard extends StatefulWidget {
   final VoidCallback onTap;
   final bool isAdmin;
 
-  const ProductCard({super.key, required this.product, required this.onTap, this.isAdmin = false});
+  const ProductCard(
+      {super.key,
+      required this.product,
+      required this.onTap,
+      this.isAdmin = false});
 
   @override
   State<ProductCard> createState() => ProductCardState();
@@ -57,13 +61,19 @@ class ProductCardState extends State<ProductCard> {
                                 imageUrl,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.broken_image, size: 60, color: AppTheme.marronClaro);
+                                  return const Icon(Icons.broken_image,
+                                      size: 60, color: AppTheme.marronClaro);
                                 },
-                                loadingBuilder: (context, child, loadingProgress) {
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
-                                  return Center(child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  return Center(
+                                      child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
                                         : null,
                                   ));
                                 },
@@ -77,11 +87,13 @@ class ProductCardState extends State<ProductCard> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: widget.product.imageUrls.map((url) {
-                                int index = widget.product.imageUrls.indexOf(url);
+                                int index =
+                                    widget.product.imageUrls.indexOf(url);
                                 return Container(
                                   width: 8.0,
                                   height: 8.0,
-                                  margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 2.0),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: _currentImageIndex == index
@@ -103,13 +115,16 @@ class ProductCardState extends State<ProductCard> {
                                 color: AppTheme.error,
                               ),
                               onPressed: () {
-                                wishlistProvider.toggleFavorite(widget.product.id);
+                                wishlistProvider
+                                    .toggleFavorite(widget.product.id);
                               },
                             ),
                           ),
                         ],
                       )
-                    : const Center(child: Icon(Icons.image_not_supported, size: 60, color: AppTheme.marronClaro)),
+                    : const Center(
+                        child: Icon(Icons.image_not_supported,
+                            size: 60, color: AppTheme.marronClaro)),
               ),
             ),
             Padding(
@@ -127,41 +142,48 @@ class ProductCardState extends State<ProductCard> {
                   Text(
                     '\$${widget.product.price.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: ElevatedButton.icon(
-                      onPressed: widget.isAdmin ? null : () async {
-                        int? selectedQuantity = await showDialog<int>(
-                          context: context,
-                          builder: (context) => QuantitySelectionDialog(product: widget.product),
-                        );
+                      onPressed: widget.isAdmin
+                          ? null
+                          : () async {
+                              int? selectedQuantity = await showDialog<int>(
+                                context: context,
+                                builder: (context) => QuantitySelectionDialog(
+                                    product: widget.product),
+                              );
 
-                        if (selectedQuantity != null && selectedQuantity > 0) {
-                          try {
-                            await CartService().addToCart(widget.product, selectedQuantity);
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${widget.product.name} añadido al carrito (x$selectedQuantity).'),
-                                backgroundColor: AppTheme.success,
-                              ),
-                            );
-                          } catch (e) {
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error al añadir al carrito: $e'),
-                                backgroundColor: AppTheme.error,
-                              ),
-                            );
-                          }
-                        }
-                      },
+                              if (selectedQuantity != null &&
+                                  selectedQuantity > 0) {
+                                try {
+                                  await CartService().addToCart(
+                                      widget.product, selectedQuantity);
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${widget.product.name} añadido al carrito (x$selectedQuantity).'),
+                                      backgroundColor: AppTheme.success,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Error al añadir al carrito: $e'),
+                                      backgroundColor: AppTheme.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
                       icon: const Icon(Icons.add_shopping_cart),
                       label: const Text('Añadir'),
                       style: ElevatedButton.styleFrom(

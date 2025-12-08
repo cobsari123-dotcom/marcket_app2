@@ -22,12 +22,14 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _imageUrlController = TextEditingController(); // New controller for image URL
-  
+  final _imageUrlController =
+      TextEditingController(); // New controller for image URL
+
   final List<File> _newImages = [];
   List<String> _existingImageUrls = [];
   final List<String> _imagesToRemove = [];
-  final List<String> _newImageUrlsFromWeb = []; // New list for image URLs from web
+  final List<String> _newImageUrlsFromWeb =
+      []; // New list for image URLs from web
 
   bool _isFeatured = false;
   bool _isLoading = false;
@@ -63,9 +65,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
     try {
       if (mounted) setState(() => _isPickingImage = true);
-      
-      final pickedFile = await ImagePicker().pickImage(source: source, imageQuality: 70);
-      
+
+      final pickedFile =
+          await ImagePicker().pickImage(source: source, imageQuality: 70);
+
       if (pickedFile != null && mounted) {
         setState(() {
           _newImages.add(File(pickedFile.path));
@@ -175,12 +178,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   Future<void> _saveProduct() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    
-    if (_newImages.isEmpty && _existingImageUrls.isEmpty && _newImageUrlsFromWeb.isEmpty) {
+
+    if (_newImages.isEmpty &&
+        _existingImageUrls.isEmpty &&
+        _newImageUrlsFromWeb.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, selecciona al menos una imagen para el producto.'),
+          content: Text(
+              'Por favor, selecciona al menos una imagen para el producto.'),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -203,7 +209,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         imagesToRemove: _imagesToRemove,
         newImageUrlsFromWeb: _newImageUrlsFromWeb, // Pass new web urls
       );
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -214,12 +220,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
       if (!mounted) return;
       Navigator.pop(context);
-
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ocurrió un error al guardar el producto: ${e.toString()}'),
+          content:
+              Text('Ocurrió un error al guardar el producto: ${e.toString()}'),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -233,7 +239,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product == null ? 'Agregar Producto' : 'Editar Producto'),
+        title: Text(
+            widget.product == null ? 'Agregar Producto' : 'Editar Producto'),
       ),
       body: Stack(
         children: [
@@ -254,13 +261,18 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                         children: <Widget>[
                           _buildImagePicker(),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_nameController, 'Nombre del Producto'),
+                          _buildTextField(
+                              _nameController, 'Nombre del Producto'),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_descriptionController, 'Descripción', maxLines: 3),
+                          _buildTextField(_descriptionController, 'Descripción',
+                              maxLines: 3),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_priceController, 'Precio', keyboardType: TextInputType.number, prefixText: '\$'),
+                          _buildTextField(_priceController, 'Precio',
+                              keyboardType: TextInputType.number,
+                              prefixText: '\$'),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_stockController, 'Stock', keyboardType: TextInputType.number),
+                          _buildTextField(_stockController, 'Stock',
+                              keyboardType: TextInputType.number),
                           const SizedBox(height: 20.0),
                           _buildTextField(_categoryController, 'Categoría'),
                           const SizedBox(height: 20.0),
@@ -289,7 +301,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Imágenes del Producto', style: Theme.of(context).textTheme.titleMedium),
+        Text('Imágenes del Producto',
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         LayoutBuilder(
           builder: (context, constraints) {
@@ -313,9 +326,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 mainAxisSpacing: 8,
                 childAspectRatio: 1.0,
               ),
-              itemCount: _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length + 1,
+              itemCount: _existingImageUrls.length +
+                  _newImages.length +
+                  _newImageUrlsFromWeb.length +
+                  1,
               itemBuilder: (context, index) {
-                if (index == _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length) {
+                if (index ==
+                    _existingImageUrls.length +
+                        _newImages.length +
+                        _newImageUrlsFromWeb.length) {
                   return _buildAddImageButton();
                 }
 
@@ -338,12 +357,14 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     () => setState(() => _newImages.removeAt(imageIndex)),
                   );
                 }
-                
-                final imageUrlIndex = index - (_existingImageUrls.length + _newImages.length);
+
+                final imageUrlIndex =
+                    index - (_existingImageUrls.length + _newImages.length);
                 final imageUrl = _newImageUrlsFromWeb[imageUrlIndex];
                 return _buildImageTile(
                   Image.network(imageUrl, fit: BoxFit.cover),
-                  () => setState(() => _newImageUrlsFromWeb.removeAt(imageUrlIndex)),
+                  () => setState(
+                      () => _newImageUrlsFromWeb.removeAt(imageUrlIndex)),
                 );
               },
             );
@@ -368,7 +389,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             children: [
               Icon(Icons.add_a_photo, size: 40, color: AppTheme.marronClaro),
               SizedBox(height: 4),
-              Text('Añadir', style: TextStyle(color: AppTheme.marronClaro), textAlign: TextAlign.center),
+              Text('Añadir',
+                  style: TextStyle(color: AppTheme.marronClaro),
+                  textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -406,7 +429,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {int? maxLines, TextInputType? keyboardType, String? prefixText}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {int? maxLines, TextInputType? keyboardType, String? prefixText}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -437,7 +461,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return ElevatedButton.icon(
       onPressed: _isLoading ? null : _saveProduct,
       icon: const Icon(Icons.save),
-      label: Text(widget.product == null ? 'Guardar Producto' : 'Actualizar Producto'),
+      label: Text(
+          widget.product == null ? 'Guardar Producto' : 'Actualizar Producto'),
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 50),
       ),

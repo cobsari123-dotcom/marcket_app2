@@ -15,7 +15,8 @@ class ChatListScreen extends StatefulWidget {
   State<ChatListScreen> createState() => ChatListScreenState();
 }
 
-class ChatListScreenState extends State<ChatListScreen> with AutomaticKeepAliveClientMixin {
+class ChatListScreenState extends State<ChatListScreen>
+    with AutomaticKeepAliveClientMixin {
   final _database = FirebaseDatabase.instance.ref();
   String? _currentUserId;
   Stream<DatabaseEvent>? _chatRoomsStream;
@@ -34,16 +35,35 @@ class ChatListScreenState extends State<ChatListScreen> with AutomaticKeepAliveC
   void _initializeStreams() {
     if (_currentUserId == null) return;
 
-    _chatRoomsStream = _database.child('chat_rooms').orderByChild('participants/$_currentUserId').equalTo(true).onValue.asBroadcastStream();
+    _chatRoomsStream = _database
+        .child('chat_rooms')
+        .orderByChild('participants/$_currentUserId')
+        .equalTo(true)
+        .onValue
+        .asBroadcastStream();
 
-    _database.child('users/$_currentUserId').get().then((DataSnapshot snapshot) {
+    _database
+        .child('users/$_currentUserId')
+        .get()
+        .then((DataSnapshot snapshot) {
       if (snapshot.exists && snapshot.value != null && mounted) {
-        final currentUserModel = UserModel.fromMap(Map<String, dynamic>.from(snapshot.value as Map), snapshot.key!);
+        final currentUserModel = UserModel.fromMap(
+            Map<String, dynamic>.from(snapshot.value as Map), snapshot.key!);
         setState(() {
           if (currentUserModel.userType == 'Seller') {
-            _usersStream = _database.child('users').orderByChild('userType').equalTo('Buyer').onValue.asBroadcastStream();
+            _usersStream = _database
+                .child('users')
+                .orderByChild('userType')
+                .equalTo('Buyer')
+                .onValue
+                .asBroadcastStream();
           } else if (currentUserModel.userType == 'Buyer') {
-            _usersStream = _database.child('users').orderByChild('userType').equalTo('Seller').onValue.asBroadcastStream();
+            _usersStream = _database
+                .child('users')
+                .orderByChild('userType')
+                .equalTo('Seller')
+                .onValue
+                .asBroadcastStream();
           } else if (currentUserModel.userType == 'Admin') {
             _usersStream = _database.child('users').onValue.asBroadcastStream();
           }
@@ -72,7 +92,10 @@ class ChatListScreenState extends State<ChatListScreen> with AutomaticKeepAliveC
         children: [
           TabBar(
             tabs: currentUserModel.userType == 'Admin'
-                ? const [Tab(text: 'Chats de Soporte'), Tab(text: 'Todos los Usuarios')]
+                ? const [
+                    Tab(text: 'Chats de Soporte'),
+                    Tab(text: 'Todos los Usuarios')
+                  ]
                 : currentUserModel.userType == 'Seller'
                     ? const [Tab(text: 'Chats'), Tab(text: 'Compradores')]
                     : const [Tab(text: 'Chats'), Tab(text: 'Vendedores')],
@@ -82,12 +105,15 @@ class ChatListScreenState extends State<ChatListScreen> with AutomaticKeepAliveC
               constraints: const BoxConstraints(maxWidth: 800),
               child: TabBarView(
                 children: [
-                  ChatTab(stream: _chatRoomsStream!, currentUserId: currentUserModel.id),
+                  ChatTab(
+                      stream: _chatRoomsStream!,
+                      currentUserId: currentUserModel.id),
                   UserListTab(
                     stream: _usersStream!,
                     currentUserId: currentUserModel.id,
                     onUserTap: (user) {
-                      _navigateToChatWithUser(user, currentUserModel.id, currentUserModel);
+                      _navigateToChatWithUser(
+                          user, currentUserModel.id, currentUserModel);
                     },
                   ),
                 ],
@@ -99,10 +125,11 @@ class ChatListScreenState extends State<ChatListScreen> with AutomaticKeepAliveC
     );
   }
 
-  void _navigateToChatWithUser(UserModel user, String currentUserId, UserModel currentUserModel) async {
+  void _navigateToChatWithUser(
+      UserModel user, String currentUserId, UserModel currentUserModel) async {
     final chatRoomId = _getChatRoomId(currentUserId, user.id);
     final chatRoomRef = FirebaseDatabase.instance.ref('chat_rooms/$chatRoomId');
-    
+
     DataSnapshot snapshot = await chatRoomRef.get();
     if (!snapshot.exists) {
       final newChatRoom = ChatRoom(

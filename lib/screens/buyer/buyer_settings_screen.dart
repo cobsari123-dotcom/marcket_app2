@@ -29,7 +29,8 @@ class BuyerSettingsScreen extends StatelessWidget {
                 onTap: () {
                   // TODO: Implement theme change logic
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad de tema pendiente')),
+                    const SnackBar(
+                        content: Text('Funcionalidad de tema pendiente')),
                   );
                 },
               ),
@@ -40,7 +41,8 @@ class BuyerSettingsScreen extends StatelessWidget {
                 onTap: () {
                   // TODO: Implement language change logic
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad de idioma pendiente')),
+                    const SnackBar(
+                        content: Text('Funcionalidad de idioma pendiente')),
                   );
                 },
               ),
@@ -56,7 +58,9 @@ class BuyerSettingsScreen extends StatelessWidget {
                 onTap: () {
                   // TODO: Implement change password logic
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad de cambio de contraseña pendiente')),
+                    const SnackBar(
+                        content: Text(
+                            'Funcionalidad de cambio de contraseña pendiente')),
                   );
                 },
               ),
@@ -66,22 +70,33 @@ class BuyerSettingsScreen extends StatelessWidget {
                 onTap: () {
                   // TODO: Implement payment method management logic
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad de gestión de pagos pendiente')),
+                    const SnackBar(
+                        content: Text(
+                            'Funcionalidad de gestión de pagos pendiente')),
                   );
                 },
               ),
-              ListTile( // New
+              ListTile(
+                // New
                 leading: const Icon(Icons.notifications),
                 title: const Text('Preferencias de Notificación'),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPreferencesScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const NotificationPreferencesScreen()));
                 },
               ),
-              ListTile( // New
+              ListTile(
+                // New
                 leading: const Icon(Icons.privacy_tip),
                 title: const Text('Configuración de Privacidad'),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySettingsScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PrivacySettingsScreen()));
                 },
               ),
             ],

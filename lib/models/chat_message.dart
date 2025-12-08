@@ -1,4 +1,3 @@
-
 class ChatMessage {
   final String id;
   final String senderId;
@@ -23,7 +22,8 @@ class ChatMessage {
       text: map['text'] ?? '',
       messageType: map['messageType'] ?? 'text',
       mediaUrl: map['mediaUrl'],
-      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(
+          (map['timestamp'] as num? ?? 0).toInt()),
     );
   }
 

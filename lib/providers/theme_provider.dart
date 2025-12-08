@@ -16,7 +16,7 @@ class ThemeProvider with ChangeNotifier {
     if (_themeMode == ThemeMode.system) {
       // Si es sistema, asumimos light por defecto o podrías checar el brillo del sistema
       // Pero para el switch, es mejor devolver true si está explícitamente en dark.
-      return false; 
+      return false;
     }
     return _themeMode == ThemeMode.dark;
   }
@@ -26,17 +26,23 @@ class ThemeProvider with ChangeNotifier {
   }
 
   void _listenToThemeChanges() {
-    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    _authStateSubscription =
+        FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _userSettingsSubscription?.cancel();
 
       if (user != null) {
-        _userSettingsSubscription = FirebaseDatabase.instance.ref('users/${user.uid}').onValue.listen((event) {
+        _userSettingsSubscription = FirebaseDatabase.instance
+            .ref('users/${user.uid}')
+            .onValue
+            .listen((event) {
           if (event.snapshot.exists) {
             final userData = UserModel.fromMap(
               Map<String, dynamic>.from(event.snapshot.value as Map),
               user.uid,
             );
-            final newThemeMode = userData.isDarkModeEnabled ?? false ? ThemeMode.dark : ThemeMode.light;
+            final newThemeMode = userData.isDarkModeEnabled ?? false
+                ? ThemeMode.dark
+                : ThemeMode.light;
             if (_themeMode != newThemeMode) {
               _themeMode = newThemeMode;
               notifyListeners();
@@ -57,12 +63,13 @@ class ThemeProvider with ChangeNotifier {
     if (user != null) {
       bool currentStatus = isDarkMode;
       // Actualizamos Firebase, el listener _listenToThemeChanges se encargará de actualizar la UI
-      await FirebaseDatabase.instance.ref('users/${user.uid}').update({
-        'isDarkModeEnabled': !currentStatus
-      });
+      await FirebaseDatabase.instance
+          .ref('users/${user.uid}')
+          .update({'isDarkModeEnabled': !currentStatus});
     } else {
       // Si no hay usuario (caso raro en esta app), cambiamos localmente
-      _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+      _themeMode =
+          _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
       notifyListeners();
     }
   }

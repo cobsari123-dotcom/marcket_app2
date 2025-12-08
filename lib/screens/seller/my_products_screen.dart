@@ -16,19 +16,23 @@ class MyProductsScreen extends StatefulWidget {
 
 class _MyProductsScreenState extends State<MyProductsScreen> {
   final ScrollController _scrollController = ScrollController();
-  final ProductService _productService = ProductService(); // Para la eliminación directa
+  final ProductService _productService =
+      ProductService(); // Para la eliminación directa
   late ProductListProvider _productListProvider;
 
   @override
   void initState() {
     super.initState();
-    _productListProvider = Provider.of<ProductListProvider>(context, listen: false);
+    _productListProvider =
+        Provider.of<ProductListProvider>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _productListProvider.refreshProducts(); // Cargar productos después del primer frame
+      _productListProvider
+          .refreshProducts(); // Cargar productos después del primer frame
     });
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
           _productListProvider.hasMoreProducts &&
           !_productListProvider.isLoadingMore) {
         _productListProvider.loadMoreProducts();
@@ -41,7 +45,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _showProductMenu(BuildContext context, Product product) {
     showModalBottomSheet(
       context: context,
@@ -55,7 +59,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product)),
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailsScreen(product: product)),
                 );
               },
             ),
@@ -64,12 +70,15 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               title: const Text('Editar'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/add_edit_product', arguments: product).then((_) => _productListProvider.refreshProducts());
+                Navigator.pushNamed(context, '/add_edit_product',
+                        arguments: product)
+                    .then((_) => _productListProvider.refreshProducts());
               },
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: AppTheme.error),
-              title: const Text('Eliminar', style: TextStyle(color: AppTheme.error)),
+              title: const Text('Eliminar',
+                  style: TextStyle(color: AppTheme.error)),
               onTap: () {
                 Navigator.pop(context);
                 _deleteProduct(context, product);
@@ -88,8 +97,13 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         title: const Text('Confirmar Eliminación'),
         content: Text('¿Estás seguro de que quieres eliminar ${product.name}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Eliminar', style: TextStyle(color: AppTheme.error))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar',
+                  style: TextStyle(color: AppTheme.error))),
         ],
       ),
     );
@@ -99,13 +113,17 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         await _productService.deleteProduct(product);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Producto eliminado exitosamente!'), backgroundColor: AppTheme.success),
+          const SnackBar(
+              content: Text('¡Producto eliminado exitosamente!'),
+              backgroundColor: AppTheme.success),
         );
         _productListProvider.refreshProducts(); // Refresh the list
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ocurrió un error al eliminar el producto: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+              content: Text('Ocurrió un error al eliminar el producto: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
     }
@@ -124,7 +142,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         if (provider.products.isEmpty) {
           return const Center(child: Text('No tienes productos aún.'));
         }
-        
+
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
@@ -155,7 +173,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                       crossAxisSpacing: 12.0,
                       mainAxisSpacing: 12.0,
                     ),
-                    itemCount: provider.products.length + (provider.isLoadingMore ? 1 : 0),
+                    itemCount: provider.products.length +
+                        (provider.isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == provider.products.length) {
                         return const Center(child: CircularProgressIndicator());

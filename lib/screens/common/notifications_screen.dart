@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:marcket_app/models/user.dart'; // Add this import
 import 'package:marcket_app/models/chat_room.dart'; // Add this import
 
-
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -63,10 +62,11 @@ class NotificationsScreenState extends State<NotificationsScreen> {
     if (!snapshot.exists) {
       final newChatRoomData = ChatRoom(
         id: chatRoomId,
-                  participants: {
-                    _userId: true,
-                    supportId: true,
-                  },        lastMessage: 'Chat iniciado desde una notificación.',
+        participants: {
+          _userId: true,
+          supportId: true,
+        },
+        lastMessage: 'Chat iniciado desde una notificación.',
         lastMessageTimestamp: DateTime.now(),
         participantInfo: {
           _userId: {
@@ -132,7 +132,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                           child: Text('Error: ${snapshot.error}',
                               style: Theme.of(context).textTheme.titleMedium));
                     }
-                    if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+                    if (!snapshot.hasData ||
+                        snapshot.data!.snapshot.value == null) {
                       return Center(
                           child: Text('No tienes notificaciones.',
                               style: Theme.of(context).textTheme.titleMedium));
@@ -147,8 +148,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                       return notification;
                     }).toList();
 
-                    notifications.sort(
-                        (a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
+                    notifications.sort((a, b) =>
+                        (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
 
                     return ListView.builder(
                       padding: const EdgeInsets.all(8.0),
@@ -184,7 +185,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
-                                          ?.copyWith(fontStyle: FontStyle.italic),
+                                          ?.copyWith(
+                                              fontStyle: FontStyle.italic),
                                     ),
                                     const Spacer(),
                                     if (_currentUserModel != null)
@@ -204,7 +206,6 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
             ),
-          );
+    );
   }
 }
-

@@ -49,7 +49,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
@@ -105,18 +105,22 @@ class MyApp extends StatelessWidget {
                 return CompleteProfileScreen(user: user);
               },
               '/add_edit_product': (context) {
-                final product = ModalRoute.of(context)!.settings.arguments as Product?;
+                final product =
+                    ModalRoute.of(context)!.settings.arguments as Product?;
                 return AddEditProductScreen(product: product);
               },
               '/create_edit_publication': (context) {
-                final publication = ModalRoute.of(context)!.settings.arguments as Publication?;
+                final publication =
+                    ModalRoute.of(context)!.settings.arguments as Publication?;
                 return CreateEditPublicationScreen(publication: publication);
               },
               '/publication_details': (context) {
-                final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+                final args = ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>;
                 final publication = args['publication'] as Publication;
                 final bool isAdmin = args['isAdmin'] ?? false;
-                return PublicationDetailsScreen(publication: publication, isAdmin: isAdmin);
+                return PublicationDetailsScreen(
+                    publication: publication, isAdmin: isAdmin);
               },
               '/chat_list': (context) => const ChatListScreen(),
               '/chat': (context) {
@@ -131,8 +135,11 @@ class MyApp extends StatelessWidget {
                   chatArgs = Map<String, String>.from(arguments);
                 } else {
                   // Log the unexpected argument type for debugging
-                  debugPrint('Error: /chat route received unexpected arguments type or format. Received: $arguments (Type: ${arguments.runtimeType})');
-                  return const Scaffold(body: Center(child: Text("Error: Argumentos de chat inválidos.")));
+                  debugPrint(
+                      'Error: /chat route received unexpected arguments type or format. Received: $arguments (Type: ${arguments.runtimeType})');
+                  return const Scaffold(
+                      body: Center(
+                          child: Text("Error: Argumentos de chat inválidos.")));
                 }
 
                 return ChatScreen(
@@ -141,13 +148,17 @@ class MyApp extends StatelessWidget {
                 );
               },
               '/public_seller_profile': (context) {
-                final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+                final args = ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>;
                 final sellerId = args['sellerId'] as String?;
                 final isAdmin = args['isAdmin'] as bool? ?? false;
                 if (sellerId != null) {
-                  return PublicSellerProfileScreen(sellerId: sellerId, isAdmin: isAdmin);
+                  return PublicSellerProfileScreen(
+                      sellerId: sellerId, isAdmin: isAdmin);
                 }
-                return const Scaffold(body: Center(child: Text("Error: Seller ID not provided.")));
+                return const Scaffold(
+                    body:
+                        Center(child: Text("Error: Seller ID not provided.")));
               },
             },
             localizationsDelegates: const [

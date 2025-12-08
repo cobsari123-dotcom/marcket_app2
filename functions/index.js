@@ -275,3 +275,98 @@ exports.sendChatNotification = onValueCreated("chat_rooms/{chatRoomId}/messages/
     return null;
   }
 });
+
+exports.sendDeliveryNotification = onValueUpdated("orders/{orderId}", async (event) => {
+  const orderId = event.params.orderId;
+  const oldStatus = event.data.previous.child('status').val();
+  const newStatus = event.data.current.child('status').val();
+  const orderData = event.data.current.val();
+  const buyerId = orderData.buyerId;
+  const sellerId = orderData.sellerId;
+
+  logger.info("Order status changed", { orderId, oldStatus, newStatus, buyerId, sellerId });
+
+  // Only send notification if status actually changed
+  if (oldStatus === newStatus) {
+    logger.info("Order status did not change, no notification sent.");
+    return null;
+  }
+
+  // Define notification details based on new status
+  let title = "Actualización de tu Pedido";
+  let body = "";
+  let sendNotification = true;
+
+  switch (newStatus) {
+    case 'shipped':
+      title = "¡Tu Pedido ha sido Enviado!";
+      body = `Tu pedido #${orderId.substring(0, 6)}... ha sido enviado. Llegará aproximadamente el ${orderData.estimatedDeliveryDate ? new Date(orderData.estimatedDeliveryDate).toLocaleDateString() : 'pronto'}.`;
+      if (orderData.deliveryTimeWindow) {
+        body += ` entre las ${orderData.deliveryTimeWindow}.`;
+      }
+      break;
+    case 'delivered':
+      title = "¡Pedido Entregado!";
+      body = `Tu pedido #${orderId.substring(0, 6)}... ha sido entregado.`;
+      break;
+    case 'cancelled':
+      title = "Pedido Cancelado";
+      body = `Tu pedido #${orderId.substring(0, 6)}... ha sido cancelado. Motivo: ${orderData.rejectionReason || 'No especificado'}.`;
+      break;
+    case 'pending': // E.g., if payment was rejected and reverted to pending
+      if (orderData.rejectionReason) {
+        title = "Atención: Problema con tu Pago";
+        body = `El pago de tu pedido #${orderId.substring(0, 6)}... ha sido rechazado. Motivo: ${orderData.rejectionReason}. Por favor, sube un nuevo comprobante.`;
+      } else {
+        sendNotification = false; // Don't send generic pending notification
+      }
+      break;
+    default:
+      sendNotification = false; // No notification for other status changes
+  }
+
+  if (!sendNotification) {
+    return null;
+  }
+
+  try {
+    // Fetch buyer's FCM token
+    const buyerSnapshot = await admin.database().ref(`users/${buyerId}/fcmToken`).once('value');
+    const buyerFcmToken = buyerSnapshot.val();
+
+    if (!buyerFcmToken) {
+      logger.info(`Buyer ${buyerId} has no FCM token.`);
+      return null;
+    }
+
+    // Fetch seller's name for context
+    const sellerSnapshot = await admin.database().ref(`users/${sellerId}/fullName`).once('value');
+    const sellerName = sellerSnapshot.val() || 'Un Vendedor';
+
+    const payload = {
+      notification: {
+        title: title,
+        body: body,
+        sound: "default",
+      },
+      data: {
+        orderId: orderId,
+        status: newStatus,
+        sellerName: sellerName,
+        // Add any other data needed for in-app navigation or display
+      },
+    };
+
+    const response = await admin.messaging().sendToDevice(buyerFcmToken, payload);
+    logger.info('Delivery notification sent successfully:', response);
+
+    if (response.results[0].error) {
+      logger.error('Error sending delivery notification:', response.results[0].error);
+    }
+    return null;
+
+  } catch (error) {
+    logger.error("Error sending delivery notification:", error);
+    return null;
+  }
+});

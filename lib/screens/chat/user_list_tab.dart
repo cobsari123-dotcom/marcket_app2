@@ -18,7 +18,8 @@ class UserListTab extends StatefulWidget {
   UserListTabState createState() => UserListTabState();
 }
 
-class UserListTabState extends State<UserListTab> with AutomaticKeepAliveClientMixin {
+class UserListTabState extends State<UserListTab>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -35,10 +36,15 @@ class UserListTabState extends State<UserListTab> with AutomaticKeepAliveClientM
           return const Center(child: Text('No hay usuarios registrados.'));
         }
 
-        final usersData = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-        final users = usersData.entries.map((entry) {
-          return UserModel.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
-        }).where((user) => user.id != widget.currentUserId).toList();
+        final usersData =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+        final users = usersData.entries
+            .map((entry) {
+              return UserModel.fromMap(
+                  Map<String, dynamic>.from(entry.value as Map), entry.key);
+            })
+            .where((user) => user.id != widget.currentUserId)
+            .toList();
 
         return ListView.builder(
           itemCount: users.length,
@@ -50,7 +56,8 @@ class UserListTabState extends State<UserListTab> with AutomaticKeepAliveClientM
                     ? NetworkImage(user.profilePicture!)
                     : null,
                 child: user.profilePicture == null
-                    ? Icon(user.userType == 'Seller' ? Icons.store : Icons.person)
+                    ? Icon(
+                        user.userType == 'Seller' ? Icons.store : Icons.person)
                     : null,
               ),
               title: Text(user.fullName),

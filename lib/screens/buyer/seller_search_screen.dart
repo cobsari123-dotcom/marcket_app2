@@ -12,7 +12,8 @@ class SellerSearchScreen extends StatefulWidget {
 
 class _SellerSearchScreenState extends State<SellerSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final DatabaseReference _usersRef = FirebaseDatabase.instance.ref().child('users');
+  final DatabaseReference _usersRef =
+      FirebaseDatabase.instance.ref().child('users');
   List<UserModel> _allSellers = [];
   List<UserModel> _filteredSellers = [];
   bool _isLoading = true;
@@ -36,11 +37,13 @@ class _SellerSearchScreenState extends State<SellerSearchScreen> {
     try {
       final snapshot = await _usersRef.get();
       if (snapshot.exists) {
-        final Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> data =
+            snapshot.value as Map<dynamic, dynamic>;
         List<UserModel> fetchedSellers = [];
         data.forEach((key, value) {
           final user = UserModel.fromMap(Map<String, dynamic>.from(value), key);
-          if (user.userType == 'Seller') { // Filter for sellers
+          if (user.userType == 'Seller') {
+            // Filter for sellers
             fetchedSellers.add(user);
           }
         });
@@ -68,7 +71,7 @@ class _SellerSearchScreenState extends State<SellerSearchScreen> {
     setState(() {
       _filteredSellers = _allSellers.where((seller) {
         return seller.fullName.toLowerCase().contains(query) ||
-               seller.email.toLowerCase().contains(query);
+            seller.email.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -96,28 +99,33 @@ class _SellerSearchScreenState extends State<SellerSearchScreen> {
         Expanded(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800), // Limit width for seller search content
+              constraints: const BoxConstraints(
+                  maxWidth: 800), // Limit width for seller search content
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _errorMessage != null
                       ? Center(child: Text(_errorMessage!))
                       : _filteredSellers.isEmpty
-                          ? const Center(child: Text('No se encontraron vendedores.'))
+                          ? const Center(
+                              child: Text('No se encontraron vendedores.'))
                           : ListView.builder(
                               itemCount: _filteredSellers.length,
                               itemBuilder: (context, index) {
                                 final seller = _filteredSellers[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 8.0, vertical: 4.0),
                                   child: ListTile(
                                     leading: CircleAvatar(
                                       radius: 20,
                                       backgroundColor: AppTheme.beigeArena,
-                                      backgroundImage: seller.profilePicture != null
+                                      backgroundImage: seller.profilePicture !=
+                                              null
                                           ? NetworkImage(seller.profilePicture!)
                                           : null,
                                       child: seller.profilePicture == null
-                                          ? const Icon(Icons.person, color: AppTheme.primary)
+                                          ? const Icon(Icons.person,
+                                              color: AppTheme.primary)
                                           : null,
                                     ),
                                     title: Text(seller.fullName),

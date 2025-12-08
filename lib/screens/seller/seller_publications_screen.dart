@@ -10,7 +10,8 @@ class SellerPublicationsScreen extends StatefulWidget {
   const SellerPublicationsScreen({super.key, this.title});
 
   @override
-  SellerPublicationsScreenState createState() => SellerPublicationsScreenState();
+  SellerPublicationsScreenState createState() =>
+      SellerPublicationsScreenState();
 }
 
 class SellerPublicationsScreenState extends State<SellerPublicationsScreen> {

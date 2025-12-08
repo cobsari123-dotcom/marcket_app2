@@ -86,14 +86,16 @@ class _AdminComplaintsSuggestionsScreenState
 
         return Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800), // Limit width for list content
+            constraints: const BoxConstraints(
+                maxWidth: 800), // Limit width for list content
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
               itemCount: provider.complaints.length,
               itemBuilder: (context, index) {
                 final complaint = provider.complaints[index];
                 final timestamp = complaint['timestamp'] != null
-                    ? DateTime.fromMillisecondsSinceEpoch(complaint['timestamp'])
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                        complaint['timestamp'])
                     : null;
                 final formattedDate = timestamp != null
                     ? DateFormat('dd/MM/yyyy HH:mm').format(timestamp)
@@ -109,7 +111,9 @@ class _AdminComplaintsSuggestionsScreenState
                       children: [
                         Text(
                           'Asunto: ${complaint['subject'] ?? 'N/A'}',
-                          style: Theme.of(context).textTheme.titleMedium
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -139,7 +143,9 @@ class _AdminComplaintsSuggestionsScreenState
                           children: [
                             Text(
                               'Estado: ${complaint['status'] ?? 'pending'} - $formattedDate',
-                              style: Theme.of(context).textTheme.bodySmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
                                   ?.copyWith(fontStyle: FontStyle.italic),
                             ),
                             TextButton(

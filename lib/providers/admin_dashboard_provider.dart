@@ -27,7 +27,8 @@ class AdminDashboardProvider with ChangeNotifier {
     _auth.authStateChanges().listen((User? user) async {
       _userSubscription?.cancel();
       if (user != null) {
-        _userSubscription = _userService.getUserStream(user.uid).listen((userModel) {
+        _userSubscription =
+            _userService.getUserStream(user.uid).listen((userModel) {
           if (!hasListeners) return;
           _currentUserModel = userModel;
           _isLoadingUserData = false;

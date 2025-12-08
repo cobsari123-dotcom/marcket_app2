@@ -19,7 +19,14 @@ class Order {
   final DateTime createdAt;
   final String? paymentReceiptUrl;
   final String? trackingNumber;
-  final String? rejectionReason; // New field for rejection reason
+  final String? rejectionReason;
+  final Map<String, String>? deliveryAddress;
+  final String? phoneNumber;
+  final String? email;
+  final String paymentMethod;
+  final DateTime? estimatedDeliveryDate;
+  final String? deliveryCode; // New field
+  final String? deliveryTimeWindow; // New field
 
   Order({
     required this.id,
@@ -31,7 +38,14 @@ class Order {
     required this.createdAt,
     this.paymentReceiptUrl,
     this.trackingNumber,
-    this.rejectionReason, // Add to constructor
+    this.rejectionReason,
+    this.deliveryAddress,
+    this.phoneNumber,
+    this.email,
+    this.paymentMethod = 'Bank Transfer',
+    this.estimatedDeliveryDate,
+    this.deliveryCode, // Add to constructor
+    this.deliveryTimeWindow, // Add to constructor
   });
 
   factory Order.fromMap(Map<String, dynamic> map, String id) {
@@ -40,17 +54,32 @@ class Order {
       buyerId: map['buyerId'] ?? '',
       sellerId: map['sellerId'] ?? '',
       items: (map['items'] as List<dynamic>?)
-          ?.map((item) => CartItem.fromMap(Map<String, dynamic>.from(item as Map)))
-          .toList() ?? [],
+              ?.map((item) =>
+                  CartItem.fromMap(Map<String, dynamic>.from(item as Map)))
+              .toList() ??
+          [],
       totalPrice: (map['totalPrice'] ?? 0.0).toDouble(),
       status: OrderStatus.values.firstWhere(
         (e) => e.toString() == 'OrderStatus.${map['status']}',
         orElse: () => OrderStatus.pending,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as num).toInt()),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+          (map['createdAt'] as num).toInt()),
       paymentReceiptUrl: map['paymentReceiptUrl'],
       trackingNumber: map['trackingNumber'],
-      rejectionReason: map['rejectionReason'], // Add to fromMap
+      rejectionReason: map['rejectionReason'],
+      deliveryAddress: map['deliveryAddress'] != null
+          ? Map<String, String>.from(map['deliveryAddress'])
+          : null,
+      phoneNumber: map['phoneNumber'],
+      email: map['email'],
+      paymentMethod: map['paymentMethod'] ?? 'Bank Transfer',
+      estimatedDeliveryDate: (map['estimatedDeliveryDate'] as num?) != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              map['estimatedDeliveryDate'].toInt())
+          : null,
+      deliveryCode: map['deliveryCode'], // Add to fromMap
+      deliveryTimeWindow: map['deliveryTimeWindow'], // Add to fromMap
     );
   }
 
@@ -64,7 +93,14 @@ class Order {
       'createdAt': createdAt.millisecondsSinceEpoch,
       'paymentReceiptUrl': paymentReceiptUrl,
       'trackingNumber': trackingNumber,
-      'rejectionReason': rejectionReason, // Add to toMap
+      'rejectionReason': rejectionReason,
+      'deliveryAddress': deliveryAddress,
+      'phoneNumber': phoneNumber,
+      'email': email,
+      'paymentMethod': paymentMethod,
+      'estimatedDeliveryDate': estimatedDeliveryDate?.millisecondsSinceEpoch,
+      'deliveryCode': deliveryCode, // Add to toMap
+      'deliveryTimeWindow': deliveryTimeWindow, // Add to toMap
     };
   }
 }

@@ -45,10 +45,12 @@ class UserManagementProvider with ChangeNotifier {
         return;
       }
 
-      final Map<dynamic, dynamic> usersMap = snapshot.value as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> usersMap =
+          snapshot.value as Map<dynamic, dynamic>;
       List<UserModel> fetchedUsers = [];
       usersMap.forEach((key, value) {
-        fetchedUsers.add(UserModel.fromMap(Map<String, dynamic>.from(value), key));
+        fetchedUsers
+            .add(UserModel.fromMap(Map<String, dynamic>.from(value), key));
       });
 
       _users = fetchedUsers;
@@ -70,7 +72,9 @@ class UserManagementProvider with ChangeNotifier {
       _filteredUsers = _users.where((user) {
         final queryLower = query.toLowerCase();
         return user.fullName.toLowerCase().contains(queryLower) ||
-               user.email.toLowerCase().contains(queryLower);
+            user.email.toLowerCase().contains(queryLower) ||
+            (user.publicId?.toLowerCase().contains(queryLower) ??
+                false); // Search by publicId
       }).toList();
     }
     notifyListeners();

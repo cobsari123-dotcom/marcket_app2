@@ -90,5 +90,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'marcketapp-25ac2.firebasestorage.app',
     measurementId: 'G-NXGLMK6Z0P',
   );
-
 }

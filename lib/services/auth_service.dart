@@ -5,11 +5,12 @@ import 'package:google_sign_in/google_sign_in.dart' as google;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   // Usamos el alias 'google.' para asegurar que usamos la librería oficial
   final google.GoogleSignIn _googleSignIn = kIsWeb
       ? google.GoogleSignIn(
-          clientId: '766952734433-a2i9su93l8j9j1h2k8n5db0hgr1cbi7h.apps.googleusercontent.com',
+          clientId:
+              '766952734433-a2i9su93l8j9j1h2k8n5db0hgr1cbi7h.apps.googleusercontent.com',
         )
       : google.GoogleSignIn();
 
@@ -35,7 +36,8 @@ class AuthService {
   Future<UserCredential?> signInWithGoogle() async {
     try {
       // 1. Iniciar el flujo interactivo usando el alias
-      final google.GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final google.GoogleSignInAccount? googleUser =
+          await _googleSignIn.signIn();
 
       if (googleUser == null) {
         debugPrint('Google Sign-In cancelado por el usuario.');
@@ -43,7 +45,8 @@ class AuthService {
       }
 
       // 2. Obtener la autenticación (con el await que corregimos antes)
-      final google.GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final google.GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // 3. Crear credencial
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -53,7 +56,6 @@ class AuthService {
 
       // 4. Iniciar sesión en Firebase
       return await _auth.signInWithCredential(credential);
-
     } on FirebaseAuthException {
       rethrow;
     } catch (e) {

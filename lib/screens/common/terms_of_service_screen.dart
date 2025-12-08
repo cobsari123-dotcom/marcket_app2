@@ -67,7 +67,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                   content:
                       'El Vendedor es responsable de la logística del envío. Cualquier fecha de entrega estimada es solo una aproximación. Manos del Mar no se hace responsable de retrasos, pérdidas o daños durante el envío.',
                 ),
-                 _TermSection(
+                _TermSection(
                   title: '8. Disputas, Devoluciones y Cancelaciones',
                   content:
                       'Cualquier disputa, solicitud de devolución o cancelación debe ser resuelta directamente entre el Comprador y el Vendedor. Manos del Mar ofrece un sistema de quejas para mediar en casos donde no se llegue a un acuerdo, pero no garantiza un resultado específico.',
@@ -77,7 +77,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                   content:
                       'Todo el contenido de la Plataforma, incluyendo logos, textos y software (excluyendo el contenido generado por el usuario), es propiedad de Manos del Mar. El contenido que publicas (como fotos y descripciones de productos) sigue siendo de tu propiedad, pero nos concedes una licencia mundial, no exclusiva y libre de regalías para usarlo en la operación y promoción de la Plataforma.',
                 ),
-                 _TermSection(
+                _TermSection(
                   title: '10. Limitación de Responsabilidad',
                   content:
                       'La Plataforma se proporciona "tal cual". Manos del Mar no será responsable de ningún daño directo, indirecto, incidental o consecuente que surja del uso o la incapacidad de usar la Plataforma, incluyendo disputas entre usuarios, fallos en los productos o problemas de envío.',

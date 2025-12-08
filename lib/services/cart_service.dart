@@ -4,7 +4,8 @@ import 'package:marcket_app/models/cart_item.dart';
 import 'package:marcket_app/models/product.dart';
 
 class CartService {
-  final DatabaseReference _cartRef = FirebaseDatabase.instance.ref().child('carts');
+  final DatabaseReference _cartRef =
+      FirebaseDatabase.instance.ref().child('carts');
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String? get _currentUserId => _auth.currentUser?.uid;
@@ -32,13 +33,15 @@ class CartService {
     if (_currentUserId == null) {
       throw Exception('User not logged in.');
     }
-    
+
     if (_currentUserId == product.sellerId) {
       throw Exception('No puedes añadir tus propios productos al carrito.');
     }
 
     // Fetch current product stock
-    final productRef = FirebaseDatabase.instance.ref().child('products/${product.sellerId}/${product.id}');
+    final productRef = FirebaseDatabase.instance
+        .ref()
+        .child('products/${product.sellerId}/${product.id}');
     final productSnapshot = await productRef.get();
 
     if (!productSnapshot.exists) {
@@ -49,7 +52,8 @@ class CartService {
     int currentStock = productData['stock'] ?? 0;
 
     if (currentStock < quantity) {
-      throw Exception('Stock insuficiente. Solo quedan $currentStock unidades.');
+      throw Exception(
+          'Stock insuficiente. Solo quedan $currentStock unidades.');
     }
 
     final cartItemRef = _cartRef.child(_currentUserId!).child(product.id);
@@ -57,14 +61,15 @@ class CartService {
 
     if (snapshot.exists) {
       // Item already in cart, update quantity
-      final existingCartItem = CartItem.fromMap(Map<String, dynamic>.from(snapshot.value as Map));
+      final existingCartItem =
+          CartItem.fromMap(Map<String, dynamic>.from(snapshot.value as Map));
       final newCartQuantity = existingCartItem.quantity + quantity;
 
       if (currentStock < newCartQuantity) {
-        throw Exception('Stock insuficiente para añadir más. Solo quedan $currentStock unidades.');
+        throw Exception(
+            'Stock insuficiente para añadir más. Solo quedan $currentStock unidades.');
       }
       await cartItemRef.update({'quantity': newCartQuantity});
-
     } else {
       // Add new item to cart
       final newCartItem = CartItem(
@@ -91,11 +96,15 @@ class CartService {
     final cartItemRef = _cartRef.child(_currentUserId!).child(productId);
     final cartItemSnapshot = await cartItemRef.get();
     if (cartItemSnapshot.exists) {
-      final cartItem = CartItem.fromMap(Map<String, dynamic>.from(cartItemSnapshot.value as Map));
-      final productRef = FirebaseDatabase.instance.ref().child('products/${cartItem.sellerId}/${cartItem.productId}');
+      final cartItem = CartItem.fromMap(
+          Map<String, dynamic>.from(cartItemSnapshot.value as Map));
+      final productRef = FirebaseDatabase.instance
+          .ref()
+          .child('products/${cartItem.sellerId}/${cartItem.productId}');
       final productSnapshot = await productRef.get();
       if (productSnapshot.exists) {
-        final productData = Map<String, dynamic>.from(productSnapshot.value as Map);
+        final productData =
+            Map<String, dynamic>.from(productSnapshot.value as Map);
         int currentStock = productData['stock'] ?? 0;
         await productRef.update({'stock': currentStock + cartItem.quantity});
       }
@@ -115,7 +124,8 @@ class CartService {
       throw Exception('Item no encontrado en el carrito.');
     }
 
-    final existingCartItem = CartItem.fromMap(Map<String, dynamic>.from(cartItemSnapshot.value as Map));
+    final existingCartItem = CartItem.fromMap(
+        Map<String, dynamic>.from(cartItemSnapshot.value as Map));
     final oldQuantity = existingCartItem.quantity;
     final quantityDifference = newQuantity - oldQuantity;
 
@@ -123,18 +133,21 @@ class CartService {
       await removeFromCart(productId);
     } else {
       // Check stock before updating
-      final productRef = FirebaseDatabase.instance.ref().child('products/${existingCartItem.sellerId}/${existingCartItem.productId}');
+      final productRef = FirebaseDatabase.instance.ref().child(
+          'products/${existingCartItem.sellerId}/${existingCartItem.productId}');
       final productSnapshot = await productRef.get();
 
       if (!productSnapshot.exists) {
         throw Exception('Producto no encontrado.');
       }
 
-      final productData = Map<String, dynamic>.from(productSnapshot.value as Map);
+      final productData =
+          Map<String, dynamic>.from(productSnapshot.value as Map);
       int currentStock = productData['stock'] ?? 0;
 
       if (quantityDifference > 0 && currentStock < quantityDifference) {
-        throw Exception('Stock insuficiente para aumentar la cantidad. Solo quedan $currentStock unidades.');
+        throw Exception(
+            'Stock insuficiente para aumentar la cantidad. Solo quedan $currentStock unidades.');
       }
 
       await cartItemRef.update({'quantity': newQuantity});
@@ -154,11 +167,15 @@ class CartService {
     if (cartSnapshot.exists) {
       final cartMap = Map<dynamic, dynamic>.from(cartSnapshot.value as Map);
       for (var entry in cartMap.entries) {
-        final cartItem = CartItem.fromMap(Map<String, dynamic>.from(entry.value));
-        final productRef = FirebaseDatabase.instance.ref().child('products/${cartItem.sellerId}/${cartItem.productId}');
+        final cartItem =
+            CartItem.fromMap(Map<String, dynamic>.from(entry.value));
+        final productRef = FirebaseDatabase.instance
+            .ref()
+            .child('products/${cartItem.sellerId}/${cartItem.productId}');
         final productSnapshot = await productRef.get();
         if (productSnapshot.exists) {
-          final productData = Map<String, dynamic>.from(productSnapshot.value as Map);
+          final productData =
+              Map<String, dynamic>.from(productSnapshot.value as Map);
           int currentStock = productData['stock'] ?? 0;
           await productRef.update({'stock': currentStock + cartItem.quantity});
         }

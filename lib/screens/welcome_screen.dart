@@ -25,7 +25,8 @@ class WelcomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 700), // Limit overall width
+                constraints:
+                    const BoxConstraints(maxWidth: 700), // Limit overall width
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
@@ -37,7 +38,10 @@ class WelcomeScreen extends StatelessWidget {
                         'assets/images/logoapp.jpg',
                         height: size.height * 0.15,
                         fit: BoxFit.contain,
-                      ).animate().fade(duration: 1000.ms).slideY(begin: -1, curve: Curves.easeOut),
+                      )
+                          .animate()
+                          .fade(duration: 1000.ms)
+                          .slideY(begin: -1, curve: Curves.easeOut),
                       const SizedBox(height: 20),
                       Text(
                         'Manos del Mar',
@@ -52,7 +56,8 @@ class WelcomeScreen extends StatelessWidget {
                         'Conectando artesanos y pescadores locales con el mundo',
                         textAlign: TextAlign.center,
                         style: textTheme.titleLarge?.copyWith(
-                          color: Colors.white.withAlpha(229), // Fixed deprecated
+                          color:
+                              Colors.white.withAlpha(229), // Fixed deprecated
                           fontSize: size.width > 600 ? 28.0 : 22.0,
                           fontWeight: FontWeight.w300,
                         ),
@@ -80,7 +85,10 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                         ),
                         child: const Text('Deseo ir a iniciar sesión'),
-                      ).animate().scale(delay: 1200.ms, duration: 600.ms, curve: Curves.elasticOut),
+                      ).animate().scale(
+                          delay: 1200.ms,
+                          duration: 600.ms,
+                          curve: Curves.elasticOut),
                       SizedBox(height: size.height * 0.05),
                     ],
                   ),
@@ -96,24 +104,30 @@ class WelcomeScreen extends StatelessWidget {
   Widget _buildFeaturesSection(BuildContext context) {
     return Column(
       children: [
-        FeatureCard( // Renamed
+        FeatureCard(
+          // Renamed
           icon: Icons.connect_without_contact,
           title: 'Conecta',
-          description: 'Comunícate directamente con artesanos y pescadores locales.',
+          description:
+              'Comunícate directamente con artesanos y pescadores locales.',
           delay: 1000.ms,
         ),
         const SizedBox(height: 20),
-        FeatureCard( // Renamed
+        FeatureCard(
+          // Renamed
           icon: Icons.explore,
           title: 'Descubre',
-          description: 'Explora productos únicos y auténticos, llenos de historia y tradición.',
+          description:
+              'Explora productos únicos y auténticos, llenos de historia y tradición.',
           delay: 1200.ms,
         ),
         const SizedBox(height: 20),
-        FeatureCard( // Renamed
+        FeatureCard(
+          // Renamed
           icon: Icons.favorite,
           title: 'Apoya',
-          description: 'Contribuye al comercio justo y al desarrollo de la economía local de Campeche.',
+          description:
+              'Contribuye al comercio justo y al desarrollo de la economía local de Campeche.',
           delay: 1400.ms,
         ),
       ],
@@ -121,13 +135,15 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-class FeatureCard extends StatelessWidget { // Renamed
+class FeatureCard extends StatelessWidget {
+  // Renamed
   final IconData icon;
   final String title;
   final String description;
   final Duration delay;
 
-  const FeatureCard({ // Renamed
+  const FeatureCard({
+    // Renamed
     super.key, // Added key
     required this.icon,
     required this.title,
@@ -148,16 +164,16 @@ class FeatureCard extends StatelessWidget { // Renamed
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withAlpha(229), // Fixed deprecated
-                ),
+                      color: Colors.white.withAlpha(229), // Fixed deprecated
+                    ),
               ),
             ],
           ),

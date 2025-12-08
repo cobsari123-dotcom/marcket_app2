@@ -37,23 +37,32 @@ class LeaveReviewScreenState extends State<LeaveReviewScreen> {
 
   Future<void> _loadCurrentUser() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    final userSnapshot = await FirebaseDatabase.instance.ref('users/${user.uid}').get();
+    if (user == null) {
+      return;
+    }
+    final userSnapshot =
+        await FirebaseDatabase.instance.ref('users/${user.uid}').get();
     if (userSnapshot.exists) {
       if (!mounted) return;
       setState(() {
-        _currentUser = UserModel.fromMap(Map<String, dynamic>.from(userSnapshot.value as Map), user.uid);
+        _currentUser = UserModel.fromMap(
+            Map<String, dynamic>.from(userSnapshot.value as Map), user.uid);
       });
     }
   }
 
   Future<void> _submitReview() async {
-    if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting || _currentUser == null) return;
+    if (!(_formKey.currentState?.validate() ?? false) ||
+        _isSubmitting ||
+        _currentUser == null) {
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
     try {
-      final reviewsRef = FirebaseDatabase.instance.ref('reviews/${widget.productId}');
+      final reviewsRef =
+          FirebaseDatabase.instance.ref('reviews/${widget.productId}');
       final newReviewRef = reviewsRef.push();
 
       final review = Review(
@@ -71,16 +80,19 @@ class LeaveReviewScreenState extends State<LeaveReviewScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Gracias por tu reseña!'), backgroundColor: AppTheme.success),
+        const SnackBar(
+            content: Text('¡Gracias por tu reseña!'),
+            backgroundColor: AppTheme.success),
       );
       if (!mounted) return;
       Navigator.of(context).pop();
-
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al enviar la reseña: $e'), backgroundColor: AppTheme.error),
+        SnackBar(
+            content: Text('Error al enviar la reseña: $e'),
+            backgroundColor: AppTheme.error),
       );
     }
   }
@@ -93,7 +105,8 @@ class LeaveReviewScreenState extends State<LeaveReviewScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600), // Limit width for the form
+          constraints:
+              const BoxConstraints(maxWidth: 600), // Limit width for the form
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Form(
@@ -115,7 +128,8 @@ class LeaveReviewScreenState extends State<LeaveReviewScreen> {
                       allowHalfRating: true,
                       itemCount: 5,
                       itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                      itemBuilder: (context, _) =>
+                          const Icon(Icons.star, color: Colors.amber),
                       onRatingUpdate: (rating) {
                         setState(() {
                           _rating = rating;
@@ -142,7 +156,9 @@ class LeaveReviewScreenState extends State<LeaveReviewScreen> {
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: _isSubmitting ? null : _submitReview,
-                    icon: _isSubmitting ? const SizedBox.shrink() : const Icon(Icons.send),
+                    icon: _isSubmitting
+                        ? const SizedBox.shrink()
+                        : const Icon(Icons.send),
                     label: _isSubmitting
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text('Publicar Reseña'),

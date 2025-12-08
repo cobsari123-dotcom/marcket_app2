@@ -12,6 +12,7 @@ import 'package:marcket_app/screens/chat/chat_list_screen.dart';
 import 'package:marcket_app/screens/common/admin_alerts_screen.dart';
 import 'package:marcket_app/screens/common/contact_support_screen.dart';
 import 'package:marcket_app/screens/common/notifications_screen.dart';
+import 'package:marcket_app/screens/common/about_us_screen.dart'; // Added import
 import 'package:marcket_app/screens/cart_screen.dart';
 import 'package:marcket_app/screens/buyer/seller_search_screen.dart';
 import 'package:marcket_app/services/cart_service.dart';
@@ -19,6 +20,7 @@ import 'package:marcket_app/screens/buyer/favorites_screen.dart';
 import 'package:marcket_app/models/cart_item.dart';
 import 'package:marcket_app/widgets/responsive_scaffold.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
@@ -42,7 +44,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   ];
 
   // Dependencies for the filter/sort dialog, moved from FeedScreen
-  final List<String> _categories = ['Todas', 'Artesanía', 'Comida', 'Servicios', 'Otros'];
+  final List<String> _categories = [
+    'Todas',
+    'Artesanía',
+    'Comida',
+    'Servicios',
+    'Otros'
+  ];
   final Map<String, String> _sortByOptions = {
     'timestamp': 'Más Recientes',
     'title': 'Título',
@@ -94,13 +102,16 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Categoría:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Categoría:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   DropdownButton<String>(
                     value: provider.selectedCategory ?? 'Todas',
                     onChanged: (String? newValue) {
-                      provider.setCategory(newValue == 'Todas' ? null : newValue);
+                      provider
+                          .setCategory(newValue == 'Todas' ? null : newValue);
                     },
-                    items: _categories.map<DropdownMenuItem<String>>((String value) {
+                    items: _categories
+                        .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),
@@ -108,7 +119,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Ordenar por:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Ordenar por:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   DropdownButton<String>(
                     value: provider.sortBy,
                     onChanged: (String? newValue) {
@@ -116,7 +128,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                         provider.setSortBy(newValue);
                       }
                     },
-                    items: _sortByOptions.entries.map<DropdownMenuItem<String>>((MapEntry<String, String> entry) {
+                    items: _sortByOptions.entries.map<DropdownMenuItem<String>>(
+                        (MapEntry<String, String> entry) {
                       return DropdownMenuItem<String>(
                         value: entry.key,
                         child: Text(entry.value),
@@ -126,7 +139,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const Text('Orden:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text('Orden:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       Switch(
                         value: provider.descending,
                         onChanged: (bool value) {
@@ -194,7 +208,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         label: Text('Favoritos'),
       ),
     ];
-    
+
     final drawer = Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -286,13 +300,30 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               Icons.warning_amber_rounded,
               color: AppTheme.secondary,
             ),
-            title: Text('Alertas de Administrador', style: textTheme.bodyMedium),
+            title:
+                Text('Alertas de Administrador', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AdminAlertsScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.info_outline,
+              color: AppTheme.secondary,
+            ),
+            title: Text('Sobre Nosotros', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AboutUsScreen(),
                 ),
               );
             },
@@ -313,7 +344,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Confirmar Cierre de Sesión'),
-                  content: const Text('¿Estás seguro de que quieres cerrar tu sesión?'),
+                  content: const Text(
+                      '¿Estás seguro de que quieres cerrar tu sesión?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
@@ -348,10 +380,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         ],
       ),
     );
-    
+
     Widget? fab;
-    if (_selectedIndex == 0) { // Only show FAB for FeedScreen
-        fab = FloatingActionButton(
+    if (_selectedIndex == 0) {
+      // Only show FAB for FeedScreen
+      fab = FloatingActionButton(
         onPressed: _showFilterSortDialog,
         backgroundColor: AppTheme.primary,
         child: const Icon(Icons.filter_list),
@@ -459,6 +492,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       onTap: () {
         _onDrawerItemTapped(index);
       },
-    );
+    )
+        .animate()
+        .fade(duration: 300.ms, delay: (50 * index).ms)
+        .slideY(begin: 0.1, end: 0, duration: 300.ms, delay: (50 * index).ms);
   }
 }

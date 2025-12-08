@@ -10,7 +10,8 @@ class SellerOrderListProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
   List<Order> _orders = [];
-  final Map<String, String> _buyerNames = {}; // Cache para nombres de compradores
+  final Map<String, String> _buyerNames =
+      {}; // Cache para nombres de compradores
   bool _isLoadingInitial = true;
   bool _isLoadingMore = false;
   String? _errorMessage;
@@ -78,19 +79,25 @@ class SellerOrderListProvider with ChangeNotifier {
           return;
         }
 
-        final Map<dynamic, dynamic> ordersMap = snapshot.value as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> ordersMap =
+            snapshot.value as Map<dynamic, dynamic>;
         List<Order> fetchedOrders = [];
         ordersMap.forEach((key, value) {
-          fetchedOrders.add(Order.fromMap(Map<String, dynamic>.from(value), key));
+          fetchedOrders
+              .add(Order.fromMap(Map<String, dynamic>.from(value), key));
         });
 
         if (fetchedOrders.isEmpty) {
           _hasMoreOrders = false;
         } else {
           // Filtra los duplicados si se usó startAfter({value, key})
-          final newOrders = fetchedOrders.where((order) => !_orders.any((existingOrder) => existingOrder.id == order.id)).toList();
+          final newOrders = fetchedOrders
+              .where((order) =>
+                  !_orders.any((existingOrder) => existingOrder.id == order.id))
+              .toList();
           _orders.addAll(newOrders);
-          _orders.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Reordenar por fecha
+          _orders.sort((a, b) =>
+              b.createdAt.compareTo(a.createdAt)); // Reordenar por fecha
           _lastOrderKey = newOrders.last.id;
           await _fetchBuyerNames(newOrders); // Obtener nombres de compradores
         }

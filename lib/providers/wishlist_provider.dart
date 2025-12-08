@@ -33,7 +33,8 @@ class WishlistProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _wishlistSubscription = _userService.getWishlistStream(userId).listen((productIds) {
+    _wishlistSubscription =
+        _userService.getWishlistStream(userId).listen((productIds) {
       if (!hasListeners) return;
       _wishlistProductIds = productIds;
       _isLoading = false;

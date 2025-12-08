@@ -31,7 +31,8 @@ class ChatListItem extends StatelessWidget {
     final otherUserName = otherUserInfo?['fullName'] ?? 'Usuario';
     final otherUserProfilePicture = otherUserInfo?['profilePicture'];
 
-    final formattedTime = DateFormat('HH:mm').format(chatRoom.lastMessageTimestamp);
+    final formattedTime =
+        DateFormat('HH:mm').format(chatRoom.lastMessageTimestamp);
 
     // ENVOLVEMOS EN DISMISSIBLE PARA PERMITIR DESLIZAR
     return Dismissible(
@@ -89,9 +90,8 @@ class ChatListItem extends StatelessWidget {
           backgroundImage: otherUserProfilePicture != null
               ? NetworkImage(otherUserProfilePicture)
               : null,
-          child: otherUserProfilePicture == null
-              ? const Icon(Icons.person)
-              : null,
+          child:
+              otherUserProfilePicture == null ? const Icon(Icons.person) : null,
         ),
         title: Text(otherUserName),
         subtitle: Text(

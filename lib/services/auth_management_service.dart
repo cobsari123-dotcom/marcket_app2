@@ -7,7 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthManagementService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
-  
+
   // CORRECCIÓN AQUÍ: Usamos el constructor () en lugar de .instance
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -17,7 +17,8 @@ class AuthManagementService {
     if (user == null) {
       throw Exception('No hay usuario autenticado.');
     }
-    AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
+    AuthCredential credential =
+        EmailAuthProvider.credential(email: email, password: password);
     await user.reauthenticateWithCredential(credential);
   }
 
@@ -59,12 +60,14 @@ class AuthManagementService {
     await _usersRef.child(user.uid).remove();
 
     // Si tiene foto de perfil y no es usuario de Google (Google maneja sus propias fotos)
-    if (profilePictureUrl != null && !user.providerData.any((p) => p.providerId == 'google.com')) {
+    if (profilePictureUrl != null &&
+        !user.providerData.any((p) => p.providerId == 'google.com')) {
       try {
         await FirebaseStorage.instance.refFromURL(profilePictureUrl).delete();
       } catch (e) {
         // Ignorar si la imagen no se encuentra o ya fue eliminada
-        debugPrint('Error al eliminar imagen de perfil del usuario ${user.uid}: $e');
+        debugPrint(
+            'Error al eliminar imagen de perfil del usuario ${user.uid}: $e');
       }
     }
 
@@ -72,7 +75,7 @@ class AuthManagementService {
     if (user.providerData.any((p) => p.providerId == 'google.com')) {
       await _googleSignIn.signOut();
     }
-    
+
     // Eliminar la cuenta de Firebase Authentication
     await user.delete();
   }

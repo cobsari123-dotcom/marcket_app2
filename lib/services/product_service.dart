@@ -6,7 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:marcket_app/models/product.dart';
 
 class ProductService {
-  final DatabaseReference _productsRef = FirebaseDatabase.instance.ref('products');
+  final DatabaseReference _productsRef =
+      FirebaseDatabase.instance.ref('products');
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   String? get getUserId => FirebaseAuth.instance.currentUser?.uid;
@@ -21,7 +22,8 @@ class ProductService {
   }
 
   // Nuevo método para obtener productos paginados
-  Future<List<Product>> getProductsPaginated(String userId, {int pageSize = 10, String? startAfterKey}) async {
+  Future<List<Product>> getProductsPaginated(String userId,
+      {int pageSize = 10, String? startAfterKey}) async {
     Query query = _productsRef.child(userId).orderByKey();
 
     if (startAfterKey != null) {
@@ -38,33 +40,39 @@ class ProductService {
 
     final data = Map<String, dynamic>.from(snapshot.value as Map);
     return data.entries.map((entry) {
-      return Product.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key, sellerIdParam: userId);
+      return Product.fromMap(
+          Map<String, dynamic>.from(entry.value as Map), entry.key,
+          sellerIdParam: userId);
     }).toList();
   }
-  
+
   // Obtener un producto específico por su ID
   Future<Product?> getProductById(String productId) async {
     final allSellersSnapshot = await _productsRef.get();
     if (allSellersSnapshot.exists) {
-      final allSellersData = Map<String, dynamic>.from(allSellersSnapshot.value as Map);
+      final allSellersData =
+          Map<String, dynamic>.from(allSellersSnapshot.value as Map);
       for (var sellerId in allSellersData.keys) {
-        final sellerProducts = allSellersData[sellerId] as Map<dynamic, dynamic>;
+        final sellerProducts =
+            allSellersData[sellerId] as Map<dynamic, dynamic>;
         if (sellerProducts.containsKey(productId)) {
-          final productData = Map<String, dynamic>.from(sellerProducts[productId] as Map);
-          return Product.fromMap(productData, productId, sellerIdParam: sellerId);
+          final productData =
+              Map<String, dynamic>.from(sellerProducts[productId] as Map);
+          return Product.fromMap(productData, productId,
+              sellerIdParam: sellerId);
         }
       }
     }
     return null;
   }
-  
+
   // Eliminar un producto
   Future<void> deleteProduct(Product product) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       throw Exception('Usuario no autenticado.');
     }
-    
+
     // Eliminar de la base de datos
     await _productsRef.child(userId).child(product.id).remove();
 
@@ -101,15 +109,13 @@ class ProductService {
     // 1. Subir nuevas imágenes y obtener sus URLs
     List<String> uploadedImageUrls = [];
     for (final imageFile in newImages) {
-      final storageRef = _storage
-          .ref()
-          .child('product_images')
-          .child('${userId}_${DateTime.now().millisecondsSinceEpoch}_${uploadedImageUrls.length}.jpg');
-      
+      final storageRef = _storage.ref().child('product_images').child(
+          '${userId}_${DateTime.now().millisecondsSinceEpoch}_${uploadedImageUrls.length}.jpg');
+
       final Uint8List imageData = await imageFile.readAsBytes();
       final metadata = SettableMetadata(contentType: "image/jpeg");
       await storageRef.putData(imageData, metadata);
-      
+
       final url = await storageRef.getDownloadURL();
       uploadedImageUrls.add(url);
     }
@@ -119,13 +125,18 @@ class ProductService {
       try {
         await _storage.refFromURL(urlToRemove).delete();
       } catch (e) {
-        debugPrint('Error al eliminar la imagen para actualizar $urlToRemove: $e');
+        debugPrint(
+            'Error al eliminar la imagen para actualizar $urlToRemove: $e');
       }
     }
 
     // 3. Preparar los datos del producto
-    final finalImageUrls = [...existingImageUrls, ...uploadedImageUrls, ...?newImageUrlsFromWeb];
-    
+    final finalImageUrls = [
+      ...existingImageUrls,
+      ...uploadedImageUrls,
+      ...?newImageUrlsFromWeb
+    ];
+
     final productData = {
       'name': name,
       'description': description,
@@ -140,7 +151,10 @@ class ProductService {
     // 4. Guardar en la base de datos
     if (existingProduct != null) {
       // Actualizar producto existente
-      await _productsRef.child(userId).child(existingProduct.id).update(productData);
+      await _productsRef
+          .child(userId)
+          .child(existingProduct.id)
+          .update(productData);
     } else {
       // Crear nuevo producto
       productData['averageRating'] = 0.0;
@@ -149,4 +163,3 @@ class ProductService {
     }
   }
 }
-

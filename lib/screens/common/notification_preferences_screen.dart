@@ -7,30 +7,37 @@ class NotificationPreferencesScreen extends StatefulWidget {
   const NotificationPreferencesScreen({super.key});
 
   @override
-  State<NotificationPreferencesScreen> createState() => _NotificationPreferencesScreenState();
+  State<NotificationPreferencesScreen> createState() =>
+      _NotificationPreferencesScreenState();
 }
 
-class _NotificationPreferencesScreenState extends State<NotificationPreferencesScreen> {
+class _NotificationPreferencesScreenState
+    extends State<NotificationPreferencesScreen> {
   bool _receiveEmailNotifications = true;
   bool _receivePushNotifications = true; // Placeholder for push notifications
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
-    _receiveEmailNotifications = userProfileProvider.currentUserModel?.receiveEmailNotifications ?? true;
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+    _receiveEmailNotifications =
+        userProfileProvider.currentUserModel?.receiveEmailNotifications ?? true;
     // Assuming push notifications might be managed elsewhere or default to true
-    _receivePushNotifications = true; 
+    _receivePushNotifications = true;
   }
 
   Future<void> _updateNotificationPreferences() async {
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     final currentUserModel = userProfileProvider.currentUserModel;
 
     if (currentUserModel == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No se pudo cargar el perfil del usuario.'), backgroundColor: AppTheme.error),
+        const SnackBar(
+            content: Text('Error: No se pudo cargar el perfil del usuario.'),
+            backgroundColor: AppTheme.error),
       );
       return;
     }
@@ -43,12 +50,16 @@ class _NotificationPreferencesScreenState extends State<NotificationPreferencesS
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preferencias de notificación actualizadas.'), backgroundColor: AppTheme.success),
+        const SnackBar(
+            content: Text('Preferencias de notificación actualizadas.'),
+            backgroundColor: AppTheme.success),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al actualizar preferencias: $e'), backgroundColor: AppTheme.error),
+        SnackBar(
+            content: Text('Error al actualizar preferencias: $e'),
+            backgroundColor: AppTheme.error),
       );
     }
   }
@@ -64,7 +75,8 @@ class _NotificationPreferencesScreenState extends State<NotificationPreferencesS
         child: Column(
           children: [
             SwitchListTile(
-              title: const Text('Recibir notificaciones por correo electrónico'),
+              title:
+                  const Text('Recibir notificaciones por correo electrónico'),
               value: _receiveEmailNotifications,
               onChanged: (bool value) {
                 setState(() {
@@ -82,7 +94,9 @@ class _NotificationPreferencesScreenState extends State<NotificationPreferencesS
                 });
                 // TODO: Implement actual push notification preference update
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Actualización de notificaciones push pendiente.')),
+                  const SnackBar(
+                      content: Text(
+                          'Actualización de notificaciones push pendiente.')),
                 );
               },
             ),

@@ -41,13 +41,15 @@ class NotificationService with ChangeNotifier {
       debugPrint('FCM Token: $_fcmToken');
       // Guardar el token en la base de datos para el usuario actual
       if (_fcmToken != null && _auth.currentUser != null) {
-        await _userService.updateUserData(_auth.currentUser!.uid, {'fcmToken': _fcmToken});
+        await _userService
+            .updateUserData(_auth.currentUser!.uid, {'fcmToken': _fcmToken});
       }
       notifyListeners();
 
       // Manejar mensajes en primer plano
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint('Mensaje en primer plano recibido: ${message.notification?.title}');
+        debugPrint(
+            'Mensaje en primer plano recibido: ${message.notification?.title}');
         // Mostrar notificación o actualizar UI
         // Ejemplo: ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(...)
       });
@@ -65,7 +67,8 @@ class NotificationService with ChangeNotifier {
       _fcmToken = newToken;
       debugPrint('Nuevo FCM Token: $newToken');
       if (_auth.currentUser != null) {
-        await _userService.updateUserData(_auth.currentUser!.uid, {'fcmToken': newToken});
+        await _userService
+            .updateUserData(_auth.currentUser!.uid, {'fcmToken': newToken});
       }
       notifyListeners();
     });

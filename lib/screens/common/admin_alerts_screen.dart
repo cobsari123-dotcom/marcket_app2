@@ -26,7 +26,8 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
     }
   }
 
-  void _showReplyDialog(BuildContext context, String alertId, String originalMessage) {
+  void _showReplyDialog(
+      BuildContext context, String alertId, String originalMessage) {
     final replyController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
@@ -42,7 +43,8 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Mensaje del administrador:', style: Theme.of(context).textTheme.bodySmall),
+                  Text('Mensaje del administrador:',
+                      style: Theme.of(context).textTheme.bodySmall),
                   Container(
                     padding: const EdgeInsets.all(8.0),
                     margin: const EdgeInsets.only(bottom: 16.0, top: 4.0),
@@ -79,21 +81,25 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
             ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
-                  final alertRef = FirebaseDatabase.instance.ref('alerts/$alertId');
+                  final alertRef =
+                      FirebaseDatabase.instance.ref('alerts/$alertId');
                   try {
                     await alertRef.update({
                       'reply': replyController.text.trim(),
                       'status': 'replied',
                     });
-                    
+
                     Navigator.of(context).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Respuesta enviada.'), backgroundColor: AppTheme.success),
+                      const SnackBar(
+                          content: Text('Respuesta enviada.'),
+                          backgroundColor: AppTheme.success),
                     );
-
                   } catch (e) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error al enviar la respuesta: $e'), backgroundColor: AppTheme.error),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Error al enviar la respuesta: $e'),
+                          backgroundColor: AppTheme.error),
                     );
                   }
                 }
@@ -131,7 +137,8 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey),
+                  Icon(Icons.notifications_off_outlined,
+                      size: 80, color: Colors.grey),
                   SizedBox(height: 16),
                   Text('No tienes alertas.'),
                 ],
@@ -139,22 +146,26 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
             );
           }
 
-          final data = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+          final data =
+              Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
           final alerts = data.entries.map((entry) {
             final value = Map<String, dynamic>.from(entry.value as Map);
             value['id'] = entry.key;
             return value;
           }).toList();
-          
-          alerts.sort((a, b) => (b['timestamp'] as int).compareTo(a['timestamp'] as int));
+
+          alerts.sort((a, b) =>
+              (b['timestamp'] as int).compareTo(a['timestamp'] as int));
 
           return ListView.builder(
             padding: const EdgeInsets.all(8.0),
             itemCount: alerts.length,
             itemBuilder: (context, index) {
               final alert = alerts[index];
-              final timestamp = DateTime.fromMillisecondsSinceEpoch(alert['timestamp']);
-              final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+              final timestamp =
+                  DateTime.fromMillisecondsSinceEpoch(alert['timestamp']);
+              final formattedDate =
+                  DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
               final status = alert['status'] ?? 'sent';
 
               return Card(
@@ -165,7 +176,8 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(alert['message'], style: Theme.of(context).textTheme.bodyMedium),
+                      Text(alert['message'],
+                          style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: 12),
                       if (alert['reply'] != null)
                         Container(
@@ -180,7 +192,9 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Tu Respuesta:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const Text('Tu Respuesta:',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
                               Text(alert['reply']),
                             ],
@@ -192,18 +206,23 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
                         children: [
                           Text(
                             formattedDate,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: Colors.grey),
                           ),
                           if (status == 'sent')
                             TextButton(
-                              onPressed: () => _showReplyDialog(context, alert['id'], alert['message']),
+                              onPressed: () => _showReplyDialog(
+                                  context, alert['id'], alert['message']),
                               child: const Text('Responder'),
                             )
                           else
                             const Chip(
                               label: Text('Respondido'),
                               backgroundColor: Colors.grey,
-                              labelStyle: TextStyle(color: Colors.white, fontSize: 10),
+                              labelStyle:
+                                  TextStyle(color: Colors.white, fontSize: 10),
                             ),
                         ],
                       ),

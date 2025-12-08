@@ -25,7 +25,7 @@ class AppInitializerState extends State<AppInitializer> {
         // Logic for handling lost files can be added here if necessary.
       }
     }
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/splash');

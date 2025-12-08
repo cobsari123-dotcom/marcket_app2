@@ -8,11 +8,13 @@ class QuantitySelectionDialog extends StatefulWidget {
   const QuantitySelectionDialog({super.key, required this.product});
 
   @override
-  State<QuantitySelectionDialog> createState() => _QuantitySelectionDialogState();
+  State<QuantitySelectionDialog> createState() =>
+      _QuantitySelectionDialogState();
 }
 
 class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
-  final TextEditingController _quantityController = TextEditingController(text: '1');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1');
   int _currentQuantity = 1;
   double _totalPrice = 0.0; // Add _totalPrice variable
 
@@ -45,7 +47,8 @@ class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('No hay suficiente stock. Stock disponible: ${widget.product.stock}'),
+            content: Text(
+                'No hay suficiente stock. Stock disponible: ${widget.product.stock}'),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -89,7 +92,8 @@ class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   ),
                   onChanged: (value) {
                     int? newQuantity = int.tryParse(value);
@@ -99,7 +103,8 @@ class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
                         _quantityController.text = newQuantity.toString();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('No hay suficiente stock. Stock disponible: ${widget.product.stock}'),
+                            content: Text(
+                                'No hay suficiente stock. Stock disponible: ${widget.product.stock}'),
                             backgroundColor: AppTheme.error,
                           ),
                         );
@@ -124,7 +129,10 @@ class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
           const SizedBox(height: 16),
           Text(
             'Total: \$${_totalPrice.toStringAsFixed(2)}', // Display total price
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -136,12 +144,15 @@ class _QuantitySelectionDialogState extends State<QuantitySelectionDialog> {
         ElevatedButton(
           onPressed: () {
             int? finalQuantity = int.tryParse(_quantityController.text);
-            if (finalQuantity != null && finalQuantity > 0 && finalQuantity <= widget.product.stock) {
+            if (finalQuantity != null &&
+                finalQuantity > 0 &&
+                finalQuantity <= widget.product.stock) {
               Navigator.of(context).pop(finalQuantity);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Cantidad inválida o excede el stock disponible (${widget.product.stock}).'),
+                  content: Text(
+                      'Cantidad inválida o excede el stock disponible (${widget.product.stock}).'),
                   backgroundColor: AppTheme.error,
                 ),
               );

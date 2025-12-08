@@ -11,27 +11,71 @@ import 'package:marcket_app/services/user_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:marcket_app/screens/seller/my_products_screen.dart';
+import 'package:marcket_app/screens/seller/seller_publications_screen.dart';
 
-class SellerProfileScreen extends StatelessWidget {
+class SellerProfileScreen extends StatefulWidget {
   final VoidCallback onProfileUpdated;
 
   const SellerProfileScreen({super.key, required this.onProfileUpdated});
 
   @override
+  State<SellerProfileScreen> createState() => _SellerProfileScreenState();
+}
+
+class _SellerProfileScreenState extends State<SellerProfileScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ProfileForm(onProfileUpdated: onProfileUpdated);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mi Perfil'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.person), text: 'Datos de Perfil'),
+            Tab(icon: Icon(Icons.shopping_bag), text: 'Mis Productos'),
+            Tab(icon: Icon(Icons.article), text: 'Mis Publicaciones'),
+          ],
+          labelColor: Colors.white,
+          unselectedLabelColor: const Color.fromARGB(255, 255, 255, 255).withAlpha(178), // Fixed deprecation
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          SellerProfileInfoTab(onProfileUpdated: widget.onProfileUpdated),
+          const MyProductsScreen(),
+          const SellerPublicationsScreen(),
+        ],
+      ),
+    );
   }
 }
 
-class ProfileForm extends StatefulWidget {
+class SellerProfileInfoTab extends StatefulWidget {
   final VoidCallback onProfileUpdated;
-  const ProfileForm({super.key, required this.onProfileUpdated});
+  const SellerProfileInfoTab({super.key, required this.onProfileUpdated});
 
   @override
-  State<ProfileForm> createState() => ProfileFormState();
+  State<SellerProfileInfoTab> createState() => _SellerProfileInfoTabState();
 }
 
-class ProfileFormState extends State<ProfileForm> {
+class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
   final _auth = FirebaseAuth.instance;
   final UserService _userService = UserService();
   final _formKey = GlobalKey<FormState>();
@@ -40,10 +84,12 @@ class ProfileFormState extends State<ProfileForm> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
   final TextEditingController _rfcController = TextEditingController();
-  final TextEditingController _paymentInstructionsController = TextEditingController();
+  final TextEditingController _paymentInstructionsController =
+      TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _businessAddressController = TextEditingController();
+  final TextEditingController _businessAddressController =
+      TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _facebookController = TextEditingController();
   final TextEditingController _instagramController = TextEditingController();
@@ -93,7 +139,9 @@ class ProfileFormState extends State<ProfileForm> {
       locale: const Locale('es', 'ES'),
     );
     if (picked != null && picked != _selectedDate) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _selectedDate = picked;
         _dobController.text = DateFormat('dd/MM/yyyy').format(picked);
@@ -108,7 +156,8 @@ class ProfileFormState extends State<ProfileForm> {
   }
 
   void _populateFields() {
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     final user = userProfileProvider.currentUserModel;
 
     if (user != null) {
@@ -131,13 +180,16 @@ class ProfileFormState extends State<ProfileForm> {
       _websiteController.text = user.socialMediaLinks?['website'] ?? '';
 
       _isGoogleUser = _auth.currentUser?.providerData.any(
-        (p) => p.providerId == 'google.com',
-      ) ?? false;
+            (p) => p.providerId == 'google.com',
+          ) ??
+          false;
     }
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -148,16 +200,20 @@ class ProfileFormState extends State<ProfileForm> {
 
   Future<void> _pickAndUploadImage() async {
     if (_isGoogleUser) {
-      _showSnackBar('Los usuarios de Google gestionan su foto desde su cuenta de Google.', isError: true);
+      _showSnackBar(
+          'Los usuarios de Google gestionan su foto desde su cuenta de Google.',
+          isError: true);
       return;
     }
-    
+
     final pickedImage = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
     );
-    if (pickedImage == null || !mounted) return;
-    
+    if (pickedImage == null || !mounted) {
+      return;
+    }
+
     setState(() {
       _imageFile = File(pickedImage.path);
       _isLoadingImage = true;
@@ -180,22 +236,31 @@ class ProfileFormState extends State<ProfileForm> {
         'profilePicture': downloadURL,
       });
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _networkImageUrl = downloadURL);
       _showSnackBar('¡Foto de perfil actualizada!');
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       _showSnackBar('Error al subir la imagen: $e', isError: true);
     } finally {
-      if (mounted) setState(() => _isLoadingImage = false);
+      if (mounted) {
+        setState(() => _isLoadingImage = false);
+      }
       widget.onProfileUpdated();
     }
   }
 
   Future<void> _syncPhotoFromGoogle() async {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     if (!_isGoogleUser) {
-      _showSnackBar('Esta opción es solo para usuarios registrados con Google.', isError: true);
+      _showSnackBar('Esta opción es solo para usuarios registrados con Google.',
+          isError: true);
       return;
     }
     setState(() => _isLoadingImage = true);
@@ -205,14 +270,19 @@ class ProfileFormState extends State<ProfileForm> {
       await _userService.updateUserData(_auth.currentUser!.uid, {
         'profilePicture': newPhotoUrl,
       });
-      if (mounted) {
-        setState(() => _networkImageUrl = newPhotoUrl);
-        _showSnackBar('Foto de perfil sincronizada con Google.');
+      if (!mounted) {
+        return;
       }
+      setState(() => _networkImageUrl = newPhotoUrl);
+      _showSnackBar('Foto de perfil sincronizada con Google.');
     } catch (e) {
-      if (mounted) _showSnackBar('Error al sincronizar la foto: $e', isError: true);
+      if (mounted) {
+        _showSnackBar('Error al sincronizar la foto: $e', isError: true);
+      }
     } finally {
-      if (mounted) setState(() => _isLoadingImage = false);
+      if (mounted) {
+        setState(() => _isLoadingImage = false);
+      }
       widget.onProfileUpdated();
     }
   }
@@ -222,13 +292,17 @@ class ProfileFormState extends State<ProfileForm> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      if (mounted) _showSnackBar('No se pudo abrir el navegador.', isError: true);
+      if (mounted) {
+        _showSnackBar('No se pudo abrir el navegador.', isError: true);
+      }
     }
   }
 
   Future<void> _deleteProfilePicture() async {
-    if (_networkImageUrl == null) return;
-    
+    if (_networkImageUrl == null) {
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -239,14 +313,21 @@ class ProfileFormState extends State<ProfileForm> {
               : '¿Estás seguro?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Eliminar', style: TextStyle(color: AppTheme.error))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar',
+                  style: TextStyle(color: AppTheme.error))),
         ],
       ),
     );
 
-    if (confirmed != true) return;
-    
+    if (confirmed != true) {
+      return;
+    }
+
     setState(() => _isLoadingImage = true);
 
     try {
@@ -266,24 +347,41 @@ class ProfileFormState extends State<ProfileForm> {
         _showSnackBar('Foto de perfil eliminada.');
       }
     } catch (e) {
-      if (mounted) _showSnackBar('Error al eliminar la foto: $e', isError: true);
+      if (mounted) {
+        _showSnackBar('Error al eliminar la foto: $e', isError: true);
+      }
     } finally {
-      if (mounted) setState(() => _isLoadingImage = false);
+      if (mounted) {
+        setState(() => _isLoadingImage = false);
+      }
       widget.onProfileUpdated();
     }
   }
 
   Future<void> _updateProfile() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     try {
       final Map<String, String> socialMediaLinksToSave = {};
-      if (_facebookController.text.isNotEmpty) socialMediaLinksToSave['facebook'] = _facebookController.text;
-      if (_instagramController.text.isNotEmpty) socialMediaLinksToSave['instagram'] = _instagramController.text;
-      if (_tiktokController.text.isNotEmpty) socialMediaLinksToSave['tiktok'] = _tiktokController.text;
-      if (_whatsappController.text.isNotEmpty) socialMediaLinksToSave['whatsapp'] = _whatsappController.text;
-      if (_websiteController.text.isNotEmpty) socialMediaLinksToSave['website'] = _websiteController.text;
+      if (_facebookController.text.isNotEmpty) {
+        socialMediaLinksToSave['facebook'] = _facebookController.text;
+      }
+      if (_instagramController.text.isNotEmpty) {
+        socialMediaLinksToSave['instagram'] = _instagramController.text;
+      }
+      if (_tiktokController.text.isNotEmpty) {
+        socialMediaLinksToSave['tiktok'] = _tiktokController.text;
+      }
+      if (_whatsappController.text.isNotEmpty) {
+        socialMediaLinksToSave['whatsapp'] = _whatsappController.text;
+      }
+      if (_websiteController.text.isNotEmpty) {
+        socialMediaLinksToSave['website'] = _websiteController.text;
+      }
 
       await userProfileProvider.updateProfile(
         fullName: _fullNameController.text,
@@ -306,11 +404,19 @@ class ProfileFormState extends State<ProfileForm> {
             duration: Duration(seconds: 3),
           ));
         } else {
-          _showSnackBar('Error: ${userProfileProvider.errorMessage}', isError: true);
+          _showSnackBar('Error: ${userProfileProvider.errorMessage}',
+              isError: true);
         }
       }
     } catch (e) {
-      if (mounted) _showSnackBar('Error al actualizar el perfil: $e', isError: true);
+      if (mounted) {
+        _showSnackBar('Error al actualizar el perfil: $e', isError: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingImage = false);
+      }
+      widget.onProfileUpdated();
     }
   }
 
@@ -329,7 +435,8 @@ class ProfileFormState extends State<ProfileForm> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FullScreenImageViewer(imageUrl: _networkImageUrl!),
+                      builder: (context) =>
+                          FullScreenImageViewer(imageUrl: _networkImageUrl!),
                     ),
                   );
                 },
@@ -387,11 +494,13 @@ class ProfileFormState extends State<ProfileForm> {
           return const Center(child: CircularProgressIndicator());
         }
         if (userProfileProvider.errorMessage != null) {
-          return Center(child: Text('Error: ${userProfileProvider.errorMessage}'));
+          return Center(
+              child: Text('Error: ${userProfileProvider.errorMessage}'));
         }
         final user = userProfileProvider.currentUserModel;
         if (user == null) {
-          return const Center(child: Text('No se encontraron datos de usuario.'));
+          return const Center(
+              child: Text('No se encontraron datos de usuario.'));
         }
 
         _fullNameController.text = user.fullName;
@@ -413,8 +522,9 @@ class ProfileFormState extends State<ProfileForm> {
         _websiteController.text = user.socialMediaLinks?['website'] ?? '';
 
         _isGoogleUser = _auth.currentUser?.providerData.any(
-          (p) => p.providerId == 'google.com',
-        ) ?? false;
+              (p) => p.providerId == 'google.com',
+            ) ??
+            false;
 
         return Center(
           child: ConstrainedBox(
@@ -445,22 +555,43 @@ class ProfileFormState extends State<ProfileForm> {
           onTap: _showProfilePictureMenu,
           child: Stack(
             children: [
-              CircleAvatar(
-                radius: 80,
-                backgroundImage: _imageFile != null
-                    ? FileImage(_imageFile!)
-                    : (_networkImageUrl != null
-                            ? NetworkImage(_networkImageUrl!)
-                            : null)
-                        as ImageProvider?,
-                backgroundColor: AppTheme.beigeArena,
-                child: _imageFile == null && _networkImageUrl == null && _isLoadingImage == false
-                    ? const Icon(
-                        Icons.store,
-                        size: 80,
-                        color: AppTheme.primary,
-                      )
-                    : (_isLoadingImage ? const CircularProgressIndicator() : null),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.primary, // Color del borde
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 0, 0, 0).withAlpha(
+                          (255 * 0.2).round()), // Fixed deprecation
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 80,
+                  backgroundImage: _imageFile != null
+                      ? FileImage(_imageFile!)
+                      : (_networkImageUrl != null
+                          ? NetworkImage(_networkImageUrl!)
+                          : null) as ImageProvider?,
+                  backgroundColor: AppTheme.beigeArena,
+                  child: _imageFile == null &&
+                          _networkImageUrl == null &&
+                          _isLoadingImage == false
+                      ? const Icon(
+                          Icons.store,
+                          size: 80,
+                          color: AppTheme.primary,
+                        )
+                      : (_isLoadingImage
+                          ? const CircularProgressIndicator()
+                          : null),
+                ),
               ),
               Positioned(
                 bottom: 0,
@@ -468,10 +599,12 @@ class ProfileFormState extends State<ProfileForm> {
                 child: _isLoadingImage
                     ? const SizedBox.shrink()
                     : CircleAvatar(
+                        radius: 20,
                         backgroundColor: AppTheme.secondary,
                         child: Icon(
                           _isGoogleUser ? Icons.settings : Icons.camera_alt,
                           color: Colors.white,
+                          size: 20,
                         ),
                       ),
               ),
@@ -481,9 +614,20 @@ class ProfileFormState extends State<ProfileForm> {
         const SizedBox(height: 16),
         Text(
           user?.fullName ?? '',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
-        Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyLarge),
+        Text(
+          user?.email ?? '',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withAlpha((255 * 0.7).round()), // Fixed deprecation
+              ),
+        ),
       ],
     );
   }
@@ -494,58 +638,137 @@ class ProfileFormState extends State<ProfileForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
-          const SizedBox(height: 16),
-          _buildDateField(),
-          const SizedBox(height: 16),
-          _buildGenderSelector(),
-          const SizedBox(height: 16),
-          _buildTextField(_rfcController, 'RFC', Icons.badge),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _phoneNumberController,
-            'Número de Teléfono',
-            Icons.phone,
+          // Sección: Información Personal
+          Card(
+            elevation: 2,
+            margin: const EdgeInsets.only(bottom: 24),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Información Personal',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                  ),
+                  const Divider(height: 32),
+                  _buildTextField(
+                      _fullNameController, 'Nombre Completo', Icons.person),
+                  const SizedBox(height: 16),
+                  _buildDateField(),
+                  const SizedBox(height: 16),
+                  _buildGenderSelector(),
+                  const SizedBox(height: 16),
+                  _buildTextField(_rfcController, 'RFC', Icons.badge),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _businessNameController,
-            'Nombre del Negocio',
-            Icons.business,
+
+          // Sección: Detalles del Negocio
+          Card(
+            elevation: 2,
+            margin: const EdgeInsets.only(bottom: 24),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Detalles del Negocio',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                  ),
+                  const Divider(height: 32),
+                  _buildTextField(
+                    _phoneNumberController,
+                    'Número de Teléfono',
+                    Icons.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _businessNameController,
+                    'Nombre del Negocio',
+                    Icons.business,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _businessAddressController,
+                    'Dirección del Negocio',
+                    Icons.location_on,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _bioController,
+                    'Biografía',
+                    Icons.info,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _paymentInstructionsController,
+                    'Instrucciones de Pago',
+                    Icons.payment,
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _businessAddressController,
-            'Dirección del Negocio',
-            Icons.location_on,
+
+          // Sección: Redes Sociales
+          Card(
+            elevation: 2,
+            margin: const EdgeInsets.only(bottom: 24),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Redes Sociales',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                  ),
+                  const Divider(height: 32),
+                  _buildSocialMediaTextField(
+                      _facebookController,
+                      'Facebook',
+                      FontAwesomeIcons.facebook,
+                      'https://facebook.com/usuario'),
+                  const SizedBox(height: 16),
+                  _buildSocialMediaTextField(
+                      _instagramController,
+                      'Instagram',
+                      FontAwesomeIcons.instagram,
+                      'https://instagram.com/usuario'),
+                  const SizedBox(height: 16),
+                  _buildSocialMediaTextField(_tiktokController, 'TikTok',
+                      FontAwesomeIcons.tiktok, 'https://tiktok.com/@usuario'),
+                  const SizedBox(height: 16),
+                  _buildSocialMediaTextField(_whatsappController, 'WhatsApp',
+                      FontAwesomeIcons.whatsapp, 'https://wa.me/numero'),
+                  const SizedBox(height: 16),
+                  _buildSocialMediaTextField(_websiteController,
+                      'Sitio Web/Otros', Icons.link, 'https://ejemplo.com'),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          Text('Redes Sociales', style: Theme.of(context).textTheme.titleLarge),
-          const Divider(),
-          const SizedBox(height: 16),
-          _buildSocialMediaTextField(_facebookController, 'Facebook', FontAwesomeIcons.facebook, 'https://facebook.com/usuario'),
-          const SizedBox(height: 16),
-          _buildSocialMediaTextField(_instagramController, 'Instagram', FontAwesomeIcons.instagram, 'https://instagram.com/usuario'),
-          const SizedBox(height: 16),
-          _buildSocialMediaTextField(_tiktokController, 'TikTok', FontAwesomeIcons.tiktok, 'https://tiktok.com/@usuario'),
-          const SizedBox(height: 16),
-          _buildSocialMediaTextField(_whatsappController, 'WhatsApp', FontAwesomeIcons.whatsapp, 'https://wa.me/numero'),
-          const SizedBox(height: 16),
-          _buildSocialMediaTextField(_websiteController, 'Sitio Web/Otros', Icons.link, 'https://ejemplo.com'),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _bioController,
-            'Biografía',
-            Icons.info,
-            maxLines: 3,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _paymentInstructionsController,
-            'Instrucciones de Pago',
-            Icons.payment,
-            maxLines: 3,
-          ),
+
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _updateProfile,
@@ -583,7 +806,10 @@ class ProfileFormState extends State<ProfileForm> {
         if (label == 'Instrucciones de Pago' || label == 'Biografía') {
           return null;
         }
-        return value!.isEmpty ? 'Por favor, introduce tu $label' : null;
+        if (value!.isEmpty) {
+          return 'Por favor, introduce tu $label';
+        }
+        return null;
       },
     );
   }
@@ -641,14 +867,20 @@ class ProfileFormState extends State<ProfileForm> {
       items: const [
         DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
         DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
-        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+        DropdownMenuItem(
+            value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
       ],
       onChanged: (value) {
         setState(() {
           _selectedGender = value;
         });
       },
-      validator: (value) => value == null ? 'Por favor selecciona tu sexo' : null,
+      validator: (value) {
+        if (value == null) {
+          return 'Por favor selecciona tu sexo';
+        }
+        return null;
+      },
     );
   }
 }

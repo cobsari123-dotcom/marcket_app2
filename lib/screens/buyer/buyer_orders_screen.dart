@@ -26,7 +26,8 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
     });
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
           _orderListProvider.hasMoreOrders &&
           !_orderListProvider.isLoadingMore) {
         _orderListProvider.loadMoreOrders();
@@ -83,7 +84,8 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800), // Limit width for order list
+        constraints:
+            const BoxConstraints(maxWidth: 800), // Limit width for order list
         child: Consumer<OrderListProvider>(
           builder: (context, provider, child) {
             if (provider.isLoadingInitial) {
@@ -97,7 +99,8 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.receipt_long, size: 80, color: AppTheme.primary),
+                    const Icon(Icons.receipt_long,
+                        size: 80, color: AppTheme.primary),
                     const SizedBox(height: 20),
                     Text(
                       'No has realizado pedidos.',
@@ -113,7 +116,8 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(8.0),
-                itemCount: provider.orders.length + (provider.isLoadingMore ? 1 : 0),
+                itemCount:
+                    provider.orders.length + (provider.isLoadingMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == provider.orders.length) {
                     return const Padding(
@@ -135,9 +139,11 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 8),
-                          Text('Fecha: ${DateFormat('dd/MM/yyyy').format(order.createdAt)}'),
+                          Text(
+                              'Fecha: ${DateFormat('dd/MM/yyyy').format(order.createdAt)}'),
                           const SizedBox(height: 4),
-                          Text('Total: \$${order.totalPrice.toStringAsFixed(2)}'),
+                          Text(
+                              'Total: \$${order.totalPrice.toStringAsFixed(2)}'),
                         ],
                       ),
                       trailing: _buildStatusChip(order.status),
@@ -145,7 +151,8 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OrderDetailScreen(orderId: order.id),
+                            builder: (context) =>
+                                OrderDetailScreen(orderId: order.id),
                           ),
                         );
                       },

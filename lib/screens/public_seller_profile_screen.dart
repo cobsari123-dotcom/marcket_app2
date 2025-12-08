@@ -16,7 +16,8 @@ class PublicSellerProfileScreen extends StatefulWidget {
   final String sellerId;
   final bool isAdmin;
 
-  const PublicSellerProfileScreen({super.key, required this.sellerId, this.isAdmin = false});
+  const PublicSellerProfileScreen(
+      {super.key, required this.sellerId, this.isAdmin = false});
 
   @override
   State<PublicSellerProfileScreen> createState() =>
@@ -36,9 +37,8 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
   }
 
   Future<void> _loadSellerData() async {
-    final snapshot = await FirebaseDatabase.instance
-        .ref('users/${widget.sellerId}')
-        .get();
+    final snapshot =
+        await FirebaseDatabase.instance.ref('users/${widget.sellerId}').get();
     if (snapshot.exists && mounted) {
       setState(() {
         _seller = UserModel.fromMap(
@@ -71,9 +71,8 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
       return;
     }
 
-    final currentUserSnapshot = await FirebaseDatabase.instance
-        .ref('users/${currentUser.uid}')
-        .get();
+    final currentUserSnapshot =
+        await FirebaseDatabase.instance.ref('users/${currentUser.uid}').get();
     if (!currentUserSnapshot.exists) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +132,8 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: () {
-                Share.share('¡Visita el perfil de ${_seller?.fullName ?? 'este vendedor'} en Manos del Mar!');
+                Share.share(
+                    '¡Visita el perfil de ${_seller?.fullName ?? 'este vendedor'} en Manos del Mar!');
               },
               tooltip: 'Compartir perfil',
             ),
@@ -167,7 +167,8 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
                   sellerProfilePicture: _seller?.profilePicture,
                   isAdmin: widget.isAdmin,
                 ),
-                PublicProductsList(sellerId: widget.sellerId, isAdmin: widget.isAdmin),
+                PublicProductsList(
+                    sellerId: widget.sellerId, isAdmin: widget.isAdmin),
               ],
             ),
     );
@@ -194,7 +195,8 @@ class SellerProfileInfoTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (seller.businessName != null && seller.businessName!.isNotEmpty) ...[
+          if (seller.businessName != null &&
+              seller.businessName!.isNotEmpty) ...[
             Text(
               seller.businessName!,
               style: Theme.of(context).textTheme.headlineSmall,
@@ -206,8 +208,10 @@ class SellerProfileInfoTab extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
-          if (seller.socialMediaLinks != null && seller.socialMediaLinks!.isNotEmpty) ...[
-            const Text('Redes Sociales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          if (seller.socialMediaLinks != null &&
+              seller.socialMediaLinks!.isNotEmpty) ...[
+            const Text('Redes Sociales',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
             ...seller.socialMediaLinks!.entries.map((entry) {
               return _buildSocialMediaLinkTile(context, entry.key, entry.value);
@@ -234,7 +238,8 @@ class SellerProfileInfoTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialMediaLinkTile(BuildContext context, String key, String url) {
+  Widget _buildSocialMediaLinkTile(
+      BuildContext context, String key, String url) {
     IconData icon;
     String title;
 
@@ -379,7 +384,8 @@ class PublicProductsList extends StatelessWidget {
   final String sellerId;
   final bool isAdmin;
 
-  const PublicProductsList({super.key, required this.sellerId, this.isAdmin = false});
+  const PublicProductsList(
+      {super.key, required this.sellerId, this.isAdmin = false});
 
   @override
   Widget build(BuildContext context) {
@@ -435,8 +441,8 @@ class PublicProductsList extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ProductDetailsScreen(product: product, isAdmin: isAdmin),
+                    builder: (context) => ProductDetailsScreen(
+                        product: product, isAdmin: isAdmin),
                   ),
                 );
               },

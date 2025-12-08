@@ -17,6 +17,7 @@ class UserModel {
   final String? bio;
   final String? gender;
   final Map<String, String>? socialMediaLinks;
+  final String? publicId; // New field
 
   const UserModel({
     required this.id,
@@ -37,6 +38,7 @@ class UserModel {
     this.bio,
     this.gender,
     this.socialMediaLinks,
+    this.publicId, // Add to constructor
   }); // Corrected: Closing brace for constructor
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -58,7 +60,9 @@ class UserModel {
       isDarkModeEnabled: map['isDarkModeEnabled'] ?? false,
       bio: map['bio'],
       gender: map['gender'],
-      socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)?.map((key, value) => MapEntry(key, value as String)),
+      socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)
+          ?.map((key, value) => MapEntry(key, value as String)),
+      publicId: map['publicId'], // Add to fromMap
     ); // Corrected: Closing parenthesis and brace for fromMap
   }
 
@@ -81,6 +85,7 @@ class UserModel {
       'bio': bio,
       'gender': gender,
       'socialMediaLinks': socialMediaLinks,
+      'publicId': publicId, // Add to toMap
     }; // Corrected: Closing brace for toMap
   }
 
@@ -103,7 +108,9 @@ class UserModel {
     String? bio,
     String? gender,
     Map<String, String>? socialMediaLinks,
-  }) { // Corrected: Closing parenthesis for copyWith parameters
+    String? publicId, // Add to copyWith
+  }) {
+    // Corrected: Closing parenthesis for copyWith parameters
     return UserModel(
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
@@ -118,11 +125,13 @@ class UserModel {
       businessAddress: businessAddress ?? this.businessAddress,
       address: address ?? this.address,
       paymentInstructions: paymentInstructions ?? this.paymentInstructions,
-      receiveEmailNotifications: receiveEmailNotifications ?? this.receiveEmailNotifications,
+      receiveEmailNotifications:
+          receiveEmailNotifications ?? this.receiveEmailNotifications,
       isDarkModeEnabled: isDarkModeEnabled ?? this.isDarkModeEnabled,
       bio: bio ?? this.bio,
       gender: gender ?? this.gender,
       socialMediaLinks: socialMediaLinks ?? this.socialMediaLinks,
+      publicId: publicId ?? this.publicId, // Add to copyWith
     ); // Corrected: Closing brace for copyWith
   }
 }

@@ -52,11 +52,13 @@ class OrderListProvider with ChangeNotifier {
         throw Exception('Usuario no autenticado.');
       }
 
-      Query query = _ordersRef.orderByChild('buyerId').equalTo(userId).limitToFirst(10);
+      Query query =
+          _ordersRef.orderByChild('buyerId').equalTo(userId).limitToFirst(10);
       if (_lastOrderKey != null) {
         query = _ordersRef.orderByChild('buyerId').equalTo(userId).startAfter({
           'buyerId': userId, // Este es el valor de referencia para equalTo
-          'key': _lastOrderKey, // Usar la clave de la última orden como ancla para la paginación
+          'key':
+              _lastOrderKey, // Usar la clave de la última orden como ancla para la paginación
         }).limitToFirst(10);
       }
 
@@ -73,19 +75,25 @@ class OrderListProvider with ChangeNotifier {
           return;
         }
 
-        final Map<dynamic, dynamic> ordersMap = snapshot.value as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> ordersMap =
+            snapshot.value as Map<dynamic, dynamic>;
         List<Order> fetchedOrders = [];
         ordersMap.forEach((key, value) {
-          fetchedOrders.add(Order.fromMap(Map<String, dynamic>.from(value), key));
+          fetchedOrders
+              .add(Order.fromMap(Map<String, dynamic>.from(value), key));
         });
 
         if (fetchedOrders.isEmpty) {
           _hasMoreOrders = false;
         } else {
           // Filtra los duplicados si se usó startAfter({value, key})
-          final newOrders = fetchedOrders.where((order) => !_orders.any((existingOrder) => existingOrder.id == order.id)).toList();
+          final newOrders = fetchedOrders
+              .where((order) =>
+                  !_orders.any((existingOrder) => existingOrder.id == order.id))
+              .toList();
           _orders.addAll(newOrders);
-          _orders.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Reordenar por fecha
+          _orders.sort((a, b) =>
+              b.createdAt.compareTo(a.createdAt)); // Reordenar por fecha
           _lastOrderKey = newOrders.last.id;
         }
 

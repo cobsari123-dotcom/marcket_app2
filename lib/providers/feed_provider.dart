@@ -103,14 +103,17 @@ class FeedProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _publicationSubscription = _publicationService.getPublicationsStream(
+      _publicationSubscription = _publicationService
+          .getPublicationsStream(
         pageSize: 5,
         startAfterKey: _lastPublicationKey,
-        startAfterValue: _lastPublicationSortValue?.toString(), // Convertir a String
+        startAfterValue:
+            _lastPublicationSortValue?.toString(), // Convertir a String
         category: _selectedCategory,
         sortBy: _sortBy,
         descending: _descending,
-      ).listen((newPublications) async {
+      )
+          .listen((newPublications) async {
         if (!hasListeners) return;
 
         if (newPublications.isEmpty) {
@@ -118,9 +121,10 @@ class FeedProvider with ChangeNotifier {
         } else {
           _publications.addAll(newPublications);
           _lastPublicationKey = newPublications.last.id;
-          _lastPublicationSortValue = _getPublicationSortValue(newPublications.last, _sortBy);
+          _lastPublicationSortValue =
+              _getPublicationSortValue(newPublications.last, _sortBy);
         }
-        
+
         await _fetchSellerDataForPublications(newPublications);
 
         _isLoadingMore = false;
@@ -151,7 +155,8 @@ class FeedProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _fetchSellerDataForPublications(List<Publication> publications) async {
+  Future<void> _fetchSellerDataForPublications(
+      List<Publication> publications) async {
     final Set<String> sellerIds = publications.map((p) => p.sellerId).toSet();
     for (final id in sellerIds) {
       if (!_sellerData.containsKey(id)) {

@@ -25,7 +25,8 @@ class UserProfileProvider with ChangeNotifier {
     _auth.authStateChanges().listen((User? user) async {
       _userSubscription?.cancel();
       if (user != null) {
-        _userSubscription = _userService.getUserStream(user.uid).listen((userModel) {
+        _userSubscription =
+            _userService.getUserStream(user.uid).listen((userModel) {
           if (!hasListeners) return;
           _currentUserModel = userModel;
           _isLoading = false;
@@ -95,7 +96,7 @@ class UserProfileProvider with ChangeNotifier {
         'socialMediaLinks': socialMediaLinks,
         'receiveEmailNotifications': receiveEmailNotifications,
       };
-      
+
       // Eliminar nulos para que no se sobrescriban campos existentes si no se proveen
       data.removeWhere((key, value) => value == null);
 

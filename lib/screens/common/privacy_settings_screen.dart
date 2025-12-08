@@ -22,13 +22,16 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
   }
 
   Future<void> _updatePrivacySettings() async {
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
     final currentUserModel = userProfileProvider.currentUserModel;
 
     if (currentUserModel == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No se pudo cargar el perfil del usuario.'), backgroundColor: AppTheme.error),
+        const SnackBar(
+            content: Text('Error: No se pudo cargar el perfil del usuario.'),
+            backgroundColor: AppTheme.error),
       );
       return;
     }
@@ -41,12 +44,17 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       // );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Configuración de privacidad actualizada.'), backgroundColor: AppTheme.success),
+        const SnackBar(
+            content: Text('Configuración de privacidad actualizada.'),
+            backgroundColor: AppTheme.success),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al actualizar configuración de privacidad: $e'), backgroundColor: AppTheme.error),
+        SnackBar(
+            content:
+                Text('Error al actualizar configuración de privacidad: $e'),
+            backgroundColor: AppTheme.error),
       );
     }
   }
@@ -63,7 +71,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           children: [
             SwitchListTile(
               title: const Text('Hacer mi perfil público'),
-              subtitle: const Text('Permite que otros usuarios vean tu perfil.'),
+              subtitle:
+                  const Text('Permite que otros usuarios vean tu perfil.'),
               value: _isProfilePublic,
               onChanged: (bool value) {
                 setState(() {
@@ -74,7 +83,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
             ),
             SwitchListTile(
               title: const Text('Permitir anuncios personalizados'),
-              subtitle: const Text('Permite que la aplicación muestre anuncios basados en tus intereses.'),
+              subtitle: const Text(
+                  'Permite que la aplicación muestre anuncios basados en tus intereses.'),
               value: _allowPersonalizedAds,
               onChanged: (bool value) {
                 setState(() {
@@ -82,7 +92,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                 });
                 // TODO: Implement actual personalized ads preference update
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Actualización de preferencias de anuncios pendiente.')),
+                  const SnackBar(
+                      content: Text(
+                          'Actualización de preferencias de anuncios pendiente.')),
                 );
               },
             ),

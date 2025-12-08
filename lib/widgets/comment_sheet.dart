@@ -24,7 +24,8 @@ class _CommentSheetState extends State<CommentSheet> {
   bool _isUploading = false;
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 70);
+    final pickedFile = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -42,11 +43,13 @@ class _CommentSheetState extends State<CommentSheet> {
       _isUploading = true;
     });
 
-    _publicationService.addComment(
+    _publicationService
+        .addComment(
       publicationId: widget.publicationId,
       commentText: _commentController.text.trim(),
       imageFile: _imageFile,
-    ).then((_) {
+    )
+        .then((_) {
       _commentController.clear();
       setState(() {
         _imageFile = null;
@@ -57,7 +60,9 @@ class _CommentSheetState extends State<CommentSheet> {
         _isUploading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al publicar el comentario: $error'), backgroundColor: AppTheme.error),
+        SnackBar(
+            content: Text('Error al publicar el comentario: $error'),
+            backgroundColor: AppTheme.error),
       );
     });
   }
@@ -65,7 +70,8 @@ class _CommentSheetState extends State<CommentSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: DraggableScrollableSheet(
         initialChildSize: 0.7,
         minChildSize: 0.4,
@@ -77,19 +83,23 @@ class _CommentSheetState extends State<CommentSheet> {
               // Header
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text('Comentarios', style: Theme.of(context).textTheme.titleLarge),
+                child: Text('Comentarios',
+                    style: Theme.of(context).textTheme.titleLarge),
               ),
               const Divider(),
               // Comments List
               Expanded(
                 child: StreamBuilder(
-                  stream: _publicationService.getCommentsStream(widget.publicationId),
+                  stream: _publicationService
+                      .getCommentsStream(widget.publicationId),
                   builder: (context, AsyncSnapshot<List<Comment>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No hay comentarios aún. ¡Sé el primero!'));
+                      return const Center(
+                          child:
+                              Text('No hay comentarios aún. ¡Sé el primero!'));
                     }
                     final comments = snapshot.data!;
                     return ListView.builder(
@@ -101,7 +111,9 @@ class _CommentSheetState extends State<CommentSheet> {
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(comment.userImageUrl),
                           ),
-                          title: Text(comment.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(comment.userName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -165,13 +177,18 @@ class _CommentSheetState extends State<CommentSheet> {
               Expanded(
                 child: TextField(
                   controller: _commentController,
-                  decoration: const InputDecoration.collapsed(hintText: 'Añadir un comentario...'),
+                  decoration: const InputDecoration.collapsed(
+                      hintText: 'Añadir un comentario...'),
                   textCapitalization: TextCapitalization.sentences,
                 ),
               ),
               IconButton(
-                icon: _isUploading ? const CircularProgressIndicator() : const Icon(Icons.send),
-                onPressed: (_isUploading || (_commentController.text.trim().isEmpty && _imageFile == null))
+                icon: _isUploading
+                    ? const CircularProgressIndicator()
+                    : const Icon(Icons.send),
+                onPressed: (_isUploading ||
+                        (_commentController.text.trim().isEmpty &&
+                            _imageFile == null))
                     ? null
                     : _postComment,
                 color: AppTheme.primary,

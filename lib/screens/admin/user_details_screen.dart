@@ -21,7 +21,8 @@ class UserDetailsScreen extends StatelessWidget {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit width for details content
+          constraints: const BoxConstraints(
+              maxWidth: 800), // Limit width for details content
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -38,13 +39,20 @@ class UserDetailsScreen extends StatelessWidget {
                 _buildDetailRow('Nombre Completo', user.fullName),
                 _buildDetailRow('Email', user.email),
                 _buildDetailRow('Tipo de Usuario', user.userType),
-                if (user.dob != null) _buildDetailRow('Fecha de Nacimiento', user.dob!),
+                if (user.dob != null)
+                  _buildDetailRow('Fecha de Nacimiento', user.dob!),
                 if (user.rfc != null) _buildDetailRow('RFC', user.rfc!),
-                if (user.phoneNumber != null) _buildDetailRow('Teléfono', user.phoneNumber!),
-                if (user.placeOfBirth != null) _buildDetailRow('Lugar de Nacimiento', user.placeOfBirth!),
-                if (user.address != null) _buildDetailRow('Dirección', user.address!),
-                if (user.businessName != null) _buildDetailRow('Nombre del Negocio', user.businessName!),
-                if (user.businessAddress != null) _buildDetailRow('Dirección del Negocio', user.businessAddress!),
+                if (user.phoneNumber != null)
+                  _buildDetailRow('Teléfono', user.phoneNumber!),
+                if (user.placeOfBirth != null)
+                  _buildDetailRow('Lugar de Nacimiento', user.placeOfBirth!),
+                if (user.address != null)
+                  _buildDetailRow('Dirección', user.address!),
+                if (user.businessName != null)
+                  _buildDetailRow('Nombre del Negocio', user.businessName!),
+                if (user.businessAddress != null)
+                  _buildDetailRow(
+                      'Dirección del Negocio', user.businessAddress!),
               ],
             ),
           ),
@@ -96,7 +104,8 @@ class UserDetailsScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 if (notificationController.text.isNotEmpty) {
-                  final notificationsRef = FirebaseDatabase.instance.ref('notifications/${user.id}');
+                  final notificationsRef =
+                      FirebaseDatabase.instance.ref('notifications/${user.id}');
                   await notificationsRef.push().set({
                     'message': notificationController.text,
                     'timestamp': ServerValue.timestamp,
@@ -105,7 +114,9 @@ class UserDetailsScreen extends StatelessWidget {
                   Navigator.pop(context);
                   if (!context.mounted) return; // Added mounted check
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notificación enviada con éxito.'), backgroundColor: Colors.green),
+                    const SnackBar(
+                        content: Text('Notificación enviada con éxito.'),
+                        backgroundColor: Colors.green),
                   );
                 }
               },

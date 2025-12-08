@@ -25,7 +25,8 @@ class Product {
     required this.reviewCount,
   });
 
-  factory Product.fromMap(Map<String, dynamic> map, String id, {String? sellerIdParam}) {
+  factory Product.fromMap(Map<String, dynamic> map, String id,
+      {String? sellerIdParam}) {
     List<String> imageUrls = [];
     if (map['imageUrls'] is List) {
       imageUrls = List<String>.from(map['imageUrls']);
@@ -43,8 +44,10 @@ class Product {
       category: map['category'] ?? '',
       isFeatured: map['isFeatured'] ?? false,
       sellerId: sellerIdParam ?? map['sellerId'] ?? '',
-      averageRating: (map['averageRating'] ?? 0.0).toDouble(), // Added to fromMap
-      reviewCount: (map['reviewCount'] as num? ?? 0).toInt(), // Added to fromMap
+      averageRating:
+          (map['averageRating'] ?? 0.0).toDouble(), // Added to fromMap
+      reviewCount:
+          (map['reviewCount'] as num? ?? 0).toInt(), // Added to fromMap
     );
   }
 

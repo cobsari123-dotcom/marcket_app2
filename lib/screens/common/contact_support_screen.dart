@@ -11,7 +11,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:marcket_app/models/user.dart';
 
 class ContactSupportScreen extends StatefulWidget {
-  const ContactSupportScreen({super.key});
+  final String? orderId; // New optional parameter
+
+  const ContactSupportScreen({super.key, this.orderId});
 
   @override
   State<ContactSupportScreen> createState() => _ContactSupportScreenState();
@@ -31,9 +33,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        final snapshot = await FirebaseDatabase.instance
-            .ref('users/${user.uid}')
-            .get();
+        final snapshot =
+            await FirebaseDatabase.instance.ref('users/${user.uid}').get();
         if (snapshot.exists && mounted) {
           setState(() {
             _currentUserModel = UserModel.fromMap(
@@ -76,13 +77,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent:
-                                  300, // Maximum width of each item
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio:
-                                  1.0, // Adjust as needed to prevent overflow
-                            ),
+                          maxCrossAxisExtent: 300, // Maximum width of each item
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio:
+                              1.0, // Adjust as needed to prevent overflow
+                        ),
                         itemCount:
                             5, // Number of support cards (feedback, complaints, chat, faq, terms)
                         itemBuilder: (context, index) {
@@ -157,8 +157,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
                                   const supportId = 'support_admin_user';
 
-                                  final database = FirebaseDatabase.instance
-                                      .ref();
+                                  final database =
+                                      FirebaseDatabase.instance.ref();
                                   final currentUserSnapshot = await database
                                       .child('users/${user.uid}')
                                       .get();
@@ -184,6 +184,13 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                                   final chatRoomRef = FirebaseDatabase.instance
                                       .ref('chat_rooms/$chatRoomId');
 
+                                  final String initialMessage = widget
+                                              .orderId !=
+                                          null
+                                      ? 'Necesito ayuda con el Pedido #${widget.orderId!.substring(0, 6)}...'
+                                      : 'Necesito ayuda general.';
+
+                                  // Check if chat room already exists with initial message
                                   final snapshot = await chatRoomRef.get();
                                   if (!snapshot.exists) {
                                     final newChatRoomData = ChatRoom(
@@ -192,7 +199,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                                         user.uid: true,
                                         supportId: true,
                                       },
-                                      lastMessage: 'Chat iniciado.',
+                                      lastMessage:
+                                          initialMessage, // Set initial message
                                       lastMessageTimestamp: DateTime.now(),
                                       participantInfo: {
                                         user.uid: {
@@ -220,6 +228,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                                     arguments: {
                                       'chatRoomId': chatRoomId,
                                       'otherUserName': 'Soporte Técnico',
+                                      'initialMessage':
+                                          initialMessage, // Pass initial message to ChatScreen
                                     },
                                   );
                                 }, // <--- AQUI FALTABA ESTA LLAVE DE CIERRE
@@ -268,8 +278,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                       Text(
                         'soporte@marcketapp.com', // Placeholder email
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.primary,
-                        ),
+                              color: AppTheme.primary,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),

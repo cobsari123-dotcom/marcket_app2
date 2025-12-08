@@ -57,7 +57,8 @@ class Publication {
 
     final commentsData = map['comments'] as Map<dynamic, dynamic>? ?? {};
     final comments = commentsData.entries.map((entry) {
-      return Comment.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
+      return Comment.fromMap(
+          Map<String, dynamic>.from(entry.value as Map), entry.key);
     }).toList();
 
     // Handle single or multiple image URLs for backward compatibility
@@ -68,19 +69,20 @@ class Publication {
       imageUrls = [map['imageUrl']];
     }
 
-
     return Publication(
       id: id,
       sellerId: map['sellerId'] ?? '',
       title: map['title'] ?? '',
       content: map['content'] ?? '',
       imageUrls: imageUrls,
-      timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(
+          (map['timestamp'] as num? ?? 0).toInt()),
       ratings: ratings,
       likes: likes, // Add to factory
       comments: comments,
       modifiedTimestamp: map['modifiedTimestamp'] != null
-          ? DateTime.fromMillisecondsSinceEpoch((map['modifiedTimestamp'] as num).toInt())
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (map['modifiedTimestamp'] as num).toInt())
           : null,
     );
   }

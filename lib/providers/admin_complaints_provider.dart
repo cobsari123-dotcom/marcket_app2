@@ -3,7 +3,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
 
 class AdminComplaintsProvider with ChangeNotifier {
-  final DatabaseReference _complaintsRef = FirebaseDatabase.instance.ref('complaints_suggestions');
+  final DatabaseReference _complaintsRef =
+      FirebaseDatabase.instance.ref('complaints_suggestions');
 
   List<Map<dynamic, dynamic>> _complaints = [];
   bool _isLoading = true;
@@ -39,7 +40,8 @@ class AdminComplaintsProvider with ChangeNotifier {
         return;
       }
 
-      final Map<dynamic, dynamic> complaintsMap = snapshot.value as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> complaintsMap =
+          snapshot.value as Map<dynamic, dynamic>;
       final List<Map<dynamic, dynamic>> fetchedComplaints = [];
       complaintsMap.forEach((key, value) {
         final complaint = Map<dynamic, dynamic>.from(value);
@@ -47,7 +49,8 @@ class AdminComplaintsProvider with ChangeNotifier {
         fetchedComplaints.add(complaint);
       });
 
-      fetchedComplaints.sort((a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
+      fetchedComplaints
+          .sort((a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
 
       _complaints = fetchedComplaints;
       _isLoading = false;

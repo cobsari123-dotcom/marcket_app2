@@ -14,19 +14,23 @@ class CreateEditPublicationScreen extends StatefulWidget {
   const CreateEditPublicationScreen({super.key, this.publication});
 
   @override
-  State<CreateEditPublicationScreen> createState() => _CreateEditPublicationScreenState();
+  State<CreateEditPublicationScreen> createState() =>
+      _CreateEditPublicationScreenState();
 }
 
-class _CreateEditPublicationScreenState extends State<CreateEditPublicationScreen> {
+class _CreateEditPublicationScreenState
+    extends State<CreateEditPublicationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _imageUrlController = TextEditingController(); // New controller for image URL
-  
+  final _imageUrlController =
+      TextEditingController(); // New controller for image URL
+
   final List<File> _newImages = [];
   List<String> _existingImageUrls = [];
   final List<String> _imagesToRemove = [];
-  final List<String> _newImageUrlsFromWeb = []; // New list for image URLs from web
+  final List<String> _newImageUrlsFromWeb =
+      []; // New list for image URLs from web
 
   bool _isLoading = false;
   bool _isPickingImage = false;
@@ -49,22 +53,25 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
     super.dispose();
   }
 
-  Future<void> _pickImage({ImageSource source = ImageSource.gallery, bool multiImage = false}) async {
+  Future<void> _pickImage(
+      {ImageSource source = ImageSource.gallery,
+      bool multiImage = false}) async {
     if (_isPickingImage) return;
 
     try {
       if (mounted) setState(() => _isPickingImage = true);
-      
+
       List<XFile> pickedFiles = [];
       if (multiImage) {
         pickedFiles = await ImagePicker().pickMultiImage(imageQuality: 70);
       } else {
-        final pickedFile = await ImagePicker().pickImage(source: source, imageQuality: 70);
+        final pickedFile =
+            await ImagePicker().pickImage(source: source, imageQuality: 70);
         if (pickedFile != null) {
           pickedFiles = [pickedFile];
         }
       }
-      
+
       if (mounted && pickedFiles.isNotEmpty) {
         setState(() {
           _newImages.addAll(pickedFiles.map((file) => File(file.path)));
@@ -174,8 +181,10 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
 
   Future<void> _savePublication() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    
-    if (_newImages.isEmpty && _existingImageUrls.isEmpty && _newImageUrlsFromWeb.isEmpty) {
+
+    if (_newImages.isEmpty &&
+        _existingImageUrls.isEmpty &&
+        _newImageUrlsFromWeb.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -194,12 +203,13 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('publication_images')
-            .child('${FirebaseAuth.instance.currentUser!.uid}_${DateTime.now().millisecondsSinceEpoch}_${newImageUrls.length}.jpg');
-        
+            .child(
+                '${FirebaseAuth.instance.currentUser!.uid}_${DateTime.now().millisecondsSinceEpoch}_${newImageUrls.length}.jpg');
+
         final Uint8List imageData = await imageFile.readAsBytes();
         final metadata = SettableMetadata(contentType: "image/jpeg");
         await storageRef.putData(imageData, metadata);
-        
+
         final url = await storageRef.getDownloadURL();
         newImageUrls.add(url);
       }
@@ -212,20 +222,27 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
         }
       }
 
-      final finalImageUrls = [..._existingImageUrls, ..._newImageUrlsFromWeb, ...newImageUrls];
+      final finalImageUrls = [
+        ..._existingImageUrls,
+        ..._newImageUrlsFromWeb,
+        ...newImageUrls
+      ];
 
       final publicationData = {
         'sellerId': FirebaseAuth.instance.currentUser!.uid,
         'title': _titleController.text.trim(),
         'content': _contentController.text.trim(),
         'imageUrls': finalImageUrls,
-        'timestamp': widget.publication?.timestamp.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
+        'timestamp': widget.publication?.timestamp.millisecondsSinceEpoch ??
+            DateTime.now().millisecondsSinceEpoch,
         'modifiedTimestamp': DateTime.now().millisecondsSinceEpoch,
       };
 
       final publicationsRef = FirebaseDatabase.instance.ref('publications');
       if (widget.publication != null) {
-        await publicationsRef.child(widget.publication!.id).update(publicationData);
+        await publicationsRef
+            .child(widget.publication!.id)
+            .update(publicationData);
       } else {
         publicationData['ratings'] = {};
         await publicationsRef.push().set(publicationData);
@@ -241,7 +258,6 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
 
       if (!mounted) return;
       Navigator.pop(context);
-
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -260,7 +276,9 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.publication == null ? 'Crear Publicación' : 'Editar Publicación'),
+        title: Text(widget.publication == null
+            ? 'Crear Publicación'
+            : 'Editar Publicación'),
       ),
       body: Stack(
         children: [
@@ -281,9 +299,12 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
                         children: <Widget>[
                           _buildImagePicker(),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_titleController, 'Título de la Publicación'),
+                          _buildTextField(
+                              _titleController, 'Título de la Publicación'),
                           const SizedBox(height: 20.0),
-                          _buildTextField(_contentController, 'Contenido de la historia', maxLines: 10),
+                          _buildTextField(
+                              _contentController, 'Contenido de la historia',
+                              maxLines: 10),
                           const SizedBox(height: 30.0),
                           _buildSaveButton(),
                         ],
@@ -330,12 +351,19 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
                 crossAxisCount: crossAxisCount,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 1.0, // Maintain square aspect ratio for images
+                childAspectRatio:
+                    1.0, // Maintain square aspect ratio for images
               ),
-              itemCount: _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length + 1,
+              itemCount: _existingImageUrls.length +
+                  _newImages.length +
+                  _newImageUrlsFromWeb.length +
+                  1,
               itemBuilder: (context, index) {
                 // The last item is the "Add" button
-                if (index == _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length) {
+                if (index ==
+                    _existingImageUrls.length +
+                        _newImages.length +
+                        _newImageUrlsFromWeb.length) {
                   return _buildAddImageButton();
                 }
 
@@ -362,11 +390,13 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
                 }
 
                 // Display new URL images
-                final imageUrlIndex = index - (_existingImageUrls.length + _newImages.length);
+                final imageUrlIndex =
+                    index - (_existingImageUrls.length + _newImages.length);
                 final imageUrl = _newImageUrlsFromWeb[imageUrlIndex];
                 return _buildImageTile(
                   Image.network(imageUrl, fit: BoxFit.cover),
-                  () => setState(() => _newImageUrlsFromWeb.removeAt(imageUrlIndex)),
+                  () => setState(
+                      () => _newImageUrlsFromWeb.removeAt(imageUrlIndex)),
                 );
               },
             );
@@ -391,7 +421,9 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
             children: [
               Icon(Icons.add_a_photo, size: 40, color: AppTheme.marronClaro),
               SizedBox(height: 4),
-              Text('Añadir', style: TextStyle(color: AppTheme.marronClaro), textAlign: TextAlign.center),
+              Text('Añadir',
+                  style: TextStyle(color: AppTheme.marronClaro),
+                  textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -429,7 +461,8 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {int? maxLines}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {int? maxLines}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(

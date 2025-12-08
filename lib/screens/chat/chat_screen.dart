@@ -14,8 +14,13 @@ import 'package:marcket_app/utils/theme.dart';
 class ChatScreen extends StatefulWidget {
   final String chatRoomId;
   final String otherUserName;
+  final String? initialMessage; // New optional parameter
 
-  const ChatScreen({super.key, required this.chatRoomId, required this.otherUserName});
+  const ChatScreen(
+      {super.key,
+      required this.chatRoomId,
+      required this.otherUserName,
+      this.initialMessage});
 
   @override
   State<ChatScreen> createState() => ChatScreenState();
@@ -27,15 +32,36 @@ class ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   bool _isUploading = false;
   File? _imageFile;
-    File? _docFile;
+  File? _docFile;
   Stream<DatabaseEvent>? _messagesStream; // Declare the stream here
 
   @override
   void initState() {
     super.initState();
-    _messagesStream = _database.child('chat_rooms/${widget.chatRoomId}/messages').orderByChild('timestamp').onValue.asBroadcastStream();
+    _messagesStream = _database
+        .child('chat_rooms/${widget.chatRoomId}/messages')
+        .orderByChild('timestamp')
+        .onValue
+        .asBroadcastStream();
+    _handleInitialMessage();
   }
 
+  Future<void> _handleInitialMessage() async {
+    if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
+      final snapshot = await _database
+          .child('chat_rooms/${widget.chatRoomId}/messages')
+          .get();
+      if (!snapshot.exists || snapshot.children.isEmpty) {
+        // Check if chat is truly empty
+        // Delay sending to ensure UI is built and current user is available
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _sendMessage(text: widget.initialMessage!);
+          }
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -46,7 +72,8 @@ class ChatScreenState extends State<ChatScreen> {
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final messageDate = DateTime(timestamp.year, timestamp.month, timestamp.day);
+    final messageDate =
+        DateTime(timestamp.year, timestamp.month, timestamp.day);
 
     if (messageDate.isAtSameMomentAs(today)) {
       return DateFormat('HH:mm').format(timestamp);
@@ -55,14 +82,20 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<void> _sendMessage({String text = '', String messageType = 'text', String? mediaUrl}) async {
-    if (text.trim().isEmpty && mediaUrl == null && _imageFile == null && _docFile == null) return;
+  Future<void> _sendMessage(
+      {String text = '', String messageType = 'text', String? mediaUrl}) async {
+    if (text.trim().isEmpty &&
+        mediaUrl == null &&
+        _imageFile == null &&
+        _docFile == null) {
+      return;
+    }
 
     if (mounted) setState(() => _isUploading = true);
 
     final user = _auth.currentUser;
     if (user == null) {
-       if (mounted) setState(() => _isUploading = false);
+      if (mounted) setState(() => _isUploading = false);
       return;
     }
 
@@ -72,17 +105,15 @@ class ChatScreenState extends State<ChatScreen> {
 
     try {
       if (_imageFile != null) {
-              const fileExtension = 'jpg';
-              const storagePath = 'chat_images';
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child(storagePath)
-            .child('${widget.chatRoomId}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension');
-        
+        const fileExtension = 'jpg';
+        const storagePath = 'chat_images';
+        final storageRef = FirebaseStorage.instance.ref().child(storagePath).child(
+            '${widget.chatRoomId}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension');
+
         final Uint8List imageData = await _imageFile!.readAsBytes();
         final metadata = SettableMetadata(contentType: "image/jpeg");
         final uploadTask = storageRef.putData(imageData, metadata);
-        
+
         final snapshot = await uploadTask;
         finalMediaUrl = await snapshot.ref.getDownloadURL();
         finalMessageType = 'image';
@@ -91,11 +122,9 @@ class ChatScreenState extends State<ChatScreen> {
         // ignore: prefer_const_declarations
         final fileExtension = text.split('.').last;
         const storagePath = 'chat_files';
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child(storagePath)
-            .child('${widget.chatRoomId}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension');
-        
+        final storageRef = FirebaseStorage.instance.ref().child(storagePath).child(
+            '${widget.chatRoomId}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension');
+
         final uploadTask = storageRef.putFile(_docFile!);
         final snapshot = await uploadTask;
         finalMediaUrl = await snapshot.ref.getDownloadURL();
@@ -103,7 +132,8 @@ class ChatScreenState extends State<ChatScreen> {
         lastMessageText = '[Archivo] $text';
       }
 
-      final newMessageRef = _database.child('chat_rooms/${widget.chatRoomId}/messages').push();
+      final newMessageRef =
+          _database.child('chat_rooms/${widget.chatRoomId}/messages').push();
       final message = ChatMessage(
         id: newMessageRef.key!,
         senderId: user.uid,
@@ -114,7 +144,7 @@ class ChatScreenState extends State<ChatScreen> {
       );
 
       await newMessageRef.set(message.toMap());
-      
+
       await _database.child('chat_rooms/${widget.chatRoomId}').update({
         'lastMessage': lastMessageText,
         'lastMessageTimestamp': message.timestamp.millisecondsSinceEpoch,
@@ -127,11 +157,12 @@ class ChatScreenState extends State<ChatScreen> {
           _docFile = null;
         });
       }
-
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar el mensaje: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+              content: Text('Error al enviar el mensaje: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -149,7 +180,7 @@ class ChatScreenState extends State<ChatScreen> {
       _imageFile = File(pickedFile.path);
     });
   }
-  
+
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles();
     if (result != null && result.files.single.path != null) {
@@ -159,7 +190,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     }
   }
-  
+
   void _showAttachmentMenu() {
     showModalBottomSheet(
       context: context,
@@ -183,7 +214,7 @@ class ChatScreenState extends State<ChatScreen> {
                   _pickImage(ImageSource.camera);
                 },
               ),
-               ListTile(
+              ListTile(
                 leading: const Icon(Icons.insert_drive_file),
                 title: const Text('Documento'),
                 onTap: () {
@@ -207,7 +238,8 @@ class ChatScreenState extends State<ChatScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit width for chat content
+          constraints: const BoxConstraints(
+              maxWidth: 800), // Limit width for chat content
           child: Column(
             children: [
               Expanded(
@@ -217,13 +249,17 @@ class ChatScreenState extends State<ChatScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+                    if (!snapshot.hasData ||
+                        snapshot.data!.snapshot.value == null) {
                       return const Center(child: Text('Aún no hay mensajes.'));
                     }
 
-                    final messagesData = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+                    final messagesData = Map<String, dynamic>.from(
+                        snapshot.data!.snapshot.value as Map);
                     final messages = messagesData.entries.map((entry) {
-                      return ChatMessage.fromMap(Map<String, dynamic>.from(entry.value as Map), entry.key);
+                      return ChatMessage.fromMap(
+                          Map<String, dynamic>.from(entry.value as Map),
+                          entry.key);
                     }).toList();
                     messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
@@ -259,7 +295,8 @@ class ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(8.0),
           child: Image.network(
             message.mediaUrl!,
-            loadingBuilder: (context, child, progress) => progress == null ? child : const CircularProgressIndicator(),
+            loadingBuilder: (context, child, progress) =>
+                progress == null ? child : const CircularProgressIndicator(),
           ),
         );
         break;
@@ -281,7 +318,8 @@ class ChatScreenState extends State<ChatScreen> {
               Expanded(
                 child: Text(
                   message.text, // File name is stored in the text field
-                  style: TextStyle(color: textColor, decoration: TextDecoration.underline),
+                  style: TextStyle(
+                      color: textColor, decoration: TextDecoration.underline),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -296,7 +334,8 @@ class ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: alignment,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
         margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
@@ -304,7 +343,8 @@ class ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             messageContent,
             Padding(
@@ -356,8 +396,10 @@ class ChatScreenState extends State<ChatScreen> {
                   child: GestureDetector(
                     onTap: () => setState(() => _imageFile = null),
                     child: Container(
-                      decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                      decoration: const BoxDecoration(
+                          color: Colors.black54, shape: BoxShape.circle),
+                      child: const Icon(Icons.close,
+                          color: Colors.white, size: 18),
                     ),
                   ),
                 ),
@@ -379,12 +421,15 @@ class ChatScreenState extends State<ChatScreen> {
                   onSubmitted: (text) => _sendMessage(text: text),
                 ),
               ),
-              _isUploading 
-                ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
-                : IconButton(
-                    icon: const Icon(Icons.send, color: AppTheme.primary),
-                    onPressed: () => _sendMessage(text: _messageController.text),
-                  ),
+              _isUploading
+                  ? const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator())
+                  : IconButton(
+                      icon: const Icon(Icons.send, color: AppTheme.primary),
+                      onPressed: () =>
+                          _sendMessage(text: _messageController.text),
+                    ),
             ],
           ),
         ],

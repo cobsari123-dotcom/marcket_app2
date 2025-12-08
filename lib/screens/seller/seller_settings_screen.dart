@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marcket_app/models/user.dart';
-import 'package:marcket_app/providers/theme_provider.dart'; 
+import 'package:marcket_app/providers/theme_provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:marcket_app/screens/common/notification_preferences_screen.dart'; 
-import 'package:marcket_app/screens/common/privacy_settings_screen.dart'; 
+import 'package:marcket_app/screens/common/notification_preferences_screen.dart';
+import 'package:marcket_app/screens/common/privacy_settings_screen.dart';
 import 'package:provider/provider.dart';
 
 // --- CORRECCIÓN: Se agregó la definición de la clase que faltaba ---
@@ -20,14 +20,19 @@ class SellerSettingsScreen extends StatefulWidget {
 }
 
 class SellerSettingsScreenState extends State<SellerSettingsScreen> {
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmNewPasswordController = TextEditingController();
+  final TextEditingController _confirmNewPasswordController =
+      TextEditingController();
   final TextEditingController _newEmailController = TextEditingController();
-  final TextEditingController _confirmNewEmailController = TextEditingController();
+  final TextEditingController _confirmNewEmailController =
+      TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _businessAddressController = TextEditingController();
-  final TextEditingController _paymentInstructionsController = TextEditingController();
+  final TextEditingController _businessAddressController =
+      TextEditingController();
+  final TextEditingController _paymentInstructionsController =
+      TextEditingController();
 
   bool _obscureNewPassword = true;
   bool _obscureConfirmNewPassword = true;
@@ -53,7 +58,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     }
   }
 
-  Future<bool> _showReauthenticateDialog(AuthManagementService authManagementService) async {
+  Future<bool> _showReauthenticateDialog(
+      AuthManagementService authManagementService) async {
     _currentPasswordController.clear();
     bool? reauthenticated = await showDialog<bool>(
       context: context,
@@ -63,7 +69,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Por favor, ingresa tu contraseña actual para continuar.'),
+            const Text(
+                'Por favor, ingresa tu contraseña actual para continuar.'),
             const SizedBox(height: 16),
             TextField(
               controller: _currentPasswordController,
@@ -73,7 +80,9 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () async {
               try {
@@ -110,13 +119,16 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     return reauthenticated ?? false;
   }
 
-  Future<void> _updatePassword(AuthManagementService authManagementService, UserProfileProvider userProfileProvider) async {
+  Future<void> _updatePassword(AuthManagementService authManagementService,
+      UserProfileProvider userProfileProvider) async {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null || userProfileProvider.currentUserModel?.userType == 'Google') {
+    if (currentUser == null ||
+        userProfileProvider.currentUserModel?.userType == 'Google') {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No puedes cambiar la contraseña para usuarios de Google.'),
+          content:
+              Text('No puedes cambiar la contraseña para usuarios de Google.'),
           backgroundColor: AppTheme.error,
           duration: Duration(seconds: 3),
         ),
@@ -124,112 +136,129 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       return;
     }
 
-    bool reauthenticated = await _showReauthenticateDialog(authManagementService);
+    bool reauthenticated =
+        await _showReauthenticateDialog(authManagementService);
     if (!mounted) return;
     if (!reauthenticated) return;
 
     _newPasswordController.clear();
     _confirmNewPasswordController.clear();
-    
-    if(!mounted) return;
+
+    if (!mounted) return;
 
     await showDialog(
       context: context,
-      builder: (context) => StatefulBuilder( 
-        builder: (context, setStateDialog) {
-          return AlertDialog(
-            title: const Text('Actualizar Contraseña'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _newPasswordController,
-                  obscureText: _obscureNewPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Nueva Contraseña',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () {
-                        setStateDialog(() => _obscureNewPassword = !_obscureNewPassword);
-                      },
-                    ),
+      builder: (context) => StatefulBuilder(builder: (context, setStateDialog) {
+        return AlertDialog(
+          title: const Text('Actualizar Contraseña'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _newPasswordController,
+                obscureText: _obscureNewPassword,
+                decoration: InputDecoration(
+                  labelText: 'Nueva Contraseña',
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () {
+                      setStateDialog(
+                          () => _obscureNewPassword = !_obscureNewPassword);
+                    },
                   ),
                 ),
-                TextField(
-                  controller: _confirmNewPasswordController,
-                  obscureText: _obscureConfirmNewPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Confirmar Nueva Contraseña',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmNewPassword ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () {
-                        setStateDialog(() => _obscureConfirmNewPassword = !_obscureConfirmNewPassword);
-                      },
-                    ),
+              ),
+              TextField(
+                controller: _confirmNewPasswordController,
+                obscureText: _obscureConfirmNewPassword,
+                decoration: InputDecoration(
+                  labelText: 'Confirmar Nueva Contraseña',
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirmNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () {
+                      setStateDialog(() => _obscureConfirmNewPassword =
+                          !_obscureConfirmNewPassword);
+                    },
                   ),
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_newPasswordController.text.length < 6) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('La contraseña debe tener al menos 6 caracteres.'),
-                        backgroundColor: AppTheme.error,
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                    return;
-                  }
-                  if (_newPasswordController.text != _confirmNewPasswordController.text) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Las contraseñas no coinciden.'),
-                        backgroundColor: AppTheme.error,
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                    return;
-                  }
-
-                  try {
-                    await authManagementService.updatePassword(_newPasswordController.text);
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Contraseña actualizada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
-                    );
-                    Navigator.of(context).pop();
-                  } on FirebaseAuthException catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Error al actualizar contraseña: ${e.message}'),
-                      backgroundColor: AppTheme.error,
-                      duration: Duration(seconds: 3),
-                    ));
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Error desconocido al actualizar contraseña: $e'),
-                      backgroundColor: AppTheme.error,
-                      duration: Duration(seconds: 3),
-                    ));
-                  }
-                },
-                child: const Text('Actualizar'),
               ),
             ],
-          );
-        }
-      ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () async {
+                if (_newPasswordController.text.length < 6) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'La contraseña debe tener al menos 6 caracteres.'),
+                      backgroundColor: AppTheme.error,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                  return;
+                }
+                if (_newPasswordController.text !=
+                    _confirmNewPasswordController.text) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Las contraseñas no coinciden.'),
+                      backgroundColor: AppTheme.error,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await authManagementService
+                      .updatePassword(_newPasswordController.text);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Contraseña actualizada exitosamente.'),
+                        backgroundColor: AppTheme.success,
+                        duration: Duration(seconds: 3)),
+                  );
+                  Navigator.of(context).pop();
+                } on FirebaseAuthException catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content:
+                        Text('Error al actualizar contraseña: ${e.message}'),
+                    backgroundColor: AppTheme.error,
+                    duration: Duration(seconds: 3),
+                  ));
+                } catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content:
+                        Text('Error desconocido al actualizar contraseña: $e'),
+                    backgroundColor: AppTheme.error,
+                    duration: Duration(seconds: 3),
+                  ));
+                }
+              },
+              child: const Text('Actualizar'),
+            ),
+          ],
+        );
+      }),
     );
   }
 
-  Future<void> _updateEmail(AuthManagementService authManagementService, UserProfileProvider userProfileProvider) async {
+  Future<void> _updateEmail(AuthManagementService authManagementService,
+      UserProfileProvider userProfileProvider) async {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null || userProfileProvider.currentUserModel?.userType == 'Google') {
+    if (currentUser == null ||
+        userProfileProvider.currentUserModel?.userType == 'Google') {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -241,14 +270,15 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       return;
     }
 
-    bool reauthenticated = await _showReauthenticateDialog(authManagementService);
+    bool reauthenticated =
+        await _showReauthenticateDialog(authManagementService);
     if (!mounted) return;
     if (!reauthenticated) return;
 
     _newEmailController.clear();
     _confirmNewEmailController.clear();
-    
-    if(!mounted) return;
+
+    if (!mounted) return;
 
     await showDialog(
       context: context,
@@ -260,23 +290,29 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
             TextField(
               controller: _newEmailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Nuevo Correo Electrónico'),
+              decoration:
+                  const InputDecoration(labelText: 'Nuevo Correo Electrónico'),
             ),
             TextField(
               controller: _confirmNewEmailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Confirmar Nuevo Correo Electrónico'),
+              decoration: const InputDecoration(
+                  labelText: 'Confirmar Nuevo Correo Electrónico'),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () async {
-              if (_newEmailController.text.isEmpty || !_newEmailController.text.contains('@')) {
+              if (_newEmailController.text.isEmpty ||
+                  !_newEmailController.text.contains('@')) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Por favor, ingresa un correo electrónico válido.'),
+                    content: Text(
+                        'Por favor, ingresa un correo electrónico válido.'),
                     backgroundColor: AppTheme.error,
                     duration: Duration(seconds: 3),
                   ),
@@ -295,10 +331,15 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
               }
 
               try {
-                await authManagementService.updateEmail(_newEmailController.text);
+                await authManagementService
+                    .updateEmail(_newEmailController.text);
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Se ha enviado un enlace de verificación a tu nuevo correo.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+                  const SnackBar(
+                      content: Text(
+                          'Se ha enviado un enlace de verificación a tu nuevo correo.'),
+                      backgroundColor: AppTheme.success,
+                      duration: Duration(seconds: 3)),
                 );
                 Navigator.of(context).pop();
               } on FirebaseAuthException catch (e) {
@@ -324,7 +365,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     );
   }
 
-  Future<void> _deleteAccount(AuthManagementService authManagementService) async {
+  Future<void> _deleteAccount(
+      AuthManagementService authManagementService) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       if (!mounted) return;
@@ -338,7 +380,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       return;
     }
 
-    bool reauthenticated = await _showReauthenticateDialog(authManagementService);
+    bool reauthenticated =
+        await _showReauthenticateDialog(authManagementService);
     if (!mounted) return;
     if (!reauthenticated) return;
 
@@ -346,10 +389,16 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar Cuenta'),
-        content: const Text('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible.'),
+        content: const Text(
+            '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Eliminar', style: TextStyle(color: AppTheme.error))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar',
+                  style: TextStyle(color: AppTheme.error))),
         ],
       ),
     );
@@ -359,13 +408,15 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     try {
       await authManagementService.deleteAccount();
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cuenta eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+        const SnackBar(
+            content: Text('Cuenta eliminada exitosamente.'),
+            backgroundColor: AppTheme.success,
+            duration: Duration(seconds: 3)),
       );
-      
+
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-      
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -383,8 +434,9 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
     }
   }
 
-  Future<void> _updateBusinessInfo(UserProfileProvider userProfileProvider) async {
-    _populateControllers(userProfileProvider.currentUserModel); 
+  Future<void> _updateBusinessInfo(
+      UserProfileProvider userProfileProvider) async {
+    _populateControllers(userProfileProvider.currentUserModel);
 
     await showDialog(
       context: context,
@@ -394,20 +446,32 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: _businessNameController, decoration: const InputDecoration(labelText: 'Nombre del Negocio')),
+              TextField(
+                  controller: _businessNameController,
+                  decoration:
+                      const InputDecoration(labelText: 'Nombre del Negocio')),
               const SizedBox(height: 16),
-              TextField(controller: _businessAddressController, decoration: const InputDecoration(labelText: 'Dirección del Negocio')),
+              TextField(
+                  controller: _businessAddressController,
+                  decoration: const InputDecoration(
+                      labelText: 'Dirección del Negocio')),
               const SizedBox(height: 16),
-              TextField(controller: _paymentInstructionsController, maxLines: 3, decoration: const InputDecoration(labelText: 'Instrucciones de Pago')),
+              TextField(
+                  controller: _paymentInstructionsController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                      labelText: 'Instrucciones de Pago')),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () async {
               await userProfileProvider.updateProfile(
-                fullName: userProfileProvider.currentUserModel!.fullName, 
+                fullName: userProfileProvider.currentUserModel!.fullName,
                 businessName: _businessNameController.text.trim(),
                 businessAddress: _businessAddressController.text.trim(),
                 paymentInstructions: _paymentInstructionsController.text.trim(),
@@ -429,13 +493,19 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Caché eliminada exitosamente.'), backgroundColor: AppTheme.success, duration: Duration(seconds: 3)),
+          SnackBar(
+              content: const Text('Caché eliminada exitosamente.'),
+              backgroundColor: AppTheme.success,
+              duration: Duration(seconds: 3)),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar caché: $e'), backgroundColor: AppTheme.error, duration: Duration(seconds: 3)),
+        SnackBar(
+            content: Text('Error al eliminar caché: $e'),
+            backgroundColor: AppTheme.error,
+            duration: Duration(seconds: 3)),
       );
     }
   }
@@ -443,7 +513,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     // Obtener los providers necesarios
-    final authService = Provider.of<AuthManagementService>(context, listen: false);
+    final authService =
+        Provider.of<AuthManagementService>(context, listen: false);
     final userProfileProvider = Provider.of<UserProfileProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -471,13 +542,14 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           ),
 
           const SizedBox(height: 24),
-          
+
           // Sección de Negocio
           _buildSectionHeader('Negocio'),
           ListTile(
             leading: const Icon(Icons.store_mall_directory_outlined),
             title: const Text('Información del Negocio'),
-            subtitle: const Text('Editar nombre, dirección e instrucciones de pago'),
+            subtitle:
+                const Text('Editar nombre, dirección e instrucciones de pago'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => _updateBusinessInfo(userProfileProvider),
           ),
@@ -503,7 +575,9 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationPreferencesScreen()),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const NotificationPreferencesScreen()),
               );
             },
           ),
@@ -515,7 +589,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PrivacySettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const PrivacySettingsScreen()),
               );
             },
           ),
@@ -532,7 +607,8 @@ class SellerSettingsScreenState extends State<SellerSettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.delete_forever, color: AppTheme.error),
-            title: const Text('Eliminar Cuenta', style: TextStyle(color: AppTheme.error)),
+            title: const Text('Eliminar Cuenta',
+                style: TextStyle(color: AppTheme.error)),
             onTap: () => _deleteAccount(authService),
           ),
         ],
