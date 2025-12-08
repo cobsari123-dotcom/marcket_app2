@@ -12,10 +12,11 @@ class UserModel {
   final String? businessAddress;
   final String? address;
   final String? paymentInstructions;
-  final bool? receiveEmailNotifications; // New field
+  final bool? receiveEmailNotifications;
   final bool? isDarkModeEnabled;
-  final String? bio; // New field
-  final Map<String, String>? socialMediaLinks; // New field
+  final String? bio;
+  final String? gender;
+  final Map<String, String>? socialMediaLinks;
 
   const UserModel({
     required this.id,
@@ -33,9 +34,10 @@ class UserModel {
     this.paymentInstructions,
     this.receiveEmailNotifications,
     this.isDarkModeEnabled,
-    this.bio, // Added to constructor
-    this.socialMediaLinks, // Added to constructor
-  });
+    this.bio,
+    this.gender,
+    this.socialMediaLinks,
+  }); // Corrected: Closing brace for constructor
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
     return UserModel(
@@ -54,9 +56,10 @@ class UserModel {
       paymentInstructions: map['paymentInstructions'],
       receiveEmailNotifications: map['receiveEmailNotifications'] ?? true,
       isDarkModeEnabled: map['isDarkModeEnabled'] ?? false,
-      bio: map['bio'], // Added to fromMap
-      socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)?.map((key, value) => MapEntry(key, value as String)), // Added to fromMap
-    );
+      bio: map['bio'],
+      gender: map['gender'],
+      socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)?.map((key, value) => MapEntry(key, value as String)),
+    ); // Corrected: Closing parenthesis and brace for fromMap
   }
 
   Map<String, dynamic> toMap() {
@@ -75,9 +78,10 @@ class UserModel {
       'paymentInstructions': paymentInstructions,
       'receiveEmailNotifications': receiveEmailNotifications,
       'isDarkModeEnabled': isDarkModeEnabled,
-      'bio': bio, // Added to toMap
-      'socialMediaLinks': socialMediaLinks, // Added to toMap
-    };
+      'bio': bio,
+      'gender': gender,
+      'socialMediaLinks': socialMediaLinks,
+    }; // Corrected: Closing brace for toMap
   }
 
   UserModel copyWith({
@@ -96,9 +100,10 @@ class UserModel {
     String? paymentInstructions,
     bool? receiveEmailNotifications,
     bool? isDarkModeEnabled,
-    String? bio, // Added to copyWith
-    Map<String, String>? socialMediaLinks, // Added to copyWith
-  }) {
+    String? bio,
+    String? gender,
+    Map<String, String>? socialMediaLinks,
+  }) { // Corrected: Closing parenthesis for copyWith parameters
     return UserModel(
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
@@ -115,8 +120,9 @@ class UserModel {
       paymentInstructions: paymentInstructions ?? this.paymentInstructions,
       receiveEmailNotifications: receiveEmailNotifications ?? this.receiveEmailNotifications,
       isDarkModeEnabled: isDarkModeEnabled ?? this.isDarkModeEnabled,
-      bio: bio ?? this.bio, // Added to copyWith
-      socialMediaLinks: socialMediaLinks ?? this.socialMediaLinks, // Added to copyWith
-    );
+      bio: bio ?? this.bio,
+      gender: gender ?? this.gender,
+      socialMediaLinks: socialMediaLinks ?? this.socialMediaLinks,
+    ); // Corrected: Closing brace for copyWith
   }
 }

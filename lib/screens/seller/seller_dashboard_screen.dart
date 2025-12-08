@@ -11,6 +11,7 @@ import 'package:marcket_app/screens/seller/seller_publications_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/models/user.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
+import 'package:marcket_app/screens/common/admin_alerts_screen.dart';
 import 'package:marcket_app/screens/common/contact_support_screen.dart';
 import 'package:marcket_app/screens/common/notifications_screen.dart';
 import 'package:marcket_app/widgets/responsive_scaffold.dart';
@@ -159,6 +160,14 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactSupportScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.warning_amber_rounded),
+            title: const Text('Alertas de Administrador'),
+            onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminAlertsScreen()));
             },
           ),
           const Divider(),

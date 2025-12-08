@@ -9,6 +9,7 @@ import 'package:marcket_app/screens/buyer/buyer_settings_screen.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/screens/buyer/feed_screen.dart';
 import 'package:marcket_app/screens/chat/chat_list_screen.dart';
+import 'package:marcket_app/screens/common/admin_alerts_screen.dart';
 import 'package:marcket_app/screens/common/contact_support_screen.dart';
 import 'package:marcket_app/screens/common/notifications_screen.dart';
 import 'package:marcket_app/screens/cart_screen.dart';
@@ -276,6 +277,22 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ContactSupportScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.warning_amber_rounded,
+              color: AppTheme.secondary,
+            ),
+            title: Text('Alertas de Administrador', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminAlertsScreen(),
                 ),
               );
             },

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marcket_app/models/publication.dart';
 import 'package:marcket_app/models/user.dart';
@@ -8,6 +9,7 @@ import 'dart:async';
 class FeedProvider with ChangeNotifier {
   final PublicationService _publicationService = PublicationService();
   final UserService _userService = UserService();
+  final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
   List<Publication> _publications = [];
   final Map<String, UserModel> _sellerData = {};
@@ -40,6 +42,37 @@ class FeedProvider with ChangeNotifier {
 
   Future<void> init() async {
     await loadInitialPublications();
+  }
+
+  Future<void> toggleLike(String publicationId) async {
+    if (_currentUserId == null) return;
+
+    final pubIndex = _publications.indexWhere((p) => p.id == publicationId);
+    if (pubIndex == -1) return;
+
+    final publication = _publications[pubIndex];
+    final bool isLiked = publication.likes.containsKey(_currentUserId);
+
+    // Optimistic update
+    if (isLiked) {
+      _publications[pubIndex].likes.remove(_currentUserId);
+    } else {
+      _publications[pubIndex].likes[_currentUserId] = true;
+    }
+    notifyListeners();
+
+    try {
+      await _publicationService.toggleLike(publicationId);
+    } catch (e) {
+      // Revert on error
+      if (isLiked) {
+        _publications[pubIndex].likes[_currentUserId] = true;
+      } else {
+        _publications[pubIndex].likes.remove(_currentUserId);
+      }
+      _errorMessage = "Error al actualizar el 'me gusta'.";
+      notifyListeners();
+    }
   }
 
   Future<void> loadInitialPublications() async {

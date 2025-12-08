@@ -8,6 +8,7 @@ class Publication {
   final List<String> imageUrls;
   final DateTime timestamp;
   final Map<String, double> ratings;
+  final Map<String, bool> likes; // New field
   final List<Comment> comments;
   final DateTime? modifiedTimestamp;
 
@@ -19,6 +20,7 @@ class Publication {
     required this.imageUrls,
     required this.timestamp,
     required this.ratings,
+    required this.likes, // Add to constructor
     required this.comments,
     this.modifiedTimestamp,
   });
@@ -30,6 +32,8 @@ class Publication {
     return ratings.values.reduce((a, b) => a + b) / ratings.length;
   }
 
+  int get likeCount => likes.length; // New getter
+
   factory Publication.fromMap(Map<String, dynamic> map, String id) {
     final ratingsData = map['ratings'];
     final Map<String, double> ratings = {};
@@ -37,6 +41,16 @@ class Publication {
       ratingsData.forEach((key, value) {
         if (value is num) {
           ratings[key.toString()] = value.toDouble();
+        }
+      });
+    }
+
+    final likesData = map['likes'];
+    final Map<String, bool> likes = {};
+    if (likesData is Map) {
+      likesData.forEach((key, value) {
+        if (value is bool) {
+          likes[key.toString()] = value;
         }
       });
     }
@@ -63,6 +77,7 @@ class Publication {
       imageUrls: imageUrls,
       timestamp: DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num? ?? 0).toInt()),
       ratings: ratings,
+      likes: likes, // Add to factory
       comments: comments,
       modifiedTimestamp: map['modifiedTimestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch((map['modifiedTimestamp'] as num).toInt())
@@ -78,8 +93,35 @@ class Publication {
       'imageUrls': imageUrls,
       'timestamp': timestamp.millisecondsSinceEpoch,
       'ratings': ratings,
+      'likes': likes, // Add to map
       'comments': comments.map((c) => c.toMap()).toList(),
       'modifiedTimestamp': modifiedTimestamp?.millisecondsSinceEpoch,
     };
+  }
+
+  Publication copyWith({
+    String? id,
+    String? sellerId,
+    String? title,
+    String? content,
+    List<String>? imageUrls,
+    DateTime? timestamp,
+    Map<String, double>? ratings,
+    Map<String, bool>? likes,
+    List<Comment>? comments,
+    DateTime? modifiedTimestamp,
+  }) {
+    return Publication(
+      id: id ?? this.id,
+      sellerId: sellerId ?? this.sellerId,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      imageUrls: imageUrls ?? this.imageUrls,
+      timestamp: timestamp ?? this.timestamp,
+      ratings: ratings ?? this.ratings,
+      likes: likes ?? this.likes,
+      comments: comments ?? this.comments,
+      modifiedTimestamp: modifiedTimestamp ?? this.modifiedTimestamp,
+    );
   }
 }

@@ -91,6 +91,7 @@ class ProductService {
     required List<String> existingImageUrls,
     required List<File> newImages,
     required List<String> imagesToRemove,
+    List<String>? newImageUrlsFromWeb, // New parameter
   }) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
@@ -98,19 +99,19 @@ class ProductService {
     }
 
     // 1. Subir nuevas imágenes y obtener sus URLs
-    List<String> newImageUrls = [];
+    List<String> uploadedImageUrls = [];
     for (final imageFile in newImages) {
       final storageRef = _storage
           .ref()
           .child('product_images')
-          .child('${userId}_${DateTime.now().millisecondsSinceEpoch}_${newImageUrls.length}.jpg');
+          .child('${userId}_${DateTime.now().millisecondsSinceEpoch}_${uploadedImageUrls.length}.jpg');
       
       final Uint8List imageData = await imageFile.readAsBytes();
       final metadata = SettableMetadata(contentType: "image/jpeg");
       await storageRef.putData(imageData, metadata);
       
       final url = await storageRef.getDownloadURL();
-      newImageUrls.add(url);
+      uploadedImageUrls.add(url);
     }
 
     // 2. Eliminar las imágenes marcadas para borrado
@@ -123,7 +124,7 @@ class ProductService {
     }
 
     // 3. Preparar los datos del producto
-    final finalImageUrls = [...existingImageUrls, ...newImageUrls];
+    final finalImageUrls = [...existingImageUrls, ...uploadedImageUrls, ...?newImageUrlsFromWeb];
     
     final productData = {
       'name': name,

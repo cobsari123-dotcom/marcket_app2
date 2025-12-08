@@ -8,6 +8,9 @@ import 'package:marcket_app/screens/seller/product_details_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marcket_app/widgets/product_card.dart';
 import 'package:marcket_app/widgets/publication_card.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Import for FontAwesomeIcons
+import 'package:url_launcher/url_launcher.dart'; // Import for url_launcher
+import 'package:share_plus/share_plus.dart'; // Import share_plus
 
 class PublicSellerProfileScreen extends StatefulWidget {
   final String sellerId;
@@ -128,6 +131,14 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
         actions: [
           if (_seller != null)
             IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () {
+                Share.share('¡Visita el perfil de ${_seller?.fullName ?? 'este vendedor'} en Manos del Mar!');
+              },
+              tooltip: 'Compartir perfil',
+            ),
+          if (_seller != null)
+            IconButton(
               icon: const Icon(Icons.chat_bubble_outline),
               onPressed: _navigateToChat,
               tooltip: 'Contactar al vendedor',
@@ -136,9 +147,9 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
+            Tab(icon: Icon(Icons.person), text: 'Perfil'),
             Tab(icon: Icon(Icons.article), text: 'Publicaciones'),
             Tab(icon: Icon(Icons.store), text: 'Productos'),
-            Tab(icon: Icon(Icons.person), text: 'Perfil'),
           ],
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white.withAlpha(178),
@@ -149,6 +160,7 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
           : TabBarView(
               controller: _tabController,
               children: [
+                SellerProfileInfoTab(seller: _seller!),
                 PublicPublicationsList(
                   sellerId: widget.sellerId,
                   sellerName: _seller?.fullName ?? 'Vendedor',
@@ -156,7 +168,6 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
                   isAdmin: widget.isAdmin,
                 ),
                 PublicProductsList(sellerId: widget.sellerId, isAdmin: widget.isAdmin),
-                SellerProfileInfoTab(seller: _seller!),
               ],
             ),
     );
@@ -195,6 +206,14 @@ class SellerProfileInfoTab extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
+          if (seller.socialMediaLinks != null && seller.socialMediaLinks!.isNotEmpty) ...[
+            const Text('Redes Sociales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(),
+            ...seller.socialMediaLinks!.entries.map((entry) {
+              return _buildSocialMediaLinkTile(context, entry.key, entry.value);
+            }),
+            const SizedBox(height: 16),
+          ],
           const Divider(),
           ListTile(
             leading: const Icon(Icons.email),
@@ -214,8 +233,55 @@ class SellerProfileInfoTab extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildSocialMediaLinkTile(BuildContext context, String key, String url) {
+    IconData icon;
+    String title;
+
+    switch (key) {
+      case 'facebook':
+        icon = FontAwesomeIcons.facebook;
+        title = 'Ir a Facebook';
+        break;
+      case 'instagram':
+        icon = FontAwesomeIcons.instagram;
+        title = 'Ir a Instagram';
+        break;
+      case 'tiktok':
+        icon = FontAwesomeIcons.tiktok;
+        title = 'Ir a TikTok';
+        break;
+      case 'whatsapp':
+        icon = FontAwesomeIcons.whatsapp;
+        title = 'Abrir WhatsApp';
+        break;
+      case 'website':
+        icon = Icons.public;
+        title = 'Ir al Sitio Web';
+        break;
+      default:
+        icon = Icons.link;
+        title = 'Abrir Enlace';
+        break;
+    }
+
+    return ListTile(
+      leading: FaIcon(icon),
+      title: Text(title),
+      subtitle: Text(url, overflow: TextOverflow.ellipsis),
+      onTap: () async {
+        final uri = Uri.parse(url);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No se pudo abrir la URL: $url')),
+          );
+        }
+      },
+    );
+  }
+}
 
 // CORREGIDO: Renombrado para evitar advertencia de linter (sin guion bajo si es usada fuera)
 int getCrossAxisCount(double screenWidth) {

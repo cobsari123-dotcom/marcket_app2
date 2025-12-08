@@ -10,6 +10,7 @@ import 'package:marcket_app/models/review.dart';
 import 'package:intl/intl.dart';
 import 'package:marcket_app/providers/wishlist_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart'; // Import share_plus
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
@@ -34,6 +35,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       appBar: AppBar(
         title: Text(widget.product.name),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              Share.share('¡Mira este producto en Manos del Mar! ${widget.product.name}: ${widget.product.description}');
+            },
+          ),
           IconButton(
             icon: Icon(
               wishlistProvider.isFavorite(widget.product.id)

@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +8,9 @@ import 'package:marcket_app/utils/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
 import 'package:marcket_app/services/user_service.dart';
-import 'package:image_picker/image_picker.dart'; // Added missing import
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SellerProfileScreen extends StatelessWidget {
   final VoidCallback onProfileUpdated;
@@ -18,7 +19,6 @@ class SellerProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Directly return ProfileForm as SellerProfileTabView is removed
     return ProfileForm(onProfileUpdated: onProfileUpdated);
   }
 }
@@ -44,18 +44,61 @@ class ProfileFormState extends State<ProfileForm> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _businessAddressController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController(); // New
-  final TextEditingController _socialMediaLinkController = TextEditingController(); // New
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _facebookController = TextEditingController();
+  final TextEditingController _instagramController = TextEditingController();
+  final TextEditingController _tiktokController = TextEditingController();
+  final TextEditingController _whatsappController = TextEditingController();
+  final TextEditingController _websiteController = TextEditingController();
+
+  String? _selectedGender;
+  DateTime? _selectedDate;
 
   File? _imageFile;
   String? _networkImageUrl;
   bool _isGoogleUser = false;
-  bool _isLoadingImage = false; // New state for image loading
+  bool _isLoadingImage = false;
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _dobController.dispose();
+    _placeOfBirthController.dispose();
+    _rfcController.dispose();
+    _paymentInstructionsController.dispose();
+    _phoneNumberController.dispose();
+    _businessNameController.dispose();
+    _businessAddressController.dispose();
+    _bioController.dispose();
+    _facebookController.dispose();
+    _instagramController.dispose();
+    _tiktokController.dispose();
+    _whatsappController.dispose();
+    _websiteController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _populateFields();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      locale: const Locale('es', 'ES'),
+    );
+    if (picked != null && picked != _selectedDate) {
+      if (!mounted) return;
+      setState(() {
+        _selectedDate = picked;
+        _dobController.text = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
   }
 
   @override
@@ -78,12 +121,15 @@ class ProfileFormState extends State<ProfileForm> {
       _phoneNumberController.text = user.phoneNumber ?? '';
       _businessNameController.text = user.businessName ?? '';
       _businessAddressController.text = user.businessAddress ?? '';
-      _bioController.text = user.bio ?? ''; // Populate new controller
-      if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) { // Populate new controller
-        _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
-      } else {
-        _socialMediaLinkController.text = '';
-      }
+      _bioController.text = user.bio ?? '';
+      _selectedGender = user.gender;
+
+      _facebookController.text = user.socialMediaLinks?['facebook'] ?? '';
+      _instagramController.text = user.socialMediaLinks?['instagram'] ?? '';
+      _tiktokController.text = user.socialMediaLinks?['tiktok'] ?? '';
+      _whatsappController.text = user.socialMediaLinks?['whatsapp'] ?? '';
+      _websiteController.text = user.socialMediaLinks?['website'] ?? '';
+
       _isGoogleUser = _auth.currentUser?.providerData.any(
         (p) => p.providerId == 'google.com',
       ) ?? false;
@@ -101,7 +147,7 @@ class ProfileFormState extends State<ProfileForm> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    if (_isGoogleUser) { // User is Google user, should not pick and upload
+    if (_isGoogleUser) {
       _showSnackBar('Los usuarios de Google gestionan su foto desde su cuenta de Google.', isError: true);
       return;
     }
@@ -142,13 +188,13 @@ class ProfileFormState extends State<ProfileForm> {
       _showSnackBar('Error al subir la imagen: $e', isError: true);
     } finally {
       if (mounted) setState(() => _isLoadingImage = false);
-      widget.onProfileUpdated(); // Notify parent to refresh user data
+      widget.onProfileUpdated();
     }
   }
 
   Future<void> _syncPhotoFromGoogle() async {
     if (!mounted) return;
-    if (!_isGoogleUser) { // User is not Google user, should not sync from Google
+    if (!_isGoogleUser) {
       _showSnackBar('Esta opción es solo para usuarios registrados con Google.', isError: true);
       return;
     }
@@ -167,7 +213,7 @@ class ProfileFormState extends State<ProfileForm> {
       if (mounted) _showSnackBar('Error al sincronizar la foto: $e', isError: true);
     } finally {
       if (mounted) setState(() => _isLoadingImage = false);
-      widget.onProfileUpdated(); // Notify parent to refresh user data
+      widget.onProfileUpdated();
     }
   }
 
@@ -204,13 +250,13 @@ class ProfileFormState extends State<ProfileForm> {
     setState(() => _isLoadingImage = true);
 
     try {
-      if (!_isGoogleUser) { // Only delete from storage if not a Google user
+      if (!_isGoogleUser) {
         await FirebaseStorage.instance.refFromURL(_networkImageUrl!).delete();
       }
       await _userService.updateUserData(_auth.currentUser!.uid, {
         'profilePicture': null,
       });
-      await _auth.currentUser?.updatePhotoURL(null); // Clear photo URL in Firebase Auth
+      await _auth.currentUser?.updatePhotoURL(null);
 
       if (mounted) {
         setState(() {
@@ -223,7 +269,7 @@ class ProfileFormState extends State<ProfileForm> {
       if (mounted) _showSnackBar('Error al eliminar la foto: $e', isError: true);
     } finally {
       if (mounted) setState(() => _isLoadingImage = false);
-      widget.onProfileUpdated(); // Notify parent to refresh user data
+      widget.onProfileUpdated();
     }
   }
 
@@ -232,10 +278,12 @@ class ProfileFormState extends State<ProfileForm> {
     
     final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
     try {
-      Map<String, String>? socialMediaLinksToSave;
-      if (_socialMediaLinkController.text.isNotEmpty) {
-        socialMediaLinksToSave = {'default': _socialMediaLinkController.text};
-      }
+      final Map<String, String> socialMediaLinksToSave = {};
+      if (_facebookController.text.isNotEmpty) socialMediaLinksToSave['facebook'] = _facebookController.text;
+      if (_instagramController.text.isNotEmpty) socialMediaLinksToSave['instagram'] = _instagramController.text;
+      if (_tiktokController.text.isNotEmpty) socialMediaLinksToSave['tiktok'] = _tiktokController.text;
+      if (_whatsappController.text.isNotEmpty) socialMediaLinksToSave['whatsapp'] = _whatsappController.text;
+      if (_websiteController.text.isNotEmpty) socialMediaLinksToSave['website'] = _websiteController.text;
 
       await userProfileProvider.updateProfile(
         fullName: _fullNameController.text,
@@ -246,12 +294,17 @@ class ProfileFormState extends State<ProfileForm> {
         phoneNumber: _phoneNumberController.text,
         businessName: _businessNameController.text,
         businessAddress: _businessAddressController.text,
-        bio: _bioController.text, // New
-        socialMediaLinks: socialMediaLinksToSave, // New
+        bio: _bioController.text,
+        gender: _selectedGender,
+        socialMediaLinks: socialMediaLinksToSave,
       );
       if (mounted) {
         if (userProfileProvider.errorMessage == null) {
-          _showSnackBar('¡Perfil actualizado con éxito!');
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('¡Perfil actualizado con éxito!'),
+            backgroundColor: AppTheme.success,
+            duration: Duration(seconds: 3),
+          ));
         } else {
           _showSnackBar('Error: ${userProfileProvider.errorMessage}', isError: true);
         }
@@ -331,7 +384,7 @@ class ProfileFormState extends State<ProfileForm> {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfileProvider, child) {
         if (userProfileProvider.isLoading) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (userProfileProvider.errorMessage != null) {
           return Center(child: Text('Error: ${userProfileProvider.errorMessage}'));
@@ -341,7 +394,6 @@ class ProfileFormState extends State<ProfileForm> {
           return const Center(child: Text('No se encontraron datos de usuario.'));
         }
 
-        // Asegurarse de que los controladores estén actualizados al construir la UI
         _fullNameController.text = user.fullName;
         _dobController.text = user.dob ?? '';
         _placeOfBirthController.text = user.placeOfBirth ?? '';
@@ -351,19 +403,22 @@ class ProfileFormState extends State<ProfileForm> {
         _businessNameController.text = user.businessName ?? '';
         _businessAddressController.text = user.businessAddress ?? '';
         _networkImageUrl = user.profilePicture;
-        _bioController.text = user.bio ?? ''; // Populate new controller
-        if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) { // Populate new controller
-          _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
-        } else {
-          _socialMediaLinkController.text = '';
-        }
+        _bioController.text = user.bio ?? '';
+        _selectedGender = user.gender;
+
+        _facebookController.text = user.socialMediaLinks?['facebook'] ?? '';
+        _instagramController.text = user.socialMediaLinks?['instagram'] ?? '';
+        _tiktokController.text = user.socialMediaLinks?['tiktok'] ?? '';
+        _whatsappController.text = user.socialMediaLinks?['whatsapp'] ?? '';
+        _websiteController.text = user.socialMediaLinks?['website'] ?? '';
+
         _isGoogleUser = _auth.currentUser?.providerData.any(
           (p) => p.providerId == 'google.com',
         ) ?? false;
 
         return Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700), // Limit width for the form
+            constraints: const BoxConstraints(maxWidth: 700),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -395,27 +450,27 @@ class ProfileFormState extends State<ProfileForm> {
                 backgroundImage: _imageFile != null
                     ? FileImage(_imageFile!)
                     : (_networkImageUrl != null
-                              ? NetworkImage(_networkImageUrl!)
-                              : null)
-                          as ImageProvider?,
+                            ? NetworkImage(_networkImageUrl!)
+                            : null)
+                        as ImageProvider?,
                 backgroundColor: AppTheme.beigeArena,
                 child: _imageFile == null && _networkImageUrl == null && _isLoadingImage == false
                     ? const Icon(
-                        Icons.store, // Icono de tienda para vendedor
+                        Icons.store,
                         size: 80,
                         color: AppTheme.primary,
                       )
-                    : (_isLoadingImage ? const CircularProgressIndicator() : null), // Show loading indicator
+                    : (_isLoadingImage ? const CircularProgressIndicator() : null),
               ),
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: _isLoadingImage // Hide camera icon when loading
+                child: _isLoadingImage
                     ? const SizedBox.shrink()
                     : CircleAvatar(
                         backgroundColor: AppTheme.secondary,
                         child: Icon(
-                          _isGoogleUser ? Icons.settings : Icons.camera_alt, // Different icon for Google vs Manual
+                          _isGoogleUser ? Icons.settings : Icons.camera_alt,
                           color: Colors.white,
                         ),
                       ),
@@ -441,17 +496,9 @@ class ProfileFormState extends State<ProfileForm> {
         children: [
           _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
           const SizedBox(height: 16),
-          _buildTextField(
-            _dobController,
-            'Fecha de Nacimiento',
-            Icons.calendar_today,
-          ),
+          _buildDateField(),
           const SizedBox(height: 16),
-          _buildTextField(
-            _placeOfBirthController,
-            'Lugar de Nacimiento',
-            Icons.location_city,
-          ),
+          _buildGenderSelector(),
           const SizedBox(height: 16),
           _buildTextField(_rfcController, 'RFC', Icons.badge),
           const SizedBox(height: 16),
@@ -472,18 +519,25 @@ class ProfileFormState extends State<ProfileForm> {
             'Dirección del Negocio',
             Icons.location_on,
           ),
+          const SizedBox(height: 24),
+          Text('Redes Sociales', style: Theme.of(context).textTheme.titleLarge),
+          const Divider(),
           const SizedBox(height: 16),
-          _buildTextField( // New
+          _buildSocialMediaTextField(_facebookController, 'Facebook', FontAwesomeIcons.facebook, 'https://facebook.com/usuario'),
+          const SizedBox(height: 16),
+          _buildSocialMediaTextField(_instagramController, 'Instagram', FontAwesomeIcons.instagram, 'https://instagram.com/usuario'),
+          const SizedBox(height: 16),
+          _buildSocialMediaTextField(_tiktokController, 'TikTok', FontAwesomeIcons.tiktok, 'https://tiktok.com/@usuario'),
+          const SizedBox(height: 16),
+          _buildSocialMediaTextField(_whatsappController, 'WhatsApp', FontAwesomeIcons.whatsapp, 'https://wa.me/numero'),
+          const SizedBox(height: 16),
+          _buildSocialMediaTextField(_websiteController, 'Sitio Web/Otros', Icons.link, 'https://ejemplo.com'),
+          const SizedBox(height: 16),
+          _buildTextField(
             _bioController,
             'Biografía',
             Icons.info,
             maxLines: 3,
-          ),
-          const SizedBox(height: 16), // New
-          _buildTextField( // New
-            _socialMediaLinkController,
-            'Enlace de Red Social (Ej. Facebook, Instagram)',
-            Icons.link,
           ),
           const SizedBox(height: 16),
           _buildTextField(
@@ -511,6 +565,7 @@ class ProfileFormState extends State<ProfileForm> {
     String label,
     IconData icon, {
     int maxLines = 1,
+    bool isSocialMedia = false,
   }) {
     return TextFormField(
       controller: controller,
@@ -520,11 +575,80 @@ class ProfileFormState extends State<ProfileForm> {
         prefixIcon: Icon(icon, color: AppTheme.primary),
       ),
       validator: (value) {
-        if (label == 'Instrucciones de Pago') {
+        if (isSocialMedia && value != null && value.isNotEmpty) {
+          if (Uri.tryParse(value)?.hasAbsolutePath != true) {
+            return 'Por favor, ingresa una URL válida.';
+          }
+        }
+        if (label == 'Instrucciones de Pago' || label == 'Biografía') {
           return null;
         }
         return value!.isEmpty ? 'Por favor, introduce tu $label' : null;
       },
+    );
+  }
+
+  Widget _buildSocialMediaTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon,
+    String hintText,
+  ) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        prefixIcon: Icon(icon, color: AppTheme.primary),
+      ),
+      validator: (value) {
+        if (value != null && value.isNotEmpty) {
+          if (Uri.tryParse(value)?.hasAbsolutePath != true) {
+            return 'Por favor, ingresa una URL válida.';
+          }
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDateField() {
+    return TextFormField(
+      controller: _dobController,
+      readOnly: true,
+      onTap: () => _selectDate(context),
+      decoration: const InputDecoration(
+        labelText: 'Fecha de Nacimiento',
+        prefixIcon: Icon(Icons.calendar_today, color: AppTheme.primary),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor selecciona tu fecha de nacimiento';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedGender,
+      decoration: const InputDecoration(
+        labelText: 'Sexo',
+        prefixIcon: Icon(Icons.wc, color: AppTheme.primary),
+      ),
+      // CORRECCIÓN: Lista constante
+      items: const [
+        DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
+        DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
+        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedGender = value;
+        });
+      },
+      validator: (value) => value == null ? 'Por favor selecciona tu sexo' : null,
     );
   }
 }

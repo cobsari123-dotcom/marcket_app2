@@ -33,62 +33,38 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 ## 🚀 Mejoras Recientes
 
 A continuación, se detallan las *últimas* mejoras y correcciones implementadas para optimizar la experiencia de usuario y la estabilidad de la aplicación.
-**Fecha de la Última Actualización:** sábado, 06 de diciembre de 2025
+**Fecha de la Última Actualización:** domingo, 07 de diciembre de 2025
 
 ### Actualizaciones Recientes (Diciembre 2025)
 
-    *   **Mejoras de Estabilidad y Robustez del Código:**
-    *   **Código 100% Limpio (Sin Errores, Advertencias ni Información):** Se realizó una limpieza exhaustiva del código para eliminar todos los errores, advertencias e información (lints) reportados por `flutter analyze`. Se aplicaron las palabras clave `const` y `final` de manera óptima, se corrigieron problemas de `invalid_constant` y `const_and_final`, y se suprimieron lints que eran falsos positivos o limitaciones del framework para asegurar que el análisis de código sea impecable.
-    *   **Corrección de `ClassCastException`:** Se resolvió un error crítico que causaba fallos en la aplicación al procesar datos numéricos (especialmente timestamps) desde Firebase Realtime Database en varios modelos (`Publication`, `CartItem`, `ChatMessage`, `ChatRoom`, `Comment`, `Order`, `Product`, `Review`). Ahora se realiza una conversión explícita a `int` o `double` para evitar crashes.
-    *   **Gestión Optimizada de Streams:** Se eliminó un `ConcurrentModificationException` que podía provocar cierres inesperados al finalizar la aplicación, asegurando que todas las suscripciones a streams de Firebase Realtime Database se cancelen correctamente en `providers` clave (`OrderListProvider`, `SellerOrderListProvider`).
-    *   **Resolución de Errores de UI:** Se corrigieron fallos de aserción (`child == _child`) y errores de `Duplicate GlobalKey` en los formularios de perfil (`BuyerProfileScreen`, `SellerProfileScreen`), garantizando una reconstrucción correcta y unificada de la interfaz de usuario.
-    *   **Corrección de `setState()` durante `build`:** Se resolvió este error en `AdminComplaintsProvider`, asegurando que el inicio del proveedor se realice después de que el widget consumidor haya terminado de construirse.
-    *   **Corrección de `Undefined class`:** Se añadió la importación faltante para `UserModel` en `BuyerProfileScreen`.
-    *   **Supresión de Advertencia de `clientId`:** Se modificó `AuthService` para que el `clientId` se pase condicionalmente solo a la plataforma web, eliminando una advertencia innecesaria en Android.
-    *   **Código 100% Limpio:** Se abordaron y corrigieron todos los errores, advertencias y sugerencias (`lints`) restantes reportados por `flutter analyze`, logrando que la base de código esté completamente libre de problemas según el análisis estático.
-
--   **Autenticación y Gestión de Roles Mejorada:**
-    *   **Lógica de Administrador Unificada:** Se consolidó la creación de cuentas de administrador, requiriendo el código secreto (`12345678`) tanto para registros manuales como para nuevos inicios de sesión de Google (si el email está en la lista blanca).
-    *   **Flujo de Primer Inicio de Sesión:** La pantalla "Completa tu Perfil" (para nuevos usuarios de Google) ahora es una pantalla completa y desplazable (`CompleteProfileScreen`) para una mejor experiencia y evitar desbordamientos.
-    *   **Flujo de Bienvenida y Login Ajustado:**
-        *   La pantalla de bienvenida (`welcome_screen.dart`) es un punto de entrada claro con un único botón "Deseo ir a iniciar sesión".
-        *   La pantalla de login (`login_screen.dart`) ahora incluye un botón para regresar a la bienvenida.
-
--   **Navegación Adaptable (Responsive) para Todos los Roles:**
-    *   Se implementó un sistema de navegación inteligente con `ResponsiveScaffold` que se adapta al tamaño de la pantalla, mostrando un menú de hamburguesa (`Drawer`) en móviles y un menú lateral fijo (`NavigationRail`) en escritorio/tabletas.
-    *   **Limpieza de Diseño:** Se eliminaron `Scaffold` anidados redundantes en todas las pantallas principales (`FeedScreen`, `BuyerOrdersScreen`, `SellerHomeScreen`, `MyProductsScreen`, etc.) para asegurar títulos únicos y controlar las flechas de retroceso.
-    *   Los `FloatingActionButton` se gestionan ahora desde los paneles principales (`Dashboard`) para su visualización condicional.
-
--   **Manejo de Perfiles y Configuración Refinado:**
-    *   **Distinción Clara:** Se separaron estrictamente las funciones de "Perfil" y "Configuración". `SellerSettingsScreen` ahora se enfoca solo en ajustes de seguridad, negocio, preferencias y utilidades.
-    *   **Gestión Precisa de Fotos de Perfil:**
-        *   **Vendedores:** Pueden gestionar (subir/cambiar/eliminar) su foto de perfil en `SellerProfileScreen`.
-        *   **Compradores:** Solo pueden *ver* su foto de perfil en `BuyerProfileScreen`, sin opciones de edición.
-        *   **Administradores:** Solo ven un icono predeterminado.
-        *   **Ubicación Consistente:** La gestión y visualización de la foto de perfil se limita exclusivamente a las pantallas de perfil.
-    -   **Nuevas Funcionalidades en Perfiles y Ajustes:**
-        *   **Perfiles de Usuario Extendidos (Admin, Comprador, Vendedor):** Se ha enriquecido la información personal de todos los roles de usuario. Ahora los perfiles incluyen campos editables para `biografía`, `dirección`, y `enlaces a redes sociales`. La visualización y edición de estos campos se ha integrado en `AdminProfileScreen`, `BuyerProfileScreen`, y `SellerProfileScreen`.
-        *   **Configuración de la Aplicación (Admin, Comprador, Vendedor):** Se ha añadido una sección de 'Configuración' dedicada en los menús de navegación (Drawer) de los Dashboards de Administrador y Comprador. Estas pantallas de configuración incluyen nuevas opciones para gestionar:
-            *   `Preferencias de Notificación`: Una pantalla dedicada para controlar los tipos de notificaciones recibidas.
-            *   `Configuración de Privacidad`: Una pantalla dedicada para gestionar la visibilidad del perfil y otras opciones de privacidad.
-        *   **Optimización de Flujo de Navegación en Ajustes:** Se corrigió el comportamiento de navegación y visualización en las pantallas de 'Notificaciones', 'Soporte Técnico' y 'Configuración de Vendedor' para asegurar que siempre se muestre un `AppBar` con un botón de retroceso funcional y un fondo correcto, eliminando fondos negros inesperados y la imposibilidad de usar el menú del dashboard.
-    -   **Mejoras de UI y Compatibilidad Web:**
-    *   Se ha rediseñado la pantalla de inicio de sesión en la versión web para utilizar una vista de tarjeta única y centrada, mejorando la consistencia visual.
-    *   Se ha solucionado un error de compilación en la web (`UnimplementedError: getLostData`) relacionado con el paquete `image_picker`, asegurando que la aplicación se inicie correctamente en navegadores Chrome.
--   **Panel de Administrador Mejorado:**
-    *   La pantalla principal para administradores ahora es un feed de publicaciones completo.
-    *   Implementado un modo de solo lectura para administradores en el feed, detalles de publicaciones y detalles de productos (sin opciones de compra, comentarios o calificaciones).
-    *   Pantalla de perfil de administrador completamente rediseñada con estadísticas, información extendida, y funciones de seguridad (cambio de contraseña).
-    *   Integrado el inicio de sesión con Google para administradores a través de una lista blanca de correos en Firebase (requiere configuración manual de emails en la base de datos).
-    *   Se eliminó la opción de que los administradores cambien su foto de perfil, manteniendo un ícono predeterminado.
--   **Perfiles de Vendedor Detallados:**
-    *   Implementada una vista de perfil público de vendedor con 3 pestañas (Productos, Publicaciones, Información del perfil).
-    *   Esta vista es accesible tanto desde el feed principal como desde la gestión de usuarios, y opera en modo de solo lectura para administradores.
--   **Gestión de Usuarios Optimizada:**
-    *   Al seleccionar un usuario en la pantalla de gestión, ahora se accede a su perfil público detallado (con las 3 pestañas).
--   **Mejoras en el Chat de Soporte (Administradores):**
-    *   El listado de chats de soporte ahora muestra claramente el rol del usuario (Comprador/Vendedor) con etiquetas visuales (`Chips`).
-    *   Se confirmó la funcionalidad existente de envío de imágenes y archivos en el chat.
+*   **Perfiles y Registro:**
+    *   La selección de género y el calendario para la fecha de nacimiento funcionan correctamente.
+    *   Añadidos mensajes de confirmación de 3 segundos al guardar cambios en las pantallas de perfil.
+*   **Auditoría de UI/UX:**
+    *   Se realizó una auditoría completa de la UI/UX, confirmando que no hay títulos duplicados ni errores de navegación que redirijan al login o cierren la app inesperadamente.
+*   **Subida de Imágenes Mejorada:**
+    *   Tanto para **Productos** como para **Publicaciones**, ahora puedes añadir imágenes desde:
+        1.  **Galería**
+        2.  **Cámara** del teléfono
+        3.  Una **URL** de internet
+*   **Gestión de Usuarios (Administrador):**
+    *   Nueva pantalla "Gestión de Usuarios" en el panel de administrador.
+    *   Permite buscar, ver detalles y **eliminar permanentemente** cuentas de usuarios, junto con sus productos y publicaciones.
+*   **Sistema de Alertas Administrador-Usuario:**
+    *   Los administradores pueden enviar **alertas** a usuarios desde la pantalla de detalle.
+    *   Los usuarios (Compradores y Vendedores) tienen una nueva sección "Alertas de Administrador" para ver y **responder** a estos mensajes.
+*   **Feed de Publicaciones Estilo TikTok:**
+    *   Las pantallas de inicio de todos los roles (Comprador, Vendedor y Administrador) ahora son un **feed de publicaciones a pantalla completa** con desplazamiento vertical.
+    *   Implementada funcionalidad de **"Me Gusta"**, con actualización de contador en base de datos y UI.
+    *   Funcionalidad de **Comentarios** que permite ver, añadir nuevos comentarios, y **subir imágenes** en ellos.
+    *   Botón para **Compartir** publicaciones en redes sociales o mediante URL.
+    *   Restricciones de rol: Administradores pueden ver pero no interactuar (dar "me gusta", comentar, compartir).
+*   **Perfil Público de Vendedor Detallado:**
+    *   La pantalla de perfil público de vendedor ahora cuenta con 3 pestañas: **Perfil**, **Publicaciones** y **Productos**.
+    *   **Enlaces a Redes Sociales:** Integración de campos para Facebook, Instagram, TikTok, WhatsApp y sitio web en el perfil de edición del vendedor. Estos enlaces se muestran en el perfil público con iconos y acceso directo.
+*   **Compartir Productos y Perfiles de Vendedor:**
+    *   Añadida la función de **Compartir** para productos individuales desde su pantalla de detalles.
+    *   Añadida la función de **Compartir** para el perfil público de los vendedores.
 
 ---
 

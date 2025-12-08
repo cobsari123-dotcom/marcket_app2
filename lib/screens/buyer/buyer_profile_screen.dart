@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:marcket_app/models/user.dart';
-
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:marcket_app/providers/user_profile_provider.dart';
@@ -17,7 +16,7 @@ class BuyerProfileScreen extends StatefulWidget {
 
 class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -25,8 +24,9 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _rfcController = TextEditingController();
   final TextEditingController _placeOfBirthController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController(); // New
-  final TextEditingController _socialMediaLinkController = TextEditingController(); // New for a single social media link
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _socialMediaLinkController = TextEditingController();
+  String? _selectedGender;
 
   @override
   void initState() {
@@ -52,8 +52,9 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       _dobController.text = user.dob ?? '';
       _rfcController.text = user.rfc ?? '';
       _placeOfBirthController.text = user.placeOfBirth ?? '';
-      _bioController.text = user.bio ?? ''; // Populate new controller
-      // For socialMediaLinks, we'll just get the first one if it exists
+      _bioController.text = user.bio ?? '';
+      _selectedGender = user.gender;
+      
       if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) {
         _socialMediaLinkController.text = user.socialMediaLinks!.values.first;
       } else {
@@ -71,8 +72,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
     _dobController.dispose();
     _rfcController.dispose();
     _placeOfBirthController.dispose();
-    _bioController.dispose(); // Dispose new controller
-    _socialMediaLinkController.dispose(); // Dispose new controller
+    _bioController.dispose();
+    _socialMediaLinkController.dispose();
     super.dispose();
   }
 
@@ -81,7 +82,6 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
 
     final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
     try {
-      // For socialMediaLinks, if the text field is not empty, we'll store it as 'default'
       Map<String, String>? socialMediaLinksToSave;
       if (_socialMediaLinkController.text.isNotEmpty) {
         socialMediaLinksToSave = {'default': _socialMediaLinkController.text};
@@ -94,24 +94,36 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         dob: _dobController.text,
         rfc: _rfcController.text,
         placeOfBirth: _placeOfBirthController.text,
-        bio: _bioController.text, // Save new field
-        socialMediaLinks: socialMediaLinksToSave, // Save new field
+        bio: _bioController.text,
+        gender: _selectedGender,
+        socialMediaLinks: socialMediaLinksToSave,
       );
+      
       if (mounted) {
         if (userProfileProvider.errorMessage == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Perfil actualizado exitosamente.'), backgroundColor: AppTheme.success),
+            const SnackBar(
+              content: Text('Perfil actualizado exitosamente.'),
+              backgroundColor: AppTheme.success,
+              duration: Duration(seconds: 3),
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${userProfileProvider.errorMessage}'), backgroundColor: AppTheme.error),
+            SnackBar(
+              content: Text('Error: ${userProfileProvider.errorMessage}'),
+              backgroundColor: AppTheme.error
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error inesperado al actualizar: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+            content: Text('Error inesperado al actualizar: $e'),
+            backgroundColor: AppTheme.error
+          ),
         );
       }
     }
@@ -130,7 +142,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
@@ -145,18 +157,16 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
         if (user == null) {
           return const Center(child: Text('No se encontraron datos de usuario.'));
         }
-        // _populateFields(); // Moved to initState and didChangeDependencies
 
         return Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700), // Limit width for the form
+            constraints: const BoxConstraints(maxWidth: 700),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
-              child: Form( // Outer Form
+              child: Form(
                 key: _formKey,
-                child: Column( // Inner Column, now directly from _buildProfileForm
+                child: Column(
                   children: [
-                    // Removed _buildProfileHeader() and its logic, replacing with simplified display
                     CircleAvatar(
                       radius: 80,
                       backgroundImage: user.profilePicture != null
@@ -165,7 +175,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
                       backgroundColor: AppTheme.beigeArena,
                       child: user.profilePicture == null
                           ? const Icon(
-                              Icons.person, // Icono de persona para comprador
+                              Icons.person,
                               size: 80,
                               color: AppTheme.primary,
                             )
@@ -178,7 +188,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
                     ),
                     Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
                     const SizedBox(height: 24),
-                    _buildProfileForm(user), // Pass user to get current values
+                    _buildProfileForm(user),
                   ],
                 ),
               ),
@@ -190,7 +200,7 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
   }
 
   Widget _buildProfileForm(UserModel user) {
-    return Column( // Now a Column, not a Form
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildTextField(_fullNameController, 'Nombre Completo', Icons.person),
@@ -208,6 +218,8 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
           Icons.location_city,
         ),
         const SizedBox(height: 16),
+        _buildGenderSelector(),
+        const SizedBox(height: 16),
         _buildTextField(_rfcController, 'RFC', Icons.badge),
         const SizedBox(height: 16),
         _buildTextField(
@@ -215,22 +227,22 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
           'Número de Teléfono',
           Icons.phone,
         ),
-        const SizedBox(height: 16), // New
-        _buildTextField( // New
+        const SizedBox(height: 16),
+        _buildTextField(
           _addressController,
           'Dirección',
           Icons.location_on,
           maxLines: 2,
         ),
-        const SizedBox(height: 16), // New
-        _buildTextField( // New
+        const SizedBox(height: 16),
+        _buildTextField(
           _bioController,
           'Biografía',
           Icons.info,
           maxLines: 3,
         ),
-        const SizedBox(height: 16), // New
-        _buildTextField( // New
+        const SizedBox(height: 16),
+        _buildTextField(
           _socialMediaLinkController,
           'Enlace de Red Social (Ej. Facebook, Instagram)',
           Icons.link,
@@ -264,6 +276,28 @@ class _BuyerProfileScreenState extends State<BuyerProfileScreen> {
       validator: (value) {
         return value!.isEmpty ? 'Por favor, introduce tu $label' : null;
       },
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedGender,
+      decoration: const InputDecoration(
+        labelText: 'Sexo',
+        prefixIcon: Icon(Icons.wc, color: AppTheme.primary),
+      ),
+      // CORRECCIÓN PRINCIPAL AQUÍ: Se eliminaron los const innecesarios dentro de la lista
+      items: const [
+        DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
+        DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
+        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedGender = value;
+        });
+      },
+      validator: (value) => value == null ? 'Por favor selecciona tu sexo' : null,
     );
   }
 }

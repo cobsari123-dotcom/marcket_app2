@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:marcket_app/providers/feed_provider.dart';
-import 'package:marcket_app/widgets/publication_card.dart';
-import 'package:marcket_app/widgets/publication_card_skeleton.dart';
+import 'package:marcket_app/widgets/comment_sheet.dart';
+import 'package:marcket_app/widgets/full_screen_publication_view.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FeedScreen extends StatefulWidget {
   final bool isAdmin;
@@ -13,73 +14,66 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
-    // Access provider directly
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<FeedProvider>(context, listen: false).init();
     });
 
-    _scrollController.addListener(() {
-      // Access provider directly here too
-      final feedProvider = Provider.of<FeedProvider>(context, listen: false);
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
-          feedProvider.hasMorePublications &&
-          !feedProvider.isLoadingMore) {
-        feedProvider.loadMorePublications();
+    _pageController.addListener(() {
+      final provider = Provider.of<FeedProvider>(context, listen: false);
+      if (_pageController.page != null &&
+          _pageController.page! >= provider.publications.length - 2 &&
+          provider.hasMorePublications &&
+          !provider.isLoadingMore) {
+        provider.loadMorePublications();
       }
     });
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FeedProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoadingInitial) {
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: 5,
-            itemBuilder: (context, index) => const PublicationCardSkeleton(),
-          );
-        }
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Consumer<FeedProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoadingInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (provider.errorMessage != null) {
-          return Center(child: Text(provider.errorMessage!));
-        }
+          if (provider.errorMessage != null) {
+            return Center(child: Text(provider.errorMessage!, style: const TextStyle(color: Colors.white)));
+          }
 
-        if (provider.publications.isEmpty) {
-          return const Center(child: Text('No hay publicaciones para mostrar.'));
-        }
+          if (provider.publications.isEmpty) {
+            return const Center(child: Text('No hay publicaciones para mostrar.', style: const TextStyle(color: Colors.white)));
+          }
 
-        return RefreshIndicator(
-          onRefresh: () => provider.init(),
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(16.0),
+          return PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
             itemCount: provider.publications.length + (provider.isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == provider.publications.length) {
-                return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
               final publication = provider.publications[index];
               final sellerInfo = provider.sellerData[publication.sellerId];
-              return PublicationCard(
+              
+              return FullScreenPublicationView(
                 publication: publication,
                 sellerName: sellerInfo?.fullName ?? 'Cargando...',
                 sellerProfilePicture: sellerInfo?.profilePicture,
-                isAdmin: widget.isAdmin, // Pass the flag here
+                isAdmin: widget.isAdmin,
                 onSellerTap: () {
                   Navigator.pushNamed(
                     context,
@@ -90,11 +84,24 @@ class _FeedScreenState extends State<FeedScreen> {
                     },
                   );
                 },
+                onLikeTap: () {
+                  provider.toggleLike(publication.id);
+                },
+                onCommentTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true, // Important for keyboard handling
+                    builder: (context) => CommentSheet(publicationId: publication.id),
+                  );
+                },
+                onShareTap: () {
+                  Share.share('¡Mira esta publicación en Manos del Mar: ${publication.title}!');
+                },
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

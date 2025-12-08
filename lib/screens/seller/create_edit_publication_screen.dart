@@ -21,10 +21,12 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final _imageUrlController = TextEditingController(); // New controller for image URL
   
   final List<File> _newImages = [];
   List<String> _existingImageUrls = [];
   final List<String> _imagesToRemove = [];
+  final List<String> _newImageUrlsFromWeb = []; // New list for image URLs from web
 
   bool _isLoading = false;
   bool _isPickingImage = false;
@@ -39,15 +41,31 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
     }
   }
 
-  Future<void> _pickImage() async {
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _imageUrlController.dispose(); // Dispose new controller
+    super.dispose();
+  }
+
+  Future<void> _pickImage({ImageSource source = ImageSource.gallery, bool multiImage = false}) async {
     if (_isPickingImage) return;
 
     try {
       if (mounted) setState(() => _isPickingImage = true);
       
-      final pickedFiles = await ImagePicker().pickMultiImage(imageQuality: 70);
+      List<XFile> pickedFiles = [];
+      if (multiImage) {
+        pickedFiles = await ImagePicker().pickMultiImage(imageQuality: 70);
+      } else {
+        final pickedFile = await ImagePicker().pickImage(source: source, imageQuality: 70);
+        if (pickedFile != null) {
+          pickedFiles = [pickedFile];
+        }
+      }
       
-      if (mounted) {
+      if (mounted && pickedFiles.isNotEmpty) {
         setState(() {
           _newImages.addAll(pickedFiles.map((file) => File(file.path)));
         });
@@ -57,10 +75,107 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
     }
   }
 
+  void _showImageSourceSelection() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galería'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(source: ImageSource.gallery, multiImage: true);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Cámara'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(source: ImageSource.camera, multiImage: false);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Desde URL'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showAddImageUrlDialog();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddImageUrlDialog() async {
+    _imageUrlController.clear();
+    final urlFormKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Añadir Imagen desde URL'),
+          content: Form(
+            key: urlFormKey,
+            child: TextFormField(
+              controller: _imageUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL de la Imagen',
+                hintText: 'Ej: https://ejemplo.com/imagen.jpg',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, ingresa una URL.';
+                }
+                // Basic URL validation
+                if (Uri.tryParse(value)?.hasAbsolutePath != true) {
+                  return 'Ingresa una URL válida.';
+                }
+                // Basic image file extension check
+                if (!value.toLowerCase().endsWith('.jpg') &&
+                    !value.toLowerCase().endsWith('.jpeg') &&
+                    !value.toLowerCase().endsWith('.png') &&
+                    !value.toLowerCase().endsWith('.gif') &&
+                    !value.toLowerCase().endsWith('.webp')) {
+                  return 'La URL debe ser de una imagen (jpg, png, gif, webp).';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (urlFormKey.currentState?.validate() ?? false) {
+                  setState(() {
+                    _newImageUrlsFromWeb.add(_imageUrlController.text.trim());
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Añadir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _savePublication() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     
-    if (_newImages.isEmpty && _existingImageUrls.isEmpty) {
+    if (_newImages.isEmpty && _existingImageUrls.isEmpty && _newImageUrlsFromWeb.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -97,7 +212,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
         }
       }
 
-      final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
+      final finalImageUrls = [..._existingImageUrls, ..._newImageUrlsFromWeb, ...newImageUrls];
 
       final publicationData = {
         'sellerId': FirebaseAuth.instance.currentUser!.uid,
@@ -142,8 +257,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
 
   @override
   Widget build(BuildContext context) {
-    // ... (UI build method remains the same)
-        final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.publication == null ? 'Crear Publicación' : 'Editar Publicación'),
@@ -191,8 +305,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   }
 
   Widget _buildImagePicker() {
-    // ... (This method remains the same)
-        return Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Imágenes', style: Theme.of(context).textTheme.titleMedium),
@@ -219,10 +332,10 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
                 mainAxisSpacing: 8,
                 childAspectRatio: 1.0, // Maintain square aspect ratio for images
               ),
-              itemCount: _existingImageUrls.length + _newImages.length + 1,
+              itemCount: _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length + 1,
               itemBuilder: (context, index) {
                 // The last item is the "Add" button
-                if (index == _existingImageUrls.length + _newImages.length) {
+                if (index == _existingImageUrls.length + _newImages.length + _newImageUrlsFromWeb.length) {
                   return _buildAddImageButton();
                 }
 
@@ -239,11 +352,21 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
                 }
 
                 // Display new local images
-                final imageIndex = index - _existingImageUrls.length;
-                final imageFile = _newImages[imageIndex];
+                if (index < _existingImageUrls.length + _newImages.length) {
+                  final imageIndex = index - _existingImageUrls.length;
+                  final imageFile = _newImages[imageIndex];
+                  return _buildImageTile(
+                    Image.file(imageFile, fit: BoxFit.cover),
+                    () => setState(() => _newImages.removeAt(imageIndex)),
+                  );
+                }
+
+                // Display new URL images
+                final imageUrlIndex = index - (_existingImageUrls.length + _newImages.length);
+                final imageUrl = _newImageUrlsFromWeb[imageUrlIndex];
                 return _buildImageTile(
-                  Image.file(imageFile, fit: BoxFit.cover),
-                  () => setState(() => _newImages.removeAt(imageIndex)),
+                  Image.network(imageUrl, fit: BoxFit.cover),
+                  () => setState(() => _newImageUrlsFromWeb.removeAt(imageUrlIndex)),
                 );
               },
             );
@@ -254,9 +377,8 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   }
 
   Widget _buildAddImageButton() {
-    // ... (This method remains the same)
-        return GestureDetector(
-      onTap: _pickImage,
+    return GestureDetector(
+      onTap: _showImageSourceSelection,
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: AppTheme.marronClaro),
@@ -278,8 +400,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   }
 
   Widget _buildImageTile(Widget image, VoidCallback onRemove) {
-    // ... (This method remains the same)
-        return Stack(
+    return Stack(
       children: [
         Container(
           decoration: BoxDecoration(
@@ -309,8 +430,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   }
 
   Widget _buildTextField(TextEditingController controller, String label, {int? maxLines}) {
-    // ... (This method remains the same)
-        return TextFormField(
+    return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
@@ -322,8 +442,7 @@ class _CreateEditPublicationScreenState extends State<CreateEditPublicationScree
   }
 
   Widget _buildSaveButton() {
-    // ... (This method remains the same)
-        return ElevatedButton.icon(
+    return ElevatedButton.icon(
       onPressed: _isLoading ? null : _savePublication,
       icon: const Icon(Icons.save),
       label: Text(widget.publication == null ? 'Publicar' : 'Actualizar'),

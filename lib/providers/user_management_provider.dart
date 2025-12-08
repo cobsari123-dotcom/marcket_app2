@@ -9,21 +9,21 @@ class UserManagementProvider with ChangeNotifier {
   final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
 
   List<UserModel> _users = [];
+  List<UserModel> _filteredUsers = [];
   bool _isLoading = true;
   String? _errorMessage;
-  String _searchQuery = '';
   StreamSubscription? _usersSubscription;
 
   List<UserModel> get users => _users;
+  List<UserModel> get filteredUsers => _filteredUsers;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  String get searchQuery => _searchQuery;
 
   UserManagementProvider() {
-    init();
+    fetchUsers();
   }
 
-  void init() {
+  void fetchUsers() {
     _listenToUserChanges();
   }
 
@@ -39,6 +39,7 @@ class UserManagementProvider with ChangeNotifier {
       final snapshot = event.snapshot;
       if (snapshot.value == null) {
         _users = [];
+        _filteredUsers = [];
         _isLoading = false;
         notifyListeners();
         return;
@@ -51,6 +52,7 @@ class UserManagementProvider with ChangeNotifier {
       });
 
       _users = fetchedUsers;
+      _filteredUsers = fetchedUsers; // Initialize filtered list
       _isLoading = false;
       notifyListeners();
     }, onError: (e) {
@@ -61,11 +63,17 @@ class UserManagementProvider with ChangeNotifier {
     });
   }
 
-  void setSearchQuery(String query) {
-    if (_searchQuery != query) {
-      _searchQuery = query;
-      notifyListeners();
+  void filterUsers(String query) {
+    if (query.isEmpty) {
+      _filteredUsers = _users;
+    } else {
+      _filteredUsers = _users.where((user) {
+        final queryLower = query.toLowerCase();
+        return user.fullName.toLowerCase().contains(queryLower) ||
+               user.email.toLowerCase().contains(queryLower);
+      }).toList();
     }
+    notifyListeners();
   }
 
   Future<void> deleteUser(UserModel user) async {

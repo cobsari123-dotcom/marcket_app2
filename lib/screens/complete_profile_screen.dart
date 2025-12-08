@@ -23,6 +23,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   final _placeOfBirthController = TextEditingController();
   final _businessNameController = TextEditingController();
   final _businessAddressController = TextEditingController();
+  String? _selectedGender;
   DateTime? _selectedDate;
   
   @override
@@ -68,11 +69,21 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         rfc: _rfcController.text.trim(),
         phoneNumber: _phoneNumberController.text.trim(),
         placeOfBirth: _placeOfBirthController.text.trim(),
+        gender: _selectedGender,
         businessName: _selectedUserType == 'Seller' ? _businessNameController.text.trim() : null,
         businessAddress: _selectedUserType == 'Seller' ? _businessAddressController.text.trim() : null,
       );
       await UserService().setUserData(widget.user.uid, newUser.toMap());
-      if (mounted) Navigator.of(context).pop(newUser);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('¡Perfil guardado con éxito!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ));
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) Navigator.of(context).pop(newUser);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -90,7 +101,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Completa tu Perfil'),
-        automaticallyImplyLeading: false, // User should not be able to go back
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: ConstrainedBox(
@@ -111,7 +122,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: _selectedUserType,
                     decoration: const InputDecoration(labelText: 'Soy un...', border: OutlineInputBorder()),
-                    items: ['Buyer', 'Seller'].map((v) => DropdownMenuItem(value: v, child: Text(v == 'Buyer' ? 'Comprador' : 'Vendedor'))).toList(),
+                    items: const [
+                      DropdownMenuItem(value: 'Buyer', child: Text('Comprador')),
+                      DropdownMenuItem(value: 'Seller', child: Text('Vendedor')),
+                    ],
                     onChanged: (v) => setState(() => _selectedUserType = v),
                     validator: (v) => v == null ? 'Por favor selecciona un tipo' : null,
                   ),
@@ -142,6 +156,23 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     decoration: const InputDecoration(labelText: 'Lugar de Nacimiento'),
                     validator: (v) => (v?.isEmpty ?? true) ? 'Ingresa tu lugar de nacimiento' : null,
                   ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedGender,
+                    decoration: const InputDecoration(labelText: 'Sexo', border: OutlineInputBorder()),
+                    // CORRECCIÓN: Lista constante limpia
+                    items: const [
+                      DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
+                      DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
+                      DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGender = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Por favor selecciona tu sexo' : null,
+                  ),
                   if (_selectedUserType == 'Seller') ...[
                     const SizedBox(height: 24),
                     const Text("Información del Negocio (Vendedor)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -168,7 +199,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         : const Text('GUARDAR Y CONTINUAR'),
                   ),
                   TextButton(
-                    onPressed: _isSaving ? null : () => Navigator.of(context).pop(), // Pop with null result
+                    onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                     child: const Text('Cancelar y cerrar sesión'),
                   )
                 ],

@@ -33,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _businessAddressController = TextEditingController();
   final TextEditingController _adminKeyController = TextEditingController();
+  String? _selectedGender;
 
   DateTime? _selectedDate;
   File? _image;
@@ -124,8 +125,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             'rfc': _rfcController.text.trim(),
             'phoneNumber': _phoneNumberController.text.trim(),
             'placeOfBirth': _placeOfBirthController.text.trim(),
+            'gender': _selectedGender,
           });
-
           if (userType == 'Seller') {
             userData.addAll({
               'businessName': _businessNameController.text.trim(),
@@ -196,7 +197,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (El resto del build method se mantiene igual)
     final textTheme = Theme.of(context).textTheme;
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
@@ -254,6 +254,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             _buildTextField(_phoneNumberController, 'Número de Teléfono', Icons.phone, keyboardType: TextInputType.phone),
                             const SizedBox(height: 20.0),
                             _buildTextField(_placeOfBirthController, 'Lugar de Nacimiento', Icons.location_city),
+                            const SizedBox(height: 20.0),
+                            _buildGenderSelector(),
+                            const SizedBox(height: 20.0),
                           ],
                           if (_selectedUserType == 'Seller' && !_isRegisteringAsAdmin) ...[
                             const SizedBox(height: 20.0),
@@ -461,6 +464,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Navigator.pushNamed(context, '/login');
       },
       child: const Text('¿Ya tienes una cuenta? Inicia Sesión'),
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedGender,
+      decoration: const InputDecoration(
+        labelText: 'Sexo',
+        prefixIcon: Icon(Icons.wc, color: AppTheme.primary),
+      ),
+      // CORRECCIÓN PRINCIPAL: Se eliminaron los const internos innecesarios
+      items: const [
+        DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
+        DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
+        DropdownMenuItem(value: 'Prefiero no decirlo', child: Text('Prefiero no decirlo')),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedGender = value;
+        });
+      },
+      validator: (value) {
+        if (!_isRegisteringAsAdmin && value == null) {
+          return 'Por favor selecciona tu sexo';
+        }
+        return null;
+      },
     );
   }
 }

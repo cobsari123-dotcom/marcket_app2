@@ -46,10 +46,50 @@ class UserService {
     }
   }
 
-  // Eliminar un usuario
+  // Eliminar un usuario y todos sus datos asociados
   Future<void> deleteUser(String uid) async {
     try {
-      await _usersRef.child(uid).remove();
+      // Referencias a los diferentes nodos de la base de datos
+      final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+      final DatabaseReference publicationsRef = FirebaseDatabase.instance.ref('publications');
+      final DatabaseReference reviewsRef = FirebaseDatabase.instance.ref('reviews');
+
+      // 1. Encontrar todas las publicaciones del usuario
+      final publicationsSnapshot = await publicationsRef.orderByChild('sellerId').equalTo(uid).get();
+      
+      // 1.1 Encontrar todas las reseñas hechas por el usuario
+      // (Asumiendo que las reseñas tienen un campo 'userId')
+      final reviewsSnapshot = await reviewsRef.orderByChild('userId').equalTo(uid).get();
+
+      // Construir un mapa para una actualización atómica
+      final Map<String, dynamic> updates = {};
+
+      // 2. Marcar para eliminación el nodo principal del usuario
+      updates['/users/$uid'] = null;
+      // 3. Marcar para eliminación los productos del usuario (si es vendedor)
+      updates['/products/$uid'] = null;
+      // 4. Marcar para eliminación el carrito del usuario
+      updates['/carts/$uid'] = null;
+
+      // 5. Marcar para eliminación cada publicación encontrada
+      if (publicationsSnapshot.exists) {
+        final publications = Map<String, dynamic>.from(publicationsSnapshot.value as Map);
+        for (final pubId in publications.keys) {
+          updates['/publications/$pubId'] = null;
+        }
+      }
+
+      // IMPLEMENTACIÓN DEL TODO: Eliminar reseñas
+      if (reviewsSnapshot.exists) {
+        final reviews = Map<String, dynamic>.from(reviewsSnapshot.value as Map);
+        for (final reviewId in reviews.keys) {
+          updates['/reviews/$reviewId'] = null;
+        }
+      }
+
+      // 6. Ejecutar la actualización atómica para borrar todos los datos a la vez
+      await rootRef.update(updates);
+
     } catch (e) {
       rethrow;
     }
