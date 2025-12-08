@@ -130,7 +130,7 @@ class _FullScreenPublicationViewState extends State<FullScreenPublicationView> {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  shadows: [Shadow(blurRadius: 2, color: Colors.black)],
+                  shadows: const [Shadow(blurRadius: 2, color: Colors.black)],
                 ),
               ),
               const SizedBox(height: 8),
@@ -138,7 +138,7 @@ class _FullScreenPublicationViewState extends State<FullScreenPublicationView> {
                 widget.publication.content,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
-                  shadows: [Shadow(blurRadius: 2, color: Colors.black)],
+                  shadows: const [Shadow(blurRadius: 2, color: Colors.black)],
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -195,7 +195,7 @@ class _FullScreenPublicationViewState extends State<FullScreenPublicationView> {
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: isActionDisabled ? Colors.grey : Colors.white,
-              shadows: [Shadow(blurRadius: 1, color: Colors.black)],
+              shadows: const [Shadow(blurRadius: 1, color: Colors.black)],
             ),
           ),
         ],

@@ -111,20 +111,19 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Configuración'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AdminSettingsScreen()));
-                },
-              ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AdminSettingsScreen()));
+                                },              ),
               ListTile(
                 leading: const Icon(Icons.info_outline),
                 title: const Text('Sobre Nosotros'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const AboutUsScreen(),

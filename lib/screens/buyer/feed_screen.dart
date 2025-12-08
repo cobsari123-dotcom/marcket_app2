@@ -57,9 +57,10 @@ class _FeedScreenState extends State<FeedScreen> {
           }
 
           if (provider.publications.isEmpty) {
+            // Corrección: Eliminado 'const' interno redundante
             return const Center(
                 child: Text('No hay publicaciones para mostrar.',
-                    style: const TextStyle(color: Colors.white)));
+                    style: TextStyle(color: Colors.white)));
           }
 
           return PageView.builder(

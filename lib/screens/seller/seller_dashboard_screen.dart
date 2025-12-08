@@ -145,7 +145,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Configuración'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const SellerSettingsScreen()));
@@ -156,7 +156,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Notificaciones'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const NotificationsScreen()));
@@ -167,7 +167,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Soporte Técnico'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const ContactSupportScreen()));
@@ -178,7 +178,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Alertas de Administrador'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const AdminAlertsScreen()));
@@ -192,7 +192,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Sobre Nosotros'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AboutUsScreen(),

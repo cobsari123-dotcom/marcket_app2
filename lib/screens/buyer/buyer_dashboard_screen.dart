@@ -255,7 +255,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Configuración', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const BuyerSettingsScreen(),
@@ -271,7 +271,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Notificaciones', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const NotificationsScreen(),
@@ -287,7 +287,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Soporte Técnico', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ContactSupportScreen(),
@@ -304,7 +304,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 Text('Alertas de Administrador', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AdminAlertsScreen(),
@@ -320,7 +320,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Sobre Nosotros', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AboutUsScreen(),

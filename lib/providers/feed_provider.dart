@@ -107,8 +107,7 @@ class FeedProvider with ChangeNotifier {
           .getPublicationsStream(
         pageSize: 5,
         startAfterKey: _lastPublicationKey,
-        startAfterValue:
-            _lastPublicationSortValue?.toString(), // Convertir a String
+        startAfterValue: _lastPublicationSortValue,
         category: _selectedCategory,
         sortBy: _sortBy,
         descending: _descending,
@@ -121,8 +120,12 @@ class FeedProvider with ChangeNotifier {
         } else {
           _publications.addAll(newPublications);
           _lastPublicationKey = newPublications.last.id;
-          _lastPublicationSortValue =
+          final lastValue =
               _getPublicationSortValue(newPublications.last, _sortBy);
+          _lastPublicationSortValue =
+              (_sortBy == 'timestamp' && lastValue is DateTime)
+                  ? lastValue.millisecondsSinceEpoch // Convert DateTime to int
+                  : lastValue;
         }
 
         await _fetchSellerDataForPublications(newPublications);

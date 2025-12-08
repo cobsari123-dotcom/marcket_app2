@@ -52,7 +52,8 @@ class _SellerProfileScreenState extends State<SellerProfileScreen>
             Tab(icon: Icon(Icons.article), text: 'Mis Publicaciones'),
           ],
           labelColor: Colors.white,
-          unselectedLabelColor: const Color.fromARGB(255, 255, 255, 255).withAlpha(178), // Fixed deprecation
+          unselectedLabelColor:
+              const Color.fromARGB(255, 255, 255, 255).withAlpha(178),
         ),
       ),
       body: TabBarView(
@@ -307,10 +308,8 @@ class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar Foto'),
-        content: Text(
-          _isGoogleUser
-              ? 'Esto quitará tu foto de la app, pero no de tu cuenta de Google.'
-              : '¿Estás seguro?',
+        content: const Text(
+          'Esto quitará tu foto de la app, pero no de tu cuenta de Google.',
         ),
         actions: [
           TextButton(
@@ -339,13 +338,14 @@ class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
       });
       await _auth.currentUser?.updatePhotoURL(null);
 
-      if (mounted) {
-        setState(() {
-          _networkImageUrl = null;
-          _imageFile = null;
-        });
-        _showSnackBar('Foto de perfil eliminada.');
+      if (!mounted) {
+        return;
       }
+      setState(() {
+        _networkImageUrl = null;
+        _imageFile = null;
+      });
+      _showSnackBar('Foto de perfil eliminada.');
     } catch (e) {
       if (mounted) {
         _showSnackBar('Error al eliminar la foto: $e', isError: true);
@@ -559,13 +559,13 @@ class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppTheme.primary, // Color del borde
+                    color: AppTheme.primary,
                     width: 3,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: const Color.fromARGB(255, 0, 0, 0).withAlpha(
-                          (255 * 0.2).round()), // Fixed deprecation
+                          (255 * 0.2).round()),
                       spreadRadius: 2,
                       blurRadius: 8,
                       offset: const Offset(0, 4),
@@ -625,7 +625,7 @@ class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
                 color: Theme.of(context)
                     .colorScheme
                     .onSurface
-                    .withAlpha((255 * 0.7).round()), // Fixed deprecation
+                    .withAlpha((255 * 0.7).round()),
               ),
         ),
       ],
@@ -863,7 +863,6 @@ class _SellerProfileInfoTabState extends State<SellerProfileInfoTab> {
         labelText: 'Sexo',
         prefixIcon: Icon(Icons.wc, color: AppTheme.primary),
       ),
-      // CORRECCIÓN: Lista constante
       items: const [
         DropdownMenuItem(value: 'Hombre', child: Text('Hombre')),
         DropdownMenuItem(value: 'Mujer', child: Text('Mujer')),
