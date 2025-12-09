@@ -216,6 +216,17 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           _buildDrawerItem(Icons.person, 'Mi Perfil', 2),
           _buildDrawerItem(Icons.chat, 'Mensajes', 3),
           _buildDrawerItem(Icons.favorite, 'Favoritos', 4),
+          ListTile(
+            leading: const Icon(
+              Icons.video_collection,
+              color: AppTheme.secondary,
+            ),
+            title: Text('Publicaciones (Reels)', style: textTheme.bodyMedium),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/reels_publications');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(

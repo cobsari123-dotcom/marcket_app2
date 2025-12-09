@@ -36,12 +36,16 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
           return Scaffold(
             appBar: AppBar( // AppBar for narrow layout
               title: widget.appBarTitle,
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              leading: Builder(
+                builder: (context) {
+                  return IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                    tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+                  );
+                }
               ),
               actions: widget.appBarActions,
             ),

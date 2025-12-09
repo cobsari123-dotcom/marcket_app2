@@ -134,7 +134,7 @@ class _SellerSearchScreenState extends State<SellerSearchScreen> {
                                     Navigator.pushNamed(
                                       context,
                                       '/public_seller_profile',
-                                      arguments: seller.id,
+                                      arguments: {'sellerId': seller.id},
                                     );
                                   },
                                 ),

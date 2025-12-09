@@ -125,16 +125,14 @@ class MyApp extends StatelessWidget {
               '/chat_list': (context) => const ChatListScreen(),
               '/chat': (context) {
                 final arguments = ModalRoute.of(context)!.settings.arguments;
-                Map<String, String>? chatArgs;
+                Map<String, String> chatArgs; // Make it non-nullable by default
 
-                if (arguments is Map<String, dynamic>) {
-                  // Further check for specific keys and their types
-                  if (arguments.containsKey('chatRoomId') &&
-                      arguments.containsKey('otherUserName') &&
-                      arguments['chatRoomId'] is String &&
-                      arguments['otherUserName'] is String) {
-                    chatArgs = Map<String, String>.from(arguments);
-                  }
+                if (arguments is Map<String, dynamic> &&
+                    arguments.containsKey('chatRoomId') &&
+                    arguments.containsKey('otherUserName') &&
+                    arguments['chatRoomId'] is String &&
+                    arguments['otherUserName'] is String) {
+                  chatArgs = Map<String, String>.from(arguments);
                 } else {
                   // Log the unexpected argument type for debugging
                   debugPrint(
@@ -149,18 +147,20 @@ class MyApp extends StatelessWidget {
                   otherUserName: chatArgs['otherUserName']!,
                 );
               },
+              '/favorites': (context) => const FavoritesScreen(),
+              '/reels_publications': (context) => const ReelsPublicationsScreen(),
               '/public_seller_profile': (context) {
-                final args = ModalRoute.of(context)!.settings.arguments
-                    as Map<String, dynamic>;
-                final sellerId = args['sellerId'] as String?;
-                final isAdmin = args['isAdmin'] as bool? ?? false;
-                if (sellerId != null) {
-                  return PublicSellerProfileScreen(
-                      sellerId: sellerId, isAdmin: isAdmin);
+                final arguments = ModalRoute.of(context)!.settings.arguments;
+                if (arguments is Map<String, dynamic>) {
+                  final sellerId = arguments['sellerId'] as String?;
+                  final isAdmin = arguments['isAdmin'] as bool? ?? false;
+                  if (sellerId != null) {
+                    return PublicSellerProfileScreen(
+                        sellerId: sellerId, isAdmin: isAdmin);
+                  }
                 }
                 return const Scaffold(
-                    body:
-                        Center(child: Text("Error: Seller ID not provided.")));
+                    body: Center(child: Text("Error: Seller ID not provided.")));
               },
             },
             localizationsDelegates: const [

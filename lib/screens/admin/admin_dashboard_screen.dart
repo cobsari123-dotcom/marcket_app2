@@ -285,6 +285,7 @@ class SupportChatListState extends State<SupportChatList> {
           names[key] = {
             'fullName': userData['fullName'] ?? 'Usuario Desconocido',
             'userType': userData['userType'] ?? 'N/A',
+            'profilePicture': userData['profilePicture'],
           };
         });
         if (mounted) {
@@ -352,11 +353,18 @@ class SupportChatListState extends State<SupportChatList> {
             final userName =
                 _usersData[otherParticipantId]?['fullName'] ?? 'Cargando...';
             final userType = _usersData[otherParticipantId]?['userType'] ?? '';
+            final userProfilePicture =
+                _usersData[otherParticipantId]?['profilePicture'];
 
             return ListTile(
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 backgroundColor: AppTheme.secondary,
-                child: Icon(Icons.person, color: AppTheme.onSecondary),
+                backgroundImage: userProfilePicture != null
+                    ? NetworkImage(userProfilePicture)
+                    : null,
+                child: userProfilePicture == null
+                    ? const Icon(Icons.person, color: AppTheme.onSecondary)
+                    : null,
               ),
               title: Row(
                 children: [

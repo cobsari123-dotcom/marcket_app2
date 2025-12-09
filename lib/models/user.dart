@@ -18,6 +18,8 @@ class UserModel {
   final String? gender;
   final Map<String, String>? socialMediaLinks;
   final String? publicId; // New field
+  final bool isSuspended;
+  final String? suspensionEndDate;
 
   const UserModel({
     required this.id,
@@ -39,7 +41,9 @@ class UserModel {
     this.gender,
     this.socialMediaLinks,
     this.publicId, // Add to constructor
-  }); // Corrected: Closing brace for constructor
+    this.isSuspended = false,
+    this.suspensionEndDate,
+  });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
     return UserModel(
@@ -63,7 +67,9 @@ class UserModel {
       socialMediaLinks: (map['socialMediaLinks'] as Map<String, dynamic>?)
           ?.map((key, value) => MapEntry(key, value as String)),
       publicId: map['publicId'], // Add to fromMap
-    ); // Corrected: Closing parenthesis and brace for fromMap
+      isSuspended: map['isSuspended'] ?? false,
+      suspensionEndDate: map['suspensionEndDate'],
+    );
   }
 
   Map<String, dynamic> toMap() {
@@ -85,8 +91,10 @@ class UserModel {
       'bio': bio,
       'gender': gender,
       'socialMediaLinks': socialMediaLinks,
-      'publicId': publicId, // Add to toMap
-    }; // Corrected: Closing brace for toMap
+      'publicId': publicId,
+      'isSuspended': isSuspended,
+      'suspensionEndDate': suspensionEndDate,
+    };
   }
 
   UserModel copyWith({
@@ -109,6 +117,8 @@ class UserModel {
     String? gender,
     Map<String, String>? socialMediaLinks,
     String? publicId, // Add to copyWith
+    bool? isSuspended,
+    String? suspensionEndDate,
   }) {
     // Corrected: Closing parenthesis for copyWith parameters
     return UserModel(
@@ -132,6 +142,8 @@ class UserModel {
       gender: gender ?? this.gender,
       socialMediaLinks: socialMediaLinks ?? this.socialMediaLinks,
       publicId: publicId ?? this.publicId, // Add to copyWith
+      isSuspended: isSuspended ?? this.isSuspended,
+      suspensionEndDate: suspensionEndDate ?? this.suspensionEndDate,
     ); // Corrected: Closing brace for copyWith
   }
 }
