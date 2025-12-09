@@ -70,6 +70,12 @@ Hemos realizado una serie de mejoras significativas en la aplicación para ofrec
 *   **Notificaciones de Entrega en Tiempo Real:**
     *   Se ha implementado una **Función de Nube de Firebase (`sendDeliveryNotification`)** que envía notificaciones push al comprador cada vez que el estado de su pedido cambia (enviado, entregado, cancelado o pago rechazado).
 
+### **Gestión Avanzada de Cuentas y Contenido (Admin y Comprador)**
+*   **Funcionalidades de Administración de Cuentas:** Los administradores ahora pueden enviar advertencias o sanciones a usuarios, suspender cuentas por periodos definidos (una semana, un mes, permanente o personalizado) y eliminar cuentas de forma permanente, todo con notificaciones automáticas al usuario afectado.
+*   **Feed de Productos para Compradores:** La pantalla de inicio del comprador ha sido refactorizada para mostrar un listado de productos directo de la base de datos, facilitando la exploración y compra.
+*   **Publicaciones Estilo Reels:** Nueva sección para compradores que permite visualizar publicaciones de vendedores en un formato vertical de "reels", con interacción de "Me Gusta", "Comentar" y "Compartir".
+*   **Mejoras en Soporte Técnico (Admin):** La lista de chats de soporte ahora muestra la foto de perfil y el nombre del usuario (comprador o vendedor) que envió el mensaje, mejorando la identificación visual.
+
 ### **Mejoras en Perfiles y Administración**
 *   **ID Público para Usuarios:** Todos los usuarios (compradores y vendedores) ahora tienen un `publicId` único generado automáticamente al completar su perfil, facilitando su identificación.
 *   **Pantalla de Detalle de Usuario para Administradores:** Nueva interfaz que permite a los administradores buscar usuarios por `publicId`, nombre o correo electrónico y visualizar un perfil completo. Para vendedores, esto incluye acceso directo a sus productos y publicaciones.
@@ -91,6 +97,7 @@ Hemos realizado una serie de mejoras significativas en la aplicación para ofrec
 *   **Corrección de Perfil de Vendedor:** Eliminado el `AppBar` duplicado en la pantalla de perfil del vendedor y reestructurado el diseño para una presentación más limpia y sin conflictos.
 *   **Mapeo Funcional de Botones en Dashboard de Vendedor:** Ajustada la lógica de los botones flotantes (`FloatingActionButton`) en el dashboard del vendedor para que las opciones de "Agregar Producto" y "Crear Publicación" aparezcan en sus respectivas pestañas ("Mis Productos" y "Mis Publicaciones").
 *   **Gestión de Imágenes Verificada:** Confirmado que las pantallas de agregar/editar productos y publicaciones ya soportan imágenes opcionales, subidas desde galería/cámara y mediante URL, con navegación de retorno consistente.
+*   **Corrección de Errores y Advertencias del Analizador:** Se han resuelto todos los errores y advertencias reportados por el analizador de código de Flutter, asegurando una base de código más limpia y robusta.
 
 ---
 
