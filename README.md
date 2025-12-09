@@ -2,6 +2,26 @@
 
 ¡Bienvenido a Marcket App, también conocida como "Manos del Mar"! Una aplicación móvil de comercio electrónico desarrollada con Flutter que conecta a artesanos y pescadores locales de Campeche, México, con consumidores interesados en productos auténticos y sostenibles.
 
+## 📝 Tabla de Contenidos
+
+*   [🌟 La Misión de Manos del Mar](#-la-misión-de-manos-del-mar)
+*   [✨ Características Principales](#-características-principales)
+    *   [Para Compradores 🛒](#para-compradores-)
+    *   [Para Vendedores 🧑‍💼](#para-vendedores-)
+    *   [Para Administradores 👮](#para-administradores-)
+*   [🚀 Mejoras Recientes](#-mejoras-recientes)
+    *   [Sistema Integral de Pedidos y Pagos](#sistema-integral-de-pedidos-y-pagos)
+    *   [Mejoras en Perfiles y Administración](#mejoras-en-perfiles-y-administración)
+    *   [UI/UX y Rendimiento](#uiux-y-rendimiento)
+*   [🛠️ Arquitectura y Tecnologías](#️-arquitectura-y-tecnologías)
+    *   [Stack Tecnológico](#stack-tecnológico)
+    *   [Arquitectura de Software](#arquitectura-de-software)
+*   [🏁 Empezando](#-empezando)
+*   [🤝 Cómo Contribuir](#-cómo-contribuir)
+*   [© Licencia](#-licencia)
+
+---
+
 ## 🌟 La Misión de Manos del Mar
 
 Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y promover el rico patrimonio cultural de Campeche, ofreciendo una plataforma digital que supera las barreras de los intermediarios y la falta de visibilidad en línea.
@@ -109,3 +129,20 @@ Para ejecutar este proyecto localmente, asegúrate de tener el [SDK de Flutter](
    ```sh
    flutter run
    ```
+
+## 🤝 Cómo Contribuir
+
+¡Agradecemos tu interés en contribuir a Manos del Mar! Para hacer tus contribuciones, por favor sigue los siguientes pasos:
+
+1.  Haz un "fork" de este repositorio.
+2.  Crea una nueva rama para tus cambios (`git checkout -b feature/tu-caracteristica`).
+3.  Realiza tus cambios y asegúrate de que el código pase todas las pruebas.
+4.  Haz "commit" de tus cambios (`git commit -m 'feat: Añade tu nueva característica'`).
+5.  Sube tu rama (`git push origin feature/tu-caracteristica`).
+6.  Abre un "Pull Request" describiendo detalladamente tus cambios.
+
+Por favor, asegúrate de que tu código siga las convenciones de estilo existentes y documenta cualquier cambio importante.
+
+## © Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
