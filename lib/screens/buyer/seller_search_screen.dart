@@ -78,73 +78,72 @@ class _SellerSearchScreenState extends State<SellerSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Buscar por nombre o email...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Buscar Vendedor'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar por nombre o email...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              filled: true,
-              fillColor: AppTheme.background,
             ),
           ),
-        ),
-        Expanded(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                  maxWidth: 800), // Limit width for seller search content
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage != null
-                      ? Center(child: Text(_errorMessage!))
-                      : _filteredSellers.isEmpty
-                          ? const Center(
-                              child: Text('No se encontraron vendedores.'))
-                          : ListView.builder(
-                              itemCount: _filteredSellers.length,
-                              itemBuilder: (context, index) {
-                                final seller = _filteredSellers[index];
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4.0),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: AppTheme.beigeArena,
-                                      backgroundImage: seller.profilePicture !=
-                                              null
-                                          ? NetworkImage(seller.profilePicture!)
-                                          : null,
-                                      child: seller.profilePicture == null
-                                          ? const Icon(Icons.person,
-                                              color: AppTheme.primary)
-                                          : null,
-                                    ),
-                                    title: Text(seller.fullName),
-                                    subtitle: Text(seller.email),
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/public_seller_profile',
-                                        arguments: seller.id,
-                                      );
-                                    },
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage != null
+                    ? Center(child: Text(_errorMessage!))
+                    : _filteredSellers.isEmpty
+                        ? const Center(
+                            child: Text('No se encontraron vendedores.'))
+                        : ListView.builder(
+                            itemCount: _filteredSellers.length,
+                            itemBuilder: (context, index) {
+                              final seller = _filteredSellers[index];
+                              return Card(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 4.0),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: AppTheme.beigeArena,
+                                    backgroundImage: seller.profilePicture !=
+                                            null
+                                        ? NetworkImage(seller.profilePicture!)
+                                        : null,
+                                    child: seller.profilePicture == null
+                                        ? const Icon(Icons.person,
+                                            color: AppTheme.primary)
+                                        : null,
                                   ),
-                                );
-                              },
-                            ),
-            ),
+                                  title: Text(seller.fullName),
+                                  subtitle: Text(seller.email),
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/public_seller_profile',
+                                      arguments: seller.id,
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

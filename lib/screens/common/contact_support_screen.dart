@@ -60,6 +60,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Soporte Técnico'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

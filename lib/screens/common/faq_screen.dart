@@ -221,6 +221,21 @@ const List<_FaqItem> _buyerFaqs = [
     answer:
         'Las publicaciones son como una red social dentro de la app. Los vendedores comparten historias, ofertas y novedades. ¡Es una gran forma de descubrir productos y conectar con su origen!',
   ),
+  _FaqItem(
+    question: '31. ¿Cómo puedo rastrear mi pedido?',
+    answer:
+        'Una vez que el vendedor marque el pedido como "Enviado", podrás ver el número de seguimiento (si lo proporciona) en los detalles de tu pedido. Con ese número, podrás rastrearlo en el sitio web de la paquetería correspondiente.',
+  ),
+  _FaqItem(
+    question: '32. ¿Qué hago si no recibo mi pedido?',
+    answer:
+        'Primero, verifica el estado del pedido y la fecha estimada de entrega. Si la fecha ya pasó, contacta al vendedor. Si no obtienes respuesta, comunícate con Soporte Técnico para que podamos ayudarte.',
+  ),
+  _FaqItem(
+    question: '33. ¿Puedo cancelar un pedido?',
+    answer:
+        'La cancelación de un pedido depende del estado en que se encuentre y de las políticas del vendedor. Si el pedido aún no ha sido pagado o enviado, es más probable que puedas cancelarlo. Contacta al vendedor lo antes posible para solicitar la cancelación.',
+  ),
 ];
 
 const List<_FaqItem> _sellerFaqs = [
@@ -366,5 +381,20 @@ const List<_FaqItem> _sellerFaqs = [
     question: '30. ¿Cómo puedo destacar entre otros vendedores?',
     answer:
         'Además de tener buenos productos, ofrece un excelente servicio al cliente, responde rápidamente a los mensajes, envía los pedidos a tiempo y mantén tu perfil y publicaciones actualizadas.',
+  ),
+  _FaqItem(
+    question: '31. ¿Cómo puedo contactar al comprador?',
+    answer:
+        'Puedes contactar al comprador a través del chat en línea. Ve a los detalles del pedido en "Mis Ventas" y encontrarás un botón para iniciar una conversación.',
+  ),
+  _FaqItem(
+    question: '32. ¿Qué pasa si el comprador no confirma la recepción del pedido?',
+    answer:
+        'Si ha pasado un tiempo razonable desde la fecha de entrega, contacta al comprador. Si no responde, puedes comunicarte con Soporte Técnico para que te ayuden a marcar el pedido como completado.',
+  ),
+  _FaqItem(
+    question: '33. ¿Cómo puedo mejorar mi reputación como vendedor?',
+    answer:
+        'Ofrece un excelente servicio al cliente, envía productos de calidad, cumple con los tiempos de envío y responde amablemente a las reseñas. Una buena reputación atrae a más compradores.',
   ),
 ];

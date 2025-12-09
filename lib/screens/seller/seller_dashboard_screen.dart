@@ -2,7 +2,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marcket_app/providers/product_list_provider.dart';
-import 'package:marcket_app/screens/buyer/feed_screen.dart';
 import 'package:marcket_app/screens/seller/my_products_screen.dart';
 import 'package:marcket_app/screens/seller/seller_orders_screen.dart';
 import 'package:marcket_app/screens/seller/seller_profile_screen.dart';
@@ -32,15 +31,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   int _selectedIndex = 0;
   UserModel? _currentUserModel;
   bool _isLoading = true;
-
-  static const List<String> _titles = <String>[
-    'Inicio',
-    'Mis Productos',
-    'Mis Publicaciones',
-    'Mis Ventas',
-    'Mensajes',
-    'Mi Perfil',
-  ];
 
   @override
   void initState() {
@@ -87,44 +77,20 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     final List<Widget> widgetOptions = <Widget>[
-      const FeedScreen(isAdmin: false),
-      const MyProductsScreen(),
-      const SellerPublicationsScreen(),
-      const SellerOrdersScreen(),
-      const ChatListScreen(),
-      SellerProfileScreen(onProfileUpdated: _loadUserData),
-    ];
-
-    final List<NavigationRailDestination> destinations = [
-      const NavigationRailDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: Text('Inicio'),
+      Scaffold(
+        body: const MyProductsScreen(),
       ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.shopping_bag_outlined),
-        selectedIcon: Icon(Icons.shopping_bag),
-        label: Text('Productos'),
+      Scaffold(
+        body: const SellerPublicationsScreen(),
       ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.article_outlined),
-        selectedIcon: Icon(Icons.article),
-        label: Text('Publicaciones'),
+      Scaffold(
+        body: const SellerOrdersScreen(),
       ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.point_of_sale_outlined),
-        selectedIcon: Icon(Icons.point_of_sale),
-        label: Text('Ventas'),
+      Scaffold(
+        body: const ChatListScreen(),
       ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.chat_outlined),
-        selectedIcon: Icon(Icons.chat),
-        label: Text('Mensajes'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.person_outlined),
-        selectedIcon: Icon(Icons.person),
-        label: Text('Perfil'),
+      Scaffold(
+        body: SellerProfileScreen(onProfileUpdated: _loadUserData),
       ),
     ];
 
@@ -133,19 +99,18 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         padding: EdgeInsets.zero,
         children: [
           _buildDrawerHeader(),
-          _buildDrawerItem(Icons.home, 'Inicio', 0),
-          _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
-          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 2),
-          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 3),
-          _buildDrawerItem(Icons.chat, 'Mensajes', 4),
-          _buildDrawerItem(Icons.person, 'Mi Perfil', 5),
+          _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 0),
+          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 1),
+          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 2),
+          _buildDrawerItem(Icons.chat, 'Mensajes', 3),
+          _buildDrawerItem(Icons.person, 'Mi Perfil', 4),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Configuración'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const SellerSettingsScreen()));
@@ -156,7 +121,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Notificaciones'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const NotificationsScreen()));
@@ -167,7 +132,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Soporte Técnico'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const ContactSupportScreen()));
@@ -178,7 +143,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Alertas de Administrador'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const AdminAlertsScreen()));
@@ -192,7 +157,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             title: const Text('Sobre Nosotros'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AboutUsScreen(),
@@ -253,8 +218,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     );
 
     Widget? fab;
-    if (_selectedIndex == 1) {
-      // FAB for MyProductsScreen
+    if (_selectedIndex == 0) {
+      // FAB for MyProductsScreen (Add Product)
       fab = FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add_edit_product').then((_) {
@@ -266,8 +231,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         backgroundColor: AppTheme.secondary,
         child: const Icon(Icons.add, color: AppTheme.onSecondary),
       );
-    } else if (_selectedIndex == 2) {
-      // FAB for SellerPublicationsScreen (new)
+    } else if (_selectedIndex == 1) {
+      // FAB for SellerPublicationsScreen (Add Publication)
       fab = FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/create_edit_publication');
@@ -277,14 +242,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       );
     }
 
+    final List<String> _appBarTitles = [
+      'Mis Productos',
+      'Mis Publicaciones',
+      'Mis Ventas',
+      'Mensajes',
+      'Mi Perfil',
+    ];
+
     return ResponsiveScaffold(
       pages: widgetOptions,
-      titles: _titles,
-      destinations: destinations,
       drawer: drawer,
       initialIndex: _selectedIndex,
       onIndexChanged: _onItemTapped,
       floatingActionButton: fab,
+      appBarTitle: Text(_appBarTitles[_selectedIndex]),
     );
   }
 

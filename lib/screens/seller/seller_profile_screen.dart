@@ -41,29 +41,31 @@ class _SellerProfileScreenState extends State<SellerProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Perfil'),
-        bottom: TabBar(
+    return Column(
+      children: [
+        // TabBar will be displayed below the ResponsiveScaffold's AppBar
+        TabBar(
           controller: _tabController,
           tabs: const [
             Tab(icon: Icon(Icons.person), text: 'Datos de Perfil'),
             Tab(icon: Icon(Icons.shopping_bag), text: 'Mis Productos'),
             Tab(icon: Icon(Icons.article), text: 'Mis Publicaciones'),
           ],
-          labelColor: Colors.white,
-          unselectedLabelColor:
-              const Color.fromARGB(255, 255, 255, 255).withAlpha(178),
+          labelColor: Theme.of(context).colorScheme.onPrimary,
+          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+          indicatorColor: Theme.of(context).colorScheme.secondary,
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          SellerProfileInfoTab(onProfileUpdated: widget.onProfileUpdated),
-          const MyProductsScreen(),
-          const SellerPublicationsScreen(),
-        ],
-      ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              SellerProfileInfoTab(onProfileUpdated: widget.onProfileUpdated),
+              const MyProductsScreen(),
+              const SellerPublicationsScreen(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -16,10 +16,13 @@ class FeedProvider with ChangeNotifier {
   bool _isLoadingInitial = true;
   bool _isLoadingMore = false;
   String? _errorMessage;
-  String? _lastPublicationKey;
-  Comparable? _lastPublicationSortValue; // Para la paginación con ordenamiento
   bool _hasMorePublications = true;
-  StreamSubscription? _publicationSubscription;
+
+  // Variables for pagination
+  // ignore: unused_field
+  String? _lastPublicationKey;
+  // ignore: unused_field
+  dynamic _lastPublicationSortValue;
 
   // Parámetros de filtro y ordenamiento
   String? _selectedCategory;
@@ -36,8 +39,30 @@ class FeedProvider with ChangeNotifier {
   String get sortBy => _sortBy;
   bool get descending => _descending;
 
+  bool get isLoading => _isLoadingInitial || _isLoadingMore;
+  bool get hasError => _errorMessage != null;
+
   FeedProvider() {
     init();
+  }
+
+  void clearAndFetchPublications() {
+    _publications = [];
+    _sellerData.clear();
+    _lastPublicationKey = null;
+    _lastPublicationSortValue = null;
+    _hasMorePublications = true;
+    _isLoadingInitial = true;
+    notifyListeners();
+    loadInitialPublications();
+  }
+
+  Future<void> fetchPublications({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      await loadInitialPublications();
+    } else {
+      await loadMorePublications();
+    }
   }
 
   Future<void> init() async {
@@ -75,87 +100,68 @@ class FeedProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadInitialPublications() async {
-    _publicationSubscription?.cancel();
-    _isLoadingInitial = true;
-    _publications = [];
-    _lastPublicationKey = null;
-    _lastPublicationSortValue = null;
-    _hasMorePublications = true;
+  Future<void> _fetchPublications({bool isInitialFetch = false}) async {
     _errorMessage = null;
-    notifyListeners();
+    if (isInitialFetch) {
+      _isLoadingInitial = true;
+      _publications = [];
+      _sellerData.clear();
+      _lastPublicationKey = null;
+      _lastPublicationSortValue = null;
+      _hasMorePublications = true;
+      notifyListeners();
+    } else if (!_hasMorePublications) {
+      return;
+    }
 
-    await _loadMorePublicationsInternal();
+    try {
+      final result = await _publicationService.getPublications(
+        startAfterKey: _lastPublicationKey,
+        startAfterValue: _lastPublicationSortValue,
+        limit: 10, // Define a page size
+        sortBy: _sortBy,
+        descending: _descending,
+      );
 
-    _isLoadingInitial = false;
-    notifyListeners();
+      final List<Publication> fetchedPublications = result['publications'];
+      _lastPublicationKey = result['lastKey'];
+      _lastPublicationSortValue = result['lastSortValue'];
+      _hasMorePublications = fetchedPublications.length == 10; // Assuming 10 is the page size
+
+      if (!hasListeners) return;
+
+      if (isInitialFetch) {
+        _publications = fetchedPublications;
+      } else {
+        _publications.addAll(fetchedPublications);
+      }
+      await _fetchSellerDataForPublications(fetchedPublications);
+    } catch (e) {
+      if (!hasListeners) return;
+      _errorMessage = 'Error al cargar publicaciones: $e';
+    } finally {
+      if (hasListeners) {
+        _isLoadingInitial = false;
+        // _isLoadingMore is not used here as it's part of the provider state logic
+        notifyListeners();
+      }
+    }
   }
 
-  // Método público para cargar más publicaciones, que llama al interno
+  Future<void> loadInitialPublications() async {
+    await _fetchPublications(isInitialFetch: true);
+  }
+
   Future<void> loadMorePublications() async {
-    await _loadMorePublicationsInternal();
-  }
-
-  Future<void> _loadMorePublicationsInternal() async {
     if (_isLoadingMore || !_hasMorePublications) return;
 
     _isLoadingMore = true;
     notifyListeners();
 
-    try {
-      _publicationSubscription = _publicationService
-          .getPublicationsStream(
-        pageSize: 5,
-        startAfterKey: _lastPublicationKey,
-        startAfterValue: _lastPublicationSortValue,
-        category: _selectedCategory,
-        sortBy: _sortBy,
-        descending: _descending,
-      )
-          .listen((newPublications) async {
-        if (!hasListeners) return;
+    await _fetchPublications(isInitialFetch: false);
 
-        if (newPublications.isEmpty) {
-          _hasMorePublications = false;
-        } else {
-          _publications.addAll(newPublications);
-          _lastPublicationKey = newPublications.last.id;
-          final lastValue =
-              _getPublicationSortValue(newPublications.last, _sortBy);
-          _lastPublicationSortValue =
-              (_sortBy == 'timestamp' && lastValue is DateTime)
-                  ? lastValue.millisecondsSinceEpoch // Convert DateTime to int
-                  : lastValue;
-        }
-
-        await _fetchSellerDataForPublications(newPublications);
-
-        _isLoadingMore = false;
-        notifyListeners();
-      }, onError: (e) {
-        if (!hasListeners) return;
-        _errorMessage = 'Error al cargar publicaciones: $e';
-        _isLoadingMore = false;
-        notifyListeners();
-      });
-    } catch (e) {
-      if (!hasListeners) return;
-      _errorMessage = 'Error al cargar publicaciones: $e';
-      _isLoadingMore = false;
-      notifyListeners();
-    }
-  }
-
-  Comparable _getPublicationSortValue(Publication p, String sortBy) {
-    switch (sortBy) {
-      case 'timestamp':
-        return p.timestamp;
-      case 'title':
-        return p.title;
-      // Añadir otros campos de ordenamiento aquí si es necesario
-      default:
-        return p.timestamp;
-    }
+    _isLoadingMore = false;
+    notifyListeners();
   }
 
   Future<void> _fetchSellerDataForPublications(
@@ -191,11 +197,5 @@ class FeedProvider with ChangeNotifier {
       _descending = descending;
       loadInitialPublications(); // Recargar todo con el nuevo orden
     }
-  }
-
-  @override
-  void dispose() {
-    _publicationSubscription?.cancel();
-    super.dispose();
   }
 }

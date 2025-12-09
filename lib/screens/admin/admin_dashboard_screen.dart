@@ -9,7 +9,6 @@ import 'package:marcket_app/screens/admin/admin_profile_screen.dart';
 import 'package:marcket_app/screens/admin/admin_settings_screen.dart';
 import 'package:marcket_app/screens/admin/admin_complaints_suggestions_screen.dart';
 import 'package:marcket_app/screens/admin/user_management_screen.dart';
-import 'package:marcket_app/screens/buyer/feed_screen.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
 import 'package:marcket_app/utils/theme.dart';
 import 'package:marcket_app/widgets/responsive_scaffold.dart';
@@ -26,51 +25,23 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  static const List<String> _titles = <String>[
-    'Soporte Técnico',
-    'Quejas y Sugerencias',
-    'Mi Perfil',
-    'Gestión de Usuarios',
-    'Feed de Publicaciones',
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<AdminDashboardProvider, ThemeProvider>(
       builder: (context, adminProvider, themeProvider, child) {
         final List<Widget> adminScreens = [
-          const SupportChatList(),
-          const AdminComplaintsSuggestionsScreen(),
-          const AdminProfileScreen(),
-          const UserManagementScreen(),
-          const FeedScreen(isAdmin: true),
-        ];
-
-        final List<NavigationRailDestination> destinations = [
-          const NavigationRailDestination(
-            icon: Icon(Icons.support_agent_outlined),
-            selectedIcon: Icon(Icons.support_agent),
-            label: Text('Soporte'),
+          Scaffold(
+            body: const SupportChatList(),
           ),
-          const NavigationRailDestination(
-            icon: Icon(Icons.feedback_outlined),
-            selectedIcon: Icon(Icons.feedback),
-            label: Text('Quejas'),
+          Scaffold(
+            body: const AdminComplaintsSuggestionsScreen(),
           ),
-          const NavigationRailDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
-            label: Text('Perfil'),
+          Scaffold(
+            body: const AdminProfileScreen(),
           ),
-          const NavigationRailDestination(
-            icon: Icon(Icons.people_outlined),
-            selectedIcon: Icon(Icons.people),
-            label: Text('Usuarios'),
-          ),
-          const NavigationRailDestination(
-            icon: Icon(Icons.dynamic_feed_outlined),
-            selectedIcon: Icon(Icons.dynamic_feed),
-            label: Text('Feed'),
+          Scaffold(
+            body: const UserManagementScreen(),
           ),
         ];
 
@@ -102,18 +73,12 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 3,
                 adminProvider,
               ),
-              _buildDrawerItem(
-                Icons.dynamic_feed,
-                'Feed de Publicaciones',
-                4,
-                adminProvider,
-              ),
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Configuración'),
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.pushReplacement(
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const AdminSettingsScreen()));
@@ -123,7 +88,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: const Text('Sobre Nosotros'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const AboutUsScreen(),
@@ -183,15 +148,21 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         );
 
+        final List<String> _appBarTitles = [
+          'Soporte Técnico',
+          'Quejas y Sugerencias',
+          'Mi Perfil',
+          'Gestión de Usuarios',
+        ];
+
         return ResponsiveScaffold(
           pages: adminScreens,
-          titles: _titles,
-          destinations: destinations,
           drawer: drawer,
           initialIndex: adminProvider.selectedIndex,
           onIndexChanged: (index) {
             adminProvider.setSelectedIndex(index);
           },
+          appBarTitle: Text(_appBarTitles[adminProvider.selectedIndex]),
         );
       },
     );

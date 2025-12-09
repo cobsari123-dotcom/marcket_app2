@@ -11,6 +11,12 @@ class AboutUsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sobre Nosotros'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Center(
         child: ConstrainedBox(

@@ -182,19 +182,6 @@ class _CreateEditPublicationScreenState
   Future<void> _savePublication() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (_newImages.isEmpty &&
-        _existingImageUrls.isEmpty &&
-        _newImageUrlsFromWeb.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, selecciona al menos una imagen.'),
-          backgroundColor: AppTheme.error,
-        ),
-      );
-      return;
-    }
-
     if (mounted) setState(() => _isLoading = true);
 
     try {
@@ -279,6 +266,12 @@ class _CreateEditPublicationScreenState
         title: Text(widget.publication == null
             ? 'Crear Publicación'
             : 'Editar Publicación'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Stack(
         children: [

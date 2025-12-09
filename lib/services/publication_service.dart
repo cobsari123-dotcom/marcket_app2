@@ -15,73 +15,60 @@ class PublicationService {
       FirebaseDatabase.instance.ref('comments');
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Stream<List<Publication>> getPublicationsStream({
-    int pageSize = 5,
+  Future<Map<String, dynamic>> getPublications({
     String? startAfterKey,
-    Comparable? startAfterValue,
-    String? category,
+    dynamic startAfterValue,
+    int limit = 10,
     String sortBy = 'timestamp',
     bool descending = true,
-  }) {
+  }) async {
     Query query = _publicationsRef.orderByChild(sortBy);
 
-    if (category != null && category.isNotEmpty) {
-      query = query.orderByChild('category').equalTo(category);
+    if (startAfterValue != null && startAfterKey != null) {
+      query = descending
+          ? query.endBefore(startAfterValue, key: startAfterKey)
+          : query.startAfter(startAfterValue, key: startAfterKey);
     }
 
-    if (startAfterValue != null) {
-      query = query.startAfter([startAfterValue, startAfterKey]);
-    }
+    query = descending ? query.limitToLast(limit) : query.limitToFirst(limit);
 
-    query = query.limitToFirst(pageSize);
+    final event = await query.once();
+    final List<Publication> publications = [];
+    final Map<dynamic, dynamic>? values =
+        event.snapshot.value as Map<dynamic, dynamic>?;
 
-    return query.onValue.map((event) {
-      final List<Publication> publications = [];
-      final Map<dynamic, dynamic>? values =
-          event.snapshot.value as Map<dynamic, dynamic>?;
+    String? lastKey;
+    dynamic lastSortValue;
 
-      if (values != null) {
-        values.forEach((key, value) {
-          try {
-            final Map<String, dynamic> publicationData =
-                Map<String, dynamic>.from(value);
-            publications.add(Publication.fromMap(publicationData, key));
-          } catch (e) {
-            debugPrint('Error parsing publication $key: $e');
-          }
-        });
-      }
+    if (values != null) {
+      List<MapEntry<dynamic, dynamic>> sortedValues = values.entries.toList();
 
+      // Firebase's limitToLast returns in ascending order, so reverse if descending is true.
       if (descending) {
-        publications.sort((a, b) {
-          final aValue = _getPublicationSortValue(a, sortBy);
-          final bValue = _getPublicationSortValue(b, sortBy);
-          if (aValue is DateTime && bValue is DateTime) {
-            return bValue.compareTo(aValue);
-          }
-          if (aValue is String && bValue is String) {
-            return bValue.compareTo(aValue);
-          }
-          if (aValue is num && bValue is num) {
-            return bValue.compareTo(aValue);
-          }
-          return 0;
-        });
+        sortedValues = sortedValues.reversed.toList();
       }
 
-      return publications;
-    });
-  }
+      for (var entry in sortedValues) {
+        try {
+          final Map<String, dynamic> publicationData =
+              Map<String, dynamic>.from(entry.value);
+          publications.add(Publication.fromMap(publicationData, entry.key));
+        } catch (e) {
+          debugPrint('Error parsing publication ${entry.key}: $e');
+        }
+      }
 
-  Comparable _getPublicationSortValue(Publication p, String sortBy) {
-    switch (sortBy) {
-      case 'timestamp':
-        return p.timestamp;
-      case 'title':
-        return p.title;
-      default:
-        return p.timestamp;
+      if (publications.isNotEmpty) {
+        lastKey = publications.last.id;
+        lastSortValue = publications.last.toMap()[sortBy];
+      }
     }
+
+    return {
+      'publications': publications,
+      'lastKey': lastKey,
+      'lastSortValue': lastSortValue,
+    };
   }
 
   Future<void> toggleLike(String publicationId) async {
@@ -162,7 +149,7 @@ class PublicationService {
     String? imageUrl;
     if (imageFile != null) {
       final String imageFileName =
-          'comment_images/${publicationId}/${DateTime.now().millisecondsSinceEpoch}_${currentUser.uid}.jpg';
+          'comment_images/$publicationId/${DateTime.now().millisecondsSinceEpoch}_${currentUser.uid}.jpg';
       final UploadTask uploadTask =
           _storage.ref().child(imageFileName).putFile(imageFile);
       final TaskSnapshot snapshot = await uploadTask;

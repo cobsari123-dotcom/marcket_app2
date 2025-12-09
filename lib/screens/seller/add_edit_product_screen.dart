@@ -179,20 +179,6 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   Future<void> _saveProduct() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (_newImages.isEmpty &&
-        _existingImageUrls.isEmpty &&
-        _newImageUrlsFromWeb.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Por favor, selecciona al menos una imagen para el producto.'),
-          backgroundColor: AppTheme.error,
-        ),
-      );
-      return;
-    }
-
     if (mounted) setState(() => _isLoading = true);
 
     try {
@@ -241,6 +227,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       appBar: AppBar(
         title: Text(
             widget.product == null ? 'Agregar Producto' : 'Editar Producto'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Stack(
         children: [

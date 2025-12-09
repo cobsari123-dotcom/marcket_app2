@@ -10,7 +10,7 @@ class AdminHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Feed de Publicaciones'),
       ),
-      body: const FeedScreen(isAdmin: true),
+      body: const FeedScreen(),
     );
   }
 }

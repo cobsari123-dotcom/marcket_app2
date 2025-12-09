@@ -688,8 +688,10 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
         context: context,
         initialTime: TimeOfDay.now(),
         builder: (BuildContext context, Widget? child) {
+          // ignore: sort_child_properties_last
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+            // ignore: sort_child_properties_last
             child: child!,
           );
         },
@@ -926,8 +928,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
           decoration: BoxDecoration(
             color: AppTheme.background,
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-                color: AppTheme.primary.withAlpha(128)),
+            border: Border.all(color: AppTheme.primary.withAlpha(128)),
           ),
           child: Text(
             _seller?.paymentInstructions?.isNotEmpty == true

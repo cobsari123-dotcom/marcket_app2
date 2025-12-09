@@ -35,13 +35,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   UserModel? _currentUserModel;
   final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
 
-  final List<String> _titles = [
-    'Inicio',
-    'Mis Pedidos',
-    'Mi Perfil',
-    'Mensajes',
-    'Favoritos',
-  ];
+  late final List<Widget> _pages;
+
 
   // Dependencies for the filter/sort dialog, moved from FeedScreen
   final List<String> _categories = [
@@ -60,6 +55,22 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+
+    _pages = [
+      const FeedScreen(),
+      Scaffold(
+        body: const BuyerOrdersScreen(),
+      ),
+      Scaffold(
+        body: BuyerProfileScreen(onProfileUpdated: _loadUserData),
+      ),
+      Scaffold(
+        body: const ChatListScreen(),
+      ),
+      Scaffold(
+        body: const FavoritesScreen(),
+      ),
+    ];
   }
 
   Future<void> _loadUserData() async {
@@ -78,16 +89,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _onDrawerItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    Navigator.pop(context); // Close the drawer
+    if (index >= 0 && index < _pages.length) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   void _showFilterSortDialog() {
@@ -173,42 +179,6 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     final textTheme = Theme.of(context).textTheme;
     final user = FirebaseAuth.instance.currentUser;
 
-    final List<Widget> buyerContent = [
-      const FeedScreen(),
-      const BuyerOrdersScreen(),
-      BuyerProfileScreen(onProfileUpdated: _loadUserData),
-      const ChatListScreen(),
-      const FavoritesScreen(),
-    ];
-
-    final List<NavigationRailDestination> destinations = [
-      const NavigationRailDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: Text('Inicio'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.shopping_bag_outlined),
-        selectedIcon: Icon(Icons.shopping_bag),
-        label: Text('Pedidos'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.person_outlined),
-        selectedIcon: Icon(Icons.person),
-        label: Text('Perfil'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.chat_outlined),
-        selectedIcon: Icon(Icons.chat),
-        label: Text('Mensajes'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.favorite_border),
-        selectedIcon: Icon(Icons.favorite),
-        label: Text('Favoritos'),
-      ),
-    ];
-
     final drawer = Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -255,7 +225,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Configuración', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const BuyerSettingsScreen(),
@@ -271,7 +241,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Notificaciones', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const NotificationsScreen(),
@@ -287,7 +257,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Soporte Técnico', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ContactSupportScreen(),
@@ -304,7 +274,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 Text('Alertas de Administrador', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AdminAlertsScreen(),
@@ -320,7 +290,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             title: Text('Sobre Nosotros', style: textTheme.bodyMedium),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AboutUsScreen(),
@@ -391,80 +361,90 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       );
     }
 
+    final List<String> _appBarTitles = [
+      'Inicio', // For FeedScreen
+      'Mis Pedidos',
+      'Mi Perfil',
+      'Mensajes',
+      'Favoritos',
+    ];
+
+    List<Widget>? currentAppBarActions;
+    if (_selectedIndex == 0) {
+      currentAppBarActions = [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SellerSearchScreen(),
+              ),
+            );
+          },
+        ),
+        StreamBuilder<List<CartItem>>(
+          stream: CartService().getCartStream(),
+          builder: (context, snapshot) {
+            int totalItems = 0;
+            if (snapshot.hasData) {
+              totalItems = snapshot.data!.fold<int>(
+                0,
+                (sum, item) => sum + item.quantity,
+              );
+            }
+            return Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CartScreen(),
+                      ),
+                    );
+                  },
+                ),
+                if (totalItems > 0)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$totalItems',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ];
+    }
+
     return ResponsiveScaffold(
-      pages: buyerContent,
-      titles: _titles,
-      destinations: destinations,
+      pages: _pages,
       drawer: drawer,
       initialIndex: _selectedIndex,
       onIndexChanged: _onItemTapped,
       floatingActionButton: fab,
-      appBarActions: _selectedIndex == 0
-          ? [
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SellerSearchScreen(),
-                    ),
-                  );
-                },
-              ),
-              StreamBuilder<List<CartItem>>(
-                stream: CartService().getCartStream(),
-                builder: (context, snapshot) {
-                  int totalItems = 0;
-                  if (snapshot.hasData) {
-                    totalItems = snapshot.data!.fold<int>(
-                      0,
-                      (sum, item) => sum + item.quantity,
-                    );
-                  }
-                  return Stack(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CartScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      if (totalItems > 0)
-                        Positioned(
-                          right: 5,
-                          top: 5,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              '$totalItems',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ]
-          : null,
+      appBarTitle: Text(_appBarTitles[_selectedIndex]),
+      appBarActions: currentAppBarActions,
     );
   }
 
@@ -490,7 +470,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         (255 * 0.1).round(),
       ),
       onTap: () {
-        _onDrawerItemTapped(index);
+        _onItemTapped(index);
+        Navigator.pop(context);
       },
     )
         .animate()

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 Future<void> testFirebaseTransaction() async {
@@ -21,11 +22,11 @@ Future<void> testFirebaseTransaction() async {
     );
 
     if (transactionResult.committed) {
-      print('Transaction successful: ${transactionResult.snapshot.value}');
+      debugPrint('Transaction successful: ${transactionResult.snapshot.value}');
     } else {
-      print('Transaction failed or aborted.');
+      debugPrint('Transaction failed or aborted.');
     }
   } catch (e) {
-    print('Transaction error: $e');
+    debugPrint('Transaction error: $e');
   }
 }
