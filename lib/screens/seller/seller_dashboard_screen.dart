@@ -242,7 +242,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       );
     }
 
-    final List<String> _appBarTitles = [
+    final List<String> appBarTitles = [
       'Mis Productos',
       'Mis Publicaciones',
       'Mis Ventas',
@@ -256,7 +256,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       initialIndex: _selectedIndex,
       onIndexChanged: _onItemTapped,
       floatingActionButton: fab,
-      appBarTitle: Text(_appBarTitles[_selectedIndex]),
+      appBarTitle: Text(appBarTitles[_selectedIndex]),
     );
   }
 

@@ -86,8 +86,7 @@ class _ReelsPublicationsScreenState extends State<ReelsPublicationsScreen> {
     setState(() {
       if (isLiked) {
         _publications[pubIndex].likes.remove(_currentUserId);
-      } else {
-        _publications[pubIndex].likes[_currentUserId!] = true;
+        _publications[pubIndex].likes[_currentUserId] = true;
       }
     });
 
@@ -97,7 +96,7 @@ class _ReelsPublicationsScreenState extends State<ReelsPublicationsScreen> {
       // Revert on error
       setState(() {
         if (isLiked) {
-          _publications[pubIndex].likes[_currentUserId!] = true;
+          _publications[pubIndex].likes[_currentUserId] = true;
         } else {
           _publications[pubIndex].likes.remove(_currentUserId);
         }
@@ -115,7 +114,6 @@ class _ReelsPublicationsScreenState extends State<ReelsPublicationsScreen> {
       builder: (context) {
         return CommentSheet(
           publicationId: publication.id,
-          initialCommentCount: publication.comments.length,
         );
       },
     );

@@ -372,7 +372,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       );
     }
 
-    final List<String> _appBarTitles = [
+    final List<String> appBarTitles = [
       'Inicio', // For FeedScreen
       'Mis Pedidos',
       'Mi Perfil',
@@ -454,7 +454,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       initialIndex: _selectedIndex,
       onIndexChanged: _onItemTapped,
       floatingActionButton: fab,
-      appBarTitle: Text(_appBarTitles[_selectedIndex]),
+      appBarTitle: Text(appBarTitles[_selectedIndex]),
       appBarActions: currentAppBarActions,
     );
   }

@@ -196,7 +196,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                 Text('Suspendiendo a: ${user.fullName} (${user.email})'),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<SanctionDuration>(
-                  value: selectedDuration,
+                  initialValue: selectedDuration,
                   decoration: const InputDecoration(
                     labelText: 'Duración de la Suspensión',
                     border: OutlineInputBorder(),
@@ -424,7 +424,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<SanctionType>(
-                  value: selectedSanctionType,
+                  initialValue: selectedSanctionType,
                   decoration: const InputDecoration(
                     labelText: 'Tipo de Sanción',
                     border: OutlineInputBorder(),

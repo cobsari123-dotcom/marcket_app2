@@ -148,7 +148,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         );
 
-        final List<String> _appBarTitles = [
+        final List<String> appBarTitles = [
           'Soporte Técnico',
           'Quejas y Sugerencias',
           'Mi Perfil',
@@ -162,7 +162,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
           onIndexChanged: (index) {
             adminProvider.setSelectedIndex(index);
           },
-          appBarTitle: Text(_appBarTitles[adminProvider.selectedIndex]),
+          appBarTitle: Text(appBarTitles[adminProvider.selectedIndex]),
         );
       },
     );

@@ -69,7 +69,7 @@ class ProductListProvider with ChangeNotifier {
         return;
       }
 
-      final newProducts = await _productService.getProductsPaginated(
+      final newProducts = await _productService.getSellerProductsPaginated(
         userId,
         pageSize: 10,
         startAfterKey: _lastProductKey,

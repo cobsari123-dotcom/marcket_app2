@@ -11,12 +11,17 @@ class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onTap;
   final bool isAdmin;
+  final String? sellerName;
+  final String? sellerProfilePicture;
 
-  const ProductCard(
-      {super.key,
-      required this.product,
-      required this.onTap,
-      this.isAdmin = false});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onTap,
+    this.isAdmin = false,
+    this.sellerName,
+    this.sellerProfilePicture,
+  });
 
   @override
   State<ProductCard> createState() => ProductCardState();
@@ -132,6 +137,28 @@ class ProductCardState extends State<ProductCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (widget.sellerName != null) ...[
+                    Row(
+                      children: [
+                        if (widget.sellerProfilePicture != null)
+                          CircleAvatar(
+                            radius: 12,
+                            backgroundImage:
+                                NetworkImage(widget.sellerProfilePicture!),
+                          ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.sellerName!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   Text(
                     widget.product.name,
                     style: Theme.of(context).textTheme.titleMedium,

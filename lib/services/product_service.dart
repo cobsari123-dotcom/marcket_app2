@@ -21,8 +21,8 @@ class ProductService {
     return _productsRef.child(userId).onValue;
   }
 
-  // Nuevo método para obtener productos paginados
-  Future<List<Product>> getProductsPaginated(String userId,
+  // Nuevo método para obtener productos paginados de un vendedor específico
+  Future<List<Product>> getSellerProductsPaginated(String userId,
       {int pageSize = 10, String? startAfterKey}) async {
     Query query = _productsRef.child(userId).orderByKey();
 
@@ -44,6 +44,70 @@ class ProductService {
           Map<String, dynamic>.from(entry.value as Map), entry.key,
           sellerIdParam: userId);
     }).toList();
+  }
+
+  // Nuevo método para obtener productos paginados y ordenados para el feed principal
+  Future<Map<String, dynamic>> getProducts({
+    String? startAfterKey,
+    dynamic startAfterValue,
+    int limit = 10,
+    String sortBy = 'timestamp',
+    bool descending = true,
+  }) async {
+    Query query = _productsRef.orderByChild(sortBy);
+
+    if (startAfterValue != null) {
+      if (descending) {
+        query = query.endBefore(startAfterValue);
+      } else {
+        query = query.startAfter(startAfterValue);
+      }
+    }
+
+    query = query.limitToFirst(limit); // For descending, this implies limitToLast then reverse
+
+    if (descending) {
+      query = query.limitToLast(limit);
+    }
+
+    final snapshot = await query.get();
+
+    if (snapshot.value == null) {
+      return {'products': [], 'lastKey': null, 'lastSortValue': null};
+    }
+
+    final List<Product> products = [];
+    final Map<String, dynamic> data =
+        Map<String, dynamic>.from(snapshot.value as Map);
+
+    // Convert map to list and apply client-side sorting for Firebase Realtime Database limitations
+    // (Firebase orderByChild with start/end after/before needs careful handling for full pagination)
+    data.forEach((key, value) {
+      products.add(Product.fromMap(Map<String, dynamic>.from(value), key,
+          sellerIdParam: value['sellerId'])); // sellerId is now part of the product data
+    });
+
+    // Re-sort if fetching in descending order (since Firebase's limitToLast is tricky with actual order)
+    if (descending) {
+      products.sort((a, b) =>
+          b.toMap()[sortBy].compareTo(a.toMap()[sortBy])); // Sort in descending
+    } else {
+      products.sort((a, b) =>
+          a.toMap()[sortBy].compareTo(b.toMap()[sortBy])); // Sort in ascending
+    }
+
+    String? lastKey;
+    dynamic lastSortValue;
+    if (products.isNotEmpty) {
+      lastKey = products.last.id;
+      lastSortValue = products.last.toMap()[sortBy];
+    }
+
+    return {
+      'products': products,
+      'lastKey': lastKey,
+      'lastSortValue': lastSortValue
+    };
   }
 
   // Obtener un producto específico por su ID

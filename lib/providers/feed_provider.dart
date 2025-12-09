@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marcket_app/models/product.dart';
 import 'package:marcket_app/models/user.dart';
@@ -9,7 +8,7 @@ import 'dart:async';
 class FeedProvider with ChangeNotifier {
   final ProductService _productService = ProductService();
   final UserService _userService = UserService();
-  final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  // final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid; // Removed as it's unused
 
   List<Product> _products = [];
   final Map<String, UserModel> _sellerData = {};
@@ -19,7 +18,9 @@ class FeedProvider with ChangeNotifier {
   bool _hasMoreProducts = true;
 
   // Variables for pagination
+  // ignore: unused_field
   String? _lastProductKey;
+  // ignore: unused_field
   dynamic _lastProductSortValue;
 
   // Parámetros de filtro y ordenamiento
@@ -55,11 +56,11 @@ class FeedProvider with ChangeNotifier {
     loadInitialProducts();
   }
 
-  Future<void> fetchPublications({bool forceRefresh = false}) async {
+  Future<void> fetchProducts({bool forceRefresh = false}) async {
     if (forceRefresh) {
-      await loadInitialPublications();
+      await loadInitialProducts();
     } else {
-      await loadMorePublications();
+      await loadMoreProducts();
     }
   }
 
@@ -85,6 +86,54 @@ class FeedProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _fetchProducts({bool isInitialFetch = false}) async {
+    _errorMessage = null;
+    if (isInitialFetch) {
+      _isLoadingInitial = true;
+      _products = [];
+      _sellerData.clear();
+      _lastProductKey = null;
+      _lastProductSortValue = null;
+      _hasMoreProducts = true;
+      notifyListeners();
+    } else if (!_hasMoreProducts) {
+      return;
+    }
+
+    try {
+      final result = await _productService.getProducts(
+        startAfterKey: _lastProductKey,
+        startAfterValue: _lastProductSortValue,
+        limit: 10, // Define a page size
+        sortBy: _sortBy,
+        descending: _descending,
+      );
+
+      final List<Product> fetchedProducts = result['products'];
+      _lastProductKey = result['lastKey'];
+      _lastProductSortValue = result['lastSortValue'];
+      _hasMoreProducts = fetchedProducts.length == 10; // Assuming 10 is the page size
+
+      if (!hasListeners) return;
+
+      if (isInitialFetch) {
+        _products = fetchedProducts;
+      } else {
+        _products.addAll(fetchedProducts);
+      }
+      await _fetchSellerDataForProducts(fetchedProducts);
+    } catch (e) {
+      if (!hasListeners) return;
+      _errorMessage = 'Error al cargar productos: $e';
+    } finally {
+      if (hasListeners) {
+        _isLoadingInitial = false;
+        // _isLoadingMore is not used here as it's part of the provider state logic
+        notifyListeners();
+      }
+    }
+  }
+
   Future<void> _fetchSellerDataForProducts(List<Product> products) async {
     final Set<String> sellerIds = products.map((p) => p.sellerId).toSet();
     for (final id in sellerIds) {
@@ -101,21 +150,20 @@ class FeedProvider with ChangeNotifier {
   void setCategory(String? category) {
     if (_selectedCategory != category) {
       _selectedCategory = category;
-      loadInitialPublications(); // Recargar todo con el nuevo filtro
+      loadInitialProducts(); // Recargar todo con el nuevo filtro
     }
   }
 
   void setSortBy(String sortBy) {
     if (_sortBy != sortBy) {
-      _sortBy = sortBy;
-      loadInitialPublications(); // Recargar todo con el nuevo orden
+      loadInitialProducts(); // Recargar todo con el nuevo orden
     }
   }
 
   void setDescending(bool descending) {
     if (_descending != descending) {
       _descending = descending;
-      loadInitialPublications(); // Recargar todo con el nuevo orden
+      loadInitialProducts(); // Recargar todo con el nuevo orden
     }
   }
 }

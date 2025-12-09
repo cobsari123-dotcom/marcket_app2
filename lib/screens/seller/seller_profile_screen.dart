@@ -52,7 +52,7 @@ class _SellerProfileScreenState extends State<SellerProfileScreen>
             Tab(icon: Icon(Icons.article), text: 'Mis Publicaciones'),
           ],
           labelColor: Theme.of(context).colorScheme.onPrimary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withAlpha((255 * 0.7).round()),
           indicatorColor: Theme.of(context).colorScheme.secondary,
         ),
         Expanded(
