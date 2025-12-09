@@ -77,15 +77,19 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     final List<Widget> widgetOptions = <Widget>[
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const MyProductsScreen(),
       ),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const SellerPublicationsScreen(),
       ),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const SellerOrdersScreen(),
       ),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const ChatListScreen(),
       ),

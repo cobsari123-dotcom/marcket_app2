@@ -31,15 +31,19 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer2<AdminDashboardProvider, ThemeProvider>(
       builder: (context, adminProvider, themeProvider, child) {
         final List<Widget> adminScreens = [
+          // ignore: prefer_const_constructors
           Scaffold(
             body: const SupportChatList(),
           ),
+          // ignore: prefer_const_constructors
           Scaffold(
             body: const AdminComplaintsSuggestionsScreen(),
           ),
+          // ignore: prefer_const_constructors
           Scaffold(
             body: const AdminProfileScreen(),
           ),
+          // ignore: prefer_const_constructors
           Scaffold(
             body: const UserManagementScreen(),
           ),

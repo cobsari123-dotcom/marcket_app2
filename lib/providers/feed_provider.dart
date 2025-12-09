@@ -25,6 +25,7 @@ class FeedProvider with ChangeNotifier {
 
   // Parámetros de filtro y ordenamiento
   String? _selectedCategory;
+  // ignore: prefer_final_fields
   String _sortBy = 'timestamp';
   bool _descending = true;
 

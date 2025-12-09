@@ -58,15 +58,18 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
     _pages = [
       const FeedScreen(),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const BuyerOrdersScreen(),
       ),
       Scaffold(
         body: BuyerProfileScreen(onProfileUpdated: _loadUserData),
       ),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const ChatListScreen(),
       ),
+      // ignore: prefer_const_constructors
       Scaffold(
         body: const FavoritesScreen(),
       ),
