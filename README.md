@@ -85,6 +85,13 @@ Hemos realizado una serie de mejoras significativas en la aplicación para ofrec
     *   **Animaciones Sutiles:** Incorporación de animaciones `fade` y `slideY` en los elementos del menú lateral de los dashboards para una experiencia de navegación más fluida y atractiva.
     *   **Diseño Profesional:** Mejoras en el layout del perfil de edición de vendedor y en la `FullScreenPublicationView` para una apariencia más cuidada y consistente.
 
+### **Mejoras en UI y Navegación**
+*   **Manejo de AppBar y Cajón de Navegación Unificado:** Se ha centralizado la gestión del `AppBar` y el botón de menú de hamburguesa en el `ResponsiveScaffold` para pantallas móviles, eliminando `AppBars` duplicados y asegurando que el cajón de navegación (`Drawer`) se abra correctamente al hacer clic en el icono.
+*   **Navegación Consistente en Pantallas Auxiliares:** Corregida la navegación desde pantallas como 'Configuración', 'Notificaciones' y 'Sobre Nosotros' para permitir un retorno adecuado a la pantalla anterior (dashboard) en lugar de llevar al inicio de sesión o salir de la aplicación. Todas estas pantallas ahora incluyen un botón de "volver" en su `AppBar`.
+*   **Corrección de Perfil de Vendedor:** Eliminado el `AppBar` duplicado en la pantalla de perfil del vendedor y reestructurado el diseño para una presentación más limpia y sin conflictos.
+*   **Mapeo Funcional de Botones en Dashboard de Vendedor:** Ajustada la lógica de los botones flotantes (`FloatingActionButton`) en el dashboard del vendedor para que las opciones de "Agregar Producto" y "Crear Publicación" aparezcan en sus respectivas pestañas ("Mis Productos" y "Mis Publicaciones").
+*   **Gestión de Imágenes Verificada:** Confirmado que las pantallas de agregar/editar productos y publicaciones ya soportan imágenes opcionales, subidas desde galería/cámara y mediante URL, con navegación de retorno consistente.
+
 ---
 
 ## 🛠️ Arquitectura y Tecnologías
