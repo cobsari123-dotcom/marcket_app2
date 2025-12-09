@@ -127,12 +127,14 @@ class MyApp extends StatelessWidget {
                 final arguments = ModalRoute.of(context)!.settings.arguments;
                 Map<String, String>? chatArgs;
 
-                if (arguments is Map &&
-                    arguments.containsKey('chatRoomId') &&
-                    arguments.containsKey('otherUserName') &&
-                    arguments['chatRoomId'] is String &&
-                    arguments['otherUserName'] is String) {
-                  chatArgs = Map<String, String>.from(arguments);
+                if (arguments is Map<String, dynamic>) {
+                  // Further check for specific keys and their types
+                  if (arguments.containsKey('chatRoomId') &&
+                      arguments.containsKey('otherUserName') &&
+                      arguments['chatRoomId'] is String &&
+                      arguments['otherUserName'] is String) {
+                    chatArgs = Map<String, String>.from(arguments);
+                  }
                 } else {
                   // Log the unexpected argument type for debugging
                   debugPrint(
