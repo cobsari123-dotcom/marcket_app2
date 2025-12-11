@@ -125,6 +125,15 @@ La aplicación utiliza una arquitectura moderna y escalable, diseñada para ser 
 
 -   **Diseño Adaptable (Responsive Design):** La navegación principal de la aplicación es totalmente adaptable. Utiliza un widget `ResponsiveScaffold` personalizado que muestra un `NavigationRail` (menú lateral fijo) en pantallas anchas como tabletas o computadoras, y un `Drawer` (menú de hamburguesa) en pantallas estrechas como las de los móviles. Esto asegura una experiencia de usuario óptima en cualquier dispositivo.
 
+### Principales Dependencias
+El proyecto utiliza una selección de paquetes de alta calidad de la comunidad de Flutter para acelerar el desarrollo y garantizar funcionalidades robustas:
+
+-   **Firebase Suite:** `firebase_core`, `firebase_auth`, `firebase_database`, `firebase_storage`, `firebase_messaging` para toda la funcionalidad de backend.
+-   **Gestión de Estado:** `provider` para un manejo de estado simple y eficiente.
+-   **Autenticación Social:** `google_sign_in` para el inicio de sesión con Google.
+-   **UI y UX:** `flutter_animate`, `shimmer`, `font_awesome_flutter`, `carousel_slider` para una interfaz moderna y atractiva.
+-   **Utilidades:** `image_picker`, `file_picker`, `url_launcher`, `share_plus` para interactuar con el sistema operativo.
+
 ### Estructura del Proyecto
 El proyecto sigue una estructura organizada para facilitar la navegación y el mantenimiento:
 - **`lib/models`**: Contiene los modelos de datos de la aplicación (ej. `User`, `Product`, `Order`).

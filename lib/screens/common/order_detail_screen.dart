@@ -30,17 +30,13 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
   UserModel? _seller;
   Stream<DatabaseEvent>? _orderStream;
   bool _isProcessing = false;
-  final TextEditingController _rejectionReasonController =
-      TextEditingController();
-  final TextEditingController _trackingNumberController =
-      TextEditingController();
-  final TextEditingController _estimatedDeliveryDateController =
-      TextEditingController();
+  
+  final TextEditingController _rejectionReasonController = TextEditingController();
+  final TextEditingController _trackingNumberController = TextEditingController();
+  final TextEditingController _estimatedDeliveryDateController = TextEditingController();
   DateTime? _selectedEstimatedDeliveryDate;
-  final TextEditingController _estimatedDeliveryTimeWindowController =
-      TextEditingController();
-  final TextEditingController _deliveryCodeConfirmationController =
-      TextEditingController();
+  final TextEditingController _estimatedDeliveryTimeWindowController = TextEditingController();
+  final TextEditingController _deliveryCodeConfirmationController = TextEditingController();
 
   @override
   void dispose() {
@@ -55,8 +51,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _orderStream =
-        FirebaseDatabase.instance.ref('orders/${widget.orderId}').onValue;
+    _orderStream = FirebaseDatabase.instance.ref('orders/${widget.orderId}').onValue;
     _loadCurrentUser();
   }
 
@@ -64,8 +59,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
     if (_currentUserId == null) {
       return;
     }
-    final userSnapshot =
-        await FirebaseDatabase.instance.ref('users/$_currentUserId').get();
+    final userSnapshot = await FirebaseDatabase.instance.ref('users/$_currentUserId').get();
     if (userSnapshot.exists && mounted) {
       setState(() {
         _currentUser = UserModel.fromMap(
@@ -79,8 +73,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
     if (_seller != null) {
       return;
     }
-    final sellerSnapshot =
-        await FirebaseDatabase.instance.ref('users/$sellerId').get();
+    final sellerSnapshot = await FirebaseDatabase.instance.ref('users/$sellerId').get();
     if (sellerSnapshot.exists && mounted) {
       setState(() {
         _seller = UserModel.fromMap(
@@ -792,8 +785,8 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
           ElevatedButton(
             onPressed: () =>
                 Navigator.pop(context, _rejectionReasonController.text),
-            child: const Text('Sí, Cancelar'),
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            child: const Text('Sí, Cancelar'), // child movido al final
           ),
         ],
       ),
