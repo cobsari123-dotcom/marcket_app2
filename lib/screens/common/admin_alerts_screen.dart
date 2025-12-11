@@ -122,12 +122,7 @@ class _AdminAlertsScreenState extends State<AdminAlertsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alertas de Administrador'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        automaticallyImplyLeading: false, // Remove default back button
       ),
       body: StreamBuilder(
         stream: _alertsQuery.onValue,

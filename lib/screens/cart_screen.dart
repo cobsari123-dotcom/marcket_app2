@@ -9,6 +9,8 @@ import 'package:collection/collection.dart'; // Import for groupBy
 import 'package:image_picker/image_picker.dart'; // New import
 import 'package:firebase_storage/firebase_storage.dart'; // New import
 import 'dart:io'; // New import
+import 'package:marcket_app/utils/ticket_generator.dart'; // NEW import
+import 'package:printing/printing.dart'; // NEW import
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -134,6 +136,7 @@ class _CartScreenState extends State<CartScreen> {
 
     try {
       final ordersRef = FirebaseDatabase.instance.ref('orders');
+      List<Order> createdOrders = []; // To store created orders for ticket generation
 
       for (var entry in itemsBySeller.entries) {
         final sellerId = entry.key;
@@ -164,6 +167,7 @@ class _CartScreenState extends State<CartScreen> {
         );
 
         await ordersRef.child(newOrderId).set(newOrder.toMap());
+        createdOrders.add(newOrder); // Add created order to list
       }
 
       // Clear the cart after successful order creation
@@ -176,6 +180,32 @@ class _CartScreenState extends State<CartScreen> {
           backgroundColor: AppTheme.success,
         ),
       );
+
+      // Generate and offer to share tickets for each created order
+      for (final order in createdOrders) {
+        final pdfBytes = await generatePaymentTicketPdf(order);
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('¡Pedido Creado!'),
+            content: Text('Tu pedido ${order.id} ha sido creado. ¿Deseas descargar/compartir tu ticket?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('No, gracias'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await Printing.sharePdf(bytes: pdfBytes, filename: 'ticket_${order.id}.pdf');
+                },
+                child: const Text('Sí, descargar/compartir'),
+              ),
+            ],
+          ),
+        );
+      }
 
       // TODO: Navigate to the 'My Orders' screen
       // Navigator.pushReplacementNamed(context, '/buyer_orders');
@@ -243,10 +273,12 @@ class _CartScreenState extends State<CartScreen> {
               double total = cartItems.fold(
                   0, (sum, item) => sum + (item.price * item.quantity));
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true, // Important for ListView inside SingleChildScrollView
+                      physics: const NeverScrollableScrollPhysics(), // Important for ListView inside SingleChildScrollView
                       itemCount: cartItems.length,
                       itemBuilder: (context, index) {
                         final item = cartItems[index];
@@ -330,51 +362,54 @@ class _CartScreenState extends State<CartScreen> {
                         );
                       },
                     ),
-                  ),
-                  _buildPaymentAndDeliverySection(), // NEW: Payment method selection and delivery details
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Total:',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            Text('\$${total.toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(color: AppTheme.primary)),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: (cartItems.isEmpty || _isProcessing)
-                                ? null
-                                : () => _checkout(cartItems),
-                            icon: _isProcessing
-                                ? const SizedBox.shrink()
-                                : const Icon(Icons.check_circle_outline),
-                            label: _isProcessing
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white)
-                                : const Text('Finalizar Compra'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              textStyle: Theme.of(context).textTheme.titleLarge,
+                    _buildPaymentAndDeliverySection(), // NEW: Payment method selection and delivery details
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Total:',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                              Text('\$${total.toStringAsFixed(2)}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(color: AppTheme.primary)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: (cartItems.isEmpty || _isProcessing)
+                                  ? null
+                                  : () => _checkout(cartItems),
+                              icon: _isProcessing
+                                  ? const SizedBox.shrink()
+                                  : const Icon(Icons.check_circle_outline),
+                              label: _isProcessing
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white)
+                                  : const Text('Finalizar Compra'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                textStyle:
+                                    Theme.of(context).textTheme.titleLarge,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),

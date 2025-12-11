@@ -2,26 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:marcket_app/models/user.dart';
-import 'package:marcket_app/providers/feed_provider.dart';
-import 'package:marcket_app/screens/buyer/buyer_orders_screen.dart';
-import 'package:marcket_app/screens/buyer/buyer_profile_screen.dart';
-import 'package:marcket_app/screens/buyer/buyer_settings_screen.dart';
-import 'package:marcket_app/utils/theme.dart';
-import 'package:marcket_app/screens/buyer/feed_screen.dart';
-import 'package:marcket_app/screens/chat/chat_list_screen.dart';
-import 'package:marcket_app/screens/common/admin_alerts_screen.dart';
-import 'package:marcket_app/screens/common/contact_support_screen.dart';
-import 'package:marcket_app/screens/common/notifications_screen.dart';
-import 'package:marcket_app/screens/common/about_us_screen.dart'; // Added import
-import 'package:marcket_app/screens/cart_screen.dart';
-import 'package:marcket_app/screens/buyer/seller_search_screen.dart';
-import 'package:marcket_app/services/cart_service.dart';
-import 'package:marcket_app/screens/buyer/favorites_screen.dart';
-import 'package:marcket_app/models/cart_item.dart';
-import 'package:marcket_app/widgets/responsive_scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
+// Importaciones de servicios y utilidades
 import 'package:marcket_app/services/auth_management_service.dart';
+import 'package:marcket_app/services/cart_service.dart';
+import 'package:marcket_app/utils/theme.dart';
+import 'package:marcket_app/models/cart_item.dart';
+import 'package:marcket_app/widgets/responsive_scaffold.dart';
+
+// Importaciones de Pantallas (Asegúrate de que estos archivos existan)
+import 'package:marcket_app/screens/buyer/buyer_orders_screen.dart';
+import 'package:marcket_app/screens/buyer/buyer_profile_screen.dart';
+import 'package:marcket_app/screens/buyer/buyer_settings_screen.dart'; // Descomentado
+import 'package:marcket_app/screens/chat/chat_list_screen.dart';
+import 'package:marcket_app/screens/cart_screen.dart';
+import 'package:marcket_app/screens/buyer/seller_search_screen.dart';
+import 'package:marcket_app/screens/buyer/favorites_screen.dart';
+import 'package:marcket_app/screens/common/welcome_dashboard_screen.dart';
+import 'package:marcket_app/screens/buyer/explore_products_screen.dart';
+
+
+// Importaciones de pantallas comunes (Descomentadas)
+import 'package:marcket_app/screens/common/admin_alerts_screen.dart'; 
+import 'package:marcket_app/screens/common/contact_support_screen.dart'; 
+import 'package:marcket_app/screens/common/notifications_screen.dart'; 
+import 'package:marcket_app/screens/common/about_us_screen.dart'; 
 
 class BuyerDashboardScreen extends StatefulWidget {
   const BuyerDashboardScreen({super.key});
@@ -37,42 +44,26 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
   late final List<Widget> _pages;
 
-
-  // Dependencies for the filter/sort dialog, moved from FeedScreen
-  final List<String> _categories = [
-    'Todas',
-    'Artesanía',
-    'Comida',
-    'Servicios',
-    'Otros'
-  ];
-  final Map<String, String> _sortByOptions = {
-    'timestamp': 'Más Recientes',
-    'title': 'Título',
-  };
-
   @override
   void initState() {
     super.initState();
     _loadUserData();
 
+    // Inicialización de las páginas
+    // NOTA: He quitado 'const' de la mayoría para evitar errores de compilación
+    // si las pantallas internas no son constantes.
     _pages = [
-      const FeedScreen(),
-      // ignore: prefer_const_constructors
-      Scaffold(
-        body: const BuyerOrdersScreen(),
-      ),
-      Scaffold(
-        body: BuyerProfileScreen(onProfileUpdated: _loadUserData),
-      ),
-      // ignore: prefer_const_constructors
-      Scaffold(
-        body: const ChatListScreen(),
-      ),
-      // ignore: prefer_const_constructors
-      Scaffold(
-        body: const FavoritesScreen(),
-      ),
+      const WelcomeDashboardScreen(), // 0
+      const Scaffold(body: BuyerOrdersScreen()), // 1
+      Scaffold(body: BuyerProfileScreen(onProfileUpdated: _loadUserData)), // 2
+      const Scaffold(body: ChatListScreen()), // 3
+      const Scaffold(body: FavoritesScreen()), // 4
+      const Scaffold(body: ExploreProductsScreen()), // 5
+      const Scaffold(body: BuyerSettingsScreen()), // 6
+      const Scaffold(body: NotificationsScreen()), // 7
+      const Scaffold(body: ContactSupportScreen()), // 8
+      const Scaffold(body: AdminAlertsScreen()), // 9
+      const Scaffold(body: AboutUsScreen()), // 10
     ];
   }
 
@@ -80,10 +71,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final snapshot = await _databaseRef.child('users/${user.uid}').get();
-      if (snapshot.exists && mounted) {
+      if (snapshot.exists && snapshot.value is Map && mounted) {
         setState(() {
+          final Map<dynamic, dynamic> rawData = snapshot.value as Map<dynamic, dynamic>;
           _currentUserModel = UserModel.fromMap(
-            Map<String, dynamic>.from(snapshot.value as Map),
+            Map<String, dynamic>.from(rawData),
             user.uid,
           );
         });
@@ -97,84 +89,6 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         _selectedIndex = index;
       });
     }
-  }
-
-  void _showFilterSortDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Filtrar y Ordenar Publicaciones'),
-          content: Consumer<FeedProvider>(
-            builder: (context, provider, child) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Categoría:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  DropdownButton<String>(
-                    value: provider.selectedCategory ?? 'Todas',
-                    onChanged: (String? newValue) {
-                      provider
-                          .setCategory(newValue == 'Todas' ? null : newValue);
-                    },
-                    items: _categories
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Ordenar por:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  DropdownButton<String>(
-                    value: provider.sortBy,
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        provider.setSortBy(newValue);
-                      }
-                    },
-                    items: _sortByOptions.entries.map<DropdownMenuItem<String>>(
-                        (MapEntry<String, String> entry) {
-                      return DropdownMenuItem<String>(
-                        value: entry.key,
-                        child: Text(entry.value),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const Text('Orden:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Switch(
-                        value: provider.descending,
-                        onChanged: (bool value) {
-                          provider.setDescending(value);
-                        },
-                        activeThumbColor: AppTheme.primary,
-                      ),
-                      Text(provider.descending ? 'Descendente' : 'Ascendente'),
-                    ],
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -199,10 +113,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                   ),
                 ),
                 Text(
-                  // Display role here
                   _getTranslatedRole(_currentUserModel?.userType),
                   style: textTheme.titleSmall?.copyWith(
-                    // Smaller font for role
                     color: AppTheme.onPrimary.withAlpha((255 * 0.8).round()),
                   ),
                 ),
@@ -234,99 +146,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           _buildDrawerItem(Icons.person, 'Mi Perfil', 2),
           _buildDrawerItem(Icons.chat, 'Mensajes', 3),
           _buildDrawerItem(Icons.favorite, 'Favoritos', 4),
-          ListTile(
-            leading: const Icon(
-              Icons.video_collection,
-              color: AppTheme.secondary,
-            ),
-            title: Text('Publicaciones (Reels)', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/reels_publications');
-            },
-          ),
+          _buildDrawerItem(Icons.store, 'Explorar Productos', 5),
           const Divider(),
-          ListTile(
-            leading: const Icon(
-              Icons.settings,
-              color: AppTheme.secondary,
-            ),
-            title: Text('Configuración', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BuyerSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.notifications,
-              color: AppTheme.secondary,
-            ),
-            title: Text('Notificaciones', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationsScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.support_agent,
-              color: AppTheme.secondary,
-            ),
-            title: Text('Soporte Técnico', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ContactSupportScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.warning_amber_rounded,
-              color: AppTheme.secondary,
-            ),
-            title:
-                Text('Alertas de Administrador', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AdminAlertsScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.info_outline,
-              color: AppTheme.secondary,
-            ),
-            title: Text('Sobre Nosotros', style: textTheme.bodyMedium),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AboutUsScreen(),
-                ),
-              );
-            },
-          ),
+          _buildDrawerItem(Icons.settings, 'Configuración', 6),
+          _buildDrawerItem(Icons.notifications, 'Notificaciones', 7),
+          _buildDrawerItem(Icons.support_agent, 'Soporte Técnico', 8),
+          _buildDrawerItem(Icons.warning_amber_rounded, 'Alertas de Administrador', 9),
+          _buildDrawerItem(Icons.info_outline, 'Sobre Nosotros', 10),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.error),
@@ -360,19 +186,21 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
               if (confirmed == true && mounted) {
                 await authManagementService.signOut();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Sesión cerrada correctamente.'),
-                    duration: const Duration(seconds: 3),
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                );
-                await Future.delayed(const Duration(milliseconds: 500));
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/',
-                  (route) => false,
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Sesión cerrada correctamente.'),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                  );
+                  await Future.delayed(const Duration(milliseconds: 500));
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/',
+                    (route) => false,
+                  );
+                }
               }
             },
           ),
@@ -380,22 +208,20 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       ),
     );
 
-    Widget? fab;
-    if (_selectedIndex == 0) {
-      // Only show FAB for FeedScreen
-      fab = FloatingActionButton(
-        onPressed: _showFilterSortDialog,
-        backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.filter_list),
-      );
-    }
+    Widget? fab; 
 
     final List<String> appBarTitles = [
-      'Inicio', // For FeedScreen
-      'Mis Pedidos',
-      'Mi Perfil',
-      'Mensajes',
-      'Favoritos',
+      'Bienvenida', // 0
+      'Mis Pedidos', // 1
+      'Mi Perfil', // 2
+      'Mensajes', // 3
+      'Favoritos', // 4
+      'Explorar Productos', // 5
+      'Configuración', // 6
+      'Notificaciones', // 7
+      'Soporte Técnico', // 8
+      'Alertas de Administrador', // 9
+      'Sobre Nosotros', // 10
     ];
 
     List<Widget>? currentAppBarActions;
@@ -510,11 +336,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
   String _getTranslatedRole(String? userType) {
     switch (userType) {
-      case 'Buyer': // Case 'Buyer' from UserModel
+      case 'Buyer':
         return 'Comprador';
-      case 'Seller': // Case 'Seller' from UserModel
+      case 'Seller':
         return 'Vendedor';
-      case 'Admin': // Case 'Admin' from UserModel
+      case 'Admin':
         return 'Administrador';
       default:
         return 'Rol Desconocido';

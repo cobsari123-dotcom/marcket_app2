@@ -11,6 +11,7 @@ import 'package:marcket_app/widgets/publication_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Import for FontAwesomeIcons
 import 'package:url_launcher/url_launcher.dart'; // Import for url_launcher
 import 'package:share_plus/share_plus.dart'; // Import share_plus
+import 'package:marcket_app/utils/theme.dart'; // Explicitly add import for AppTheme
 
 class PublicSellerProfileScreen extends StatefulWidget {
   final String sellerId;
@@ -151,8 +152,11 @@ class PublicSellerProfileScreenState extends State<PublicSellerProfileScreen>
             Tab(icon: Icon(Icons.article), text: 'Publicaciones'),
             Tab(icon: Icon(Icons.store), text: 'Productos'),
           ],
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withAlpha(178),
+          labelColor: AppTheme.secondary,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: AppTheme.secondary,
+          indicatorWeight: 3.0,
+          indicatorSize: TabBarIndicatorSize.tab,
         ),
       ),
       body: _seller == null

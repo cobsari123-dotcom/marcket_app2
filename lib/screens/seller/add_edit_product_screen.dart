@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:marcket_app/models/product.dart';
 import 'package:marcket_app/services/product_service.dart';
 import 'package:marcket_app/utils/theme.dart';
+import 'package:intl/intl.dart'; // Import for DateFormat
 
 class AddEditProductScreen extends StatefulWidget {
   final Product? product;
@@ -22,14 +23,20 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _imageUrlController =
-      TextEditingController(); // New controller for image URL
+  final _imageUrlController = TextEditingController();
+
+  // New controllers for freshness and weight
+  final _freshnessController = TextEditingController();
+  final _freshnessDateController = TextEditingController();
+  final _weightValueController = TextEditingController();
+  final _weightUnitController = TextEditingController();
+
+  String _selectedProductType = 'Artesanía'; // Default product type
 
   final List<File> _newImages = [];
   List<String> _existingImageUrls = [];
   final List<String> _imagesToRemove = [];
-  final List<String> _newImageUrlsFromWeb =
-      []; // New list for image URLs from web
+  final List<String> _newImageUrlsFromWeb = [];
 
   bool _isFeatured = false;
   bool _isLoading = false;
@@ -46,6 +53,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       _categoryController.text = widget.product!.category;
       _isFeatured = widget.product!.isFeatured;
       _existingImageUrls = List<String>.from(widget.product!.imageUrls);
+
+      // Initialize new fields
+      _freshnessController.text = widget.product!.freshness ?? '';
+      if (widget.product!.freshnessDate != null) {
+        _freshnessDateController.text = DateFormat('dd/MM/yyyy').format(widget.product!.freshnessDate!);
+      }
+      _weightValueController.text = widget.product!.weightValue?.toString() ?? '';
+      _weightUnitController.text = widget.product!.weightUnit ?? '';
+      _selectedProductType = widget.product!.productType;
     }
   }
 
@@ -56,7 +72,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     _priceController.dispose();
     _stockController.dispose();
     _categoryController.dispose();
-    _imageUrlController.dispose(); // Dispose new controller
+    _imageUrlController.dispose();
+    // Dispose new controllers
+    _freshnessController.dispose();
+    _freshnessDateController.dispose();
+    _weightValueController.dispose();
+    _weightUnitController.dispose();
     super.dispose();
   }
 
@@ -138,11 +159,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, ingresa una URL.';
                 }
-                // Basic URL validation
                 if (Uri.tryParse(value)?.hasAbsolutePath != true) {
                   return 'Ingresa una URL válida.';
                 }
-                // Basic image file extension check
                 if (!value.toLowerCase().endsWith('.jpg') &&
                     !value.toLowerCase().endsWith('.jpeg') &&
                     !value.toLowerCase().endsWith('.png') &&
@@ -176,12 +195,36 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     );
   }
 
+  Future<void> _selectFreshnessDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      if (!mounted) return;
+      setState(() {
+        _freshnessDateController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
+      });
+    }
+  }
+
   Future<void> _saveProduct() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (mounted) setState(() => _isLoading = true);
 
     try {
+      DateTime? parsedFreshnessDate;
+      if (_freshnessDateController.text.isNotEmpty) {
+        try {
+          parsedFreshnessDate = DateFormat('dd/MM/yyyy').parse(_freshnessDateController.text);
+        } catch (e) {
+          debugPrint('Error parsing freshness date: $e');
+        }
+      }
+
       await _productService.saveProduct(
         existingProduct: widget.product,
         name: _nameController.text.trim(),
@@ -193,7 +236,19 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         existingImageUrls: _existingImageUrls,
         newImages: _newImages,
         imagesToRemove: _imagesToRemove,
-        newImageUrlsFromWeb: _newImageUrlsFromWeb, // Pass new web urls
+        newImageUrlsFromWeb: _newImageUrlsFromWeb,
+        // New fields
+        productType: _selectedProductType,
+        freshness: _selectedProductType == 'Marisco' && _freshnessController.text.trim().isNotEmpty
+            ? _freshnessController.text.trim()
+            : null,
+        freshnessDate: _selectedProductType == 'Marisco' ? parsedFreshnessDate : null,
+        weightValue: _selectedProductType == 'Marisco' && _weightValueController.text.trim().isNotEmpty
+            ? double.tryParse(_weightValueController.text.trim())
+            : null,
+        weightUnit: _selectedProductType == 'Marisco' && _weightUnitController.text.trim().isNotEmpty
+            ? _weightUnitController.text.trim()
+            : null,
       );
 
       if (!mounted) return;
@@ -268,6 +323,30 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                           const SizedBox(height: 20.0),
                           _buildTextField(_categoryController, 'Categoría'),
                           const SizedBox(height: 20.0),
+                          _buildProductTypeSelector(), // New product type selector
+                          if (_selectedProductType == 'Marisco') ...[
+                            const SizedBox(height: 20.0),
+                            _buildTextField(
+                                _freshnessController, 'Frescura (ej. Fresco del mar, 2 días)'),
+                            const SizedBox(height: 20.0),
+                            TextFormField(
+                              controller: _freshnessDateController,
+                              decoration: const InputDecoration(
+                                labelText: 'Fecha de Frescura (opcional)',
+                                suffixIcon: Icon(Icons.calendar_today),
+                              ),
+                              readOnly: true,
+                              onTap: () => _selectFreshnessDate(context),
+                            ),
+                            const SizedBox(height: 20.0),
+                            _buildTextField(
+                                _weightValueController, 'Cantidad/Peso',
+                                keyboardType: TextInputType.number),
+                            const SizedBox(height: 20.0),
+                            _buildTextField(
+                                _weightUnitController, 'Unidad (ej. kg, g, unidad)'),
+                          ],
+                          const SizedBox(height: 20.0),
                           _buildFeaturedSwitch(),
                           const SizedBox(height: 30.0),
                           _buildSaveButton(),
@@ -286,6 +365,30 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProductTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Tipo de Producto', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SegmentedButton<String>(
+          segments: const <ButtonSegment<String>>[
+            ButtonSegment<String>(value: 'Artesanía', label: Text('Artesanía')),
+            ButtonSegment<String>(value: 'Marisco', label: Text('Marisco')),
+          ],
+          selected: <String>{_selectedProductType},
+          onSelectionChanged: (Set<String> newSelection) {
+            setState(() {
+              _selectedProductType = newSelection.first;
+            });
+          },
+          emptySelectionAllowed: false,
+          multiSelectionEnabled: false,
+        ),
+      ],
     );
   }
 
@@ -431,7 +534,21 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       ),
       maxLines: maxLines,
       keyboardType: keyboardType,
-      validator: (value) => value!.isEmpty ? 'Por favor ingresa $label' : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          if (label == 'Fecha de Frescura (opcional)') {
+            return null; // Date is optional
+          }
+          if (_selectedProductType == 'Marisco' &&
+              (label == 'Frescura (ej. Fresco del mar, 2 días)' ||
+                  label == 'Cantidad/Peso' ||
+                  label == 'Unidad (ej. kg, g, unidad)')) {
+            return 'Por favor ingresa $label';
+          }
+          return 'Por favor ingresa $label';
+        }
+        return null;
+      },
     );
   }
 

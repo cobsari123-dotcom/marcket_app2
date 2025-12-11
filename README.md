@@ -11,7 +11,9 @@
     *   [Para Administradores 👮](#para-administradores-)
 *   [🚀 Mejoras Recientes](#-mejoras-recientes)
     *   [Sistema Integral de Pedidos y Pagos](#sistema-integral-de-pedidos-y-pagos)
+    *   [Gestión Avanzada de Cuentas y Contenido (Admin y Comprador)](#gestión-avanzada-de-cuentas-y-contenido-admin-y-comprador)
     *   [Mejoras en Perfiles y Administración](#mejoras-en-perfiles-y-administración)
+    *   [Dinámicas FAQs para Todos los Roles](#dinámicas-faqs-para-todos-los-roles)
     *   [UI/UX y Rendimiento](#uiux-y-rendimiento)
 *   [🛠️ Arquitectura y Tecnologías](#️-arquitectura-y-tecnologías)
     *   [Stack Tecnológico](#stack-tecnológico)
@@ -35,7 +37,7 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Lista de Deseos (Favoritos):** Guarda tus productos preferidos en una lista de favoritos para acceder a ellos fácilmente.
 - **Gestión de Carrito y Compras Avanzada:** Añade productos al carrito, selecciona métodos de pago (transferencia bancaria o pago contra entrega), proporciona dirección de envío detallada y sube comprobantes de pago.
 - **Seguimiento de Pedidos Detallado:** Rastrea el estado de tus pedidos, visualiza códigos de entrega, tiempos estimados y números de seguimiento.
-- **Chat Directo con Vendedores y Soporte:** Comunícate directamente con artesanos, pescadores locales y con el equipo de soporte para cualquier incidencia.
+- **Chat Directo con Vendedores y Soporte:** Comunícate directamente con artesanos, pescadores locales y con el equipo de soporte para cualquier incidencia. Navega al perfil público del vendedor directamente desde el chat para ver sus productos y publicaciones.
 - **Reseñas y Calificaciones:** Valora los productos y vendedores después de una compra.
 - **Inicio Dinámico:** La pantalla de inicio ahora muestra una variedad de productos de diferentes vendedores, con la opción de filtrar por categoría y una presentación aleatoria para una experiencia de compra más dinámica.
 
@@ -88,8 +90,15 @@ Hemos realizado una serie de mejoras significativas en la aplicación para ofrec
     *   Al activarlo, inicia un chat directo con el equipo de soporte, pre-llenando automáticamente los detalles del `orderId` para una asistencia rápida y contextualizada.
 *   **Pantalla "Sobre Nosotros":** Nueva sección informativa accesible desde el menú lateral de todos los roles, explicando la génesis de la app por estudiantes de la UTC y facilitando diversos canales de contacto.
 
+### **Dinámicas FAQs para Todos los Roles**
+*   **Externalización de Preguntas Frecuentes:** Las Preguntas Frecuentes (FAQs) han sido externalizadas de código duro a un sistema dinámico (simulado con un `FaqService` que se integra con Firebase Firestore en un entorno de producción). Esto permite una gestión más sencilla y escalable del contenido.
+*   **FAQs Personalizadas por Rol:** La sección de FAQs ahora presenta pestañas dinámicas que muestran preguntas específicas para cada rol de usuario (Comprador, Vendedor, Administrador), proporcionando información relevante a cada tipo de usuario.
+
 ### **UI/UX y Rendimiento**
 *   **Feed de Publicaciones Estilo TikTok Unificado:** La pantalla principal de "Inicio" para todos los roles (Comprador, Vendedor, Administrador) ahora presenta un feed de publicaciones a pantalla completa con desplazamiento vertical, incluyendo funciones de "Me Gusta", "Comentarios" (con carga de imágenes) y "Compartir".
+*   **Navegación de Chat a Perfil:** Al hacer clic en el nombre de usuario en la barra superior de un chat, se navega directamente al perfil público del otro usuario, mostrando sus publicaciones y productos, y ofreciendo una opción para chatear.
+*   **Optimización de Interfaz del Carrito:** Se ha resuelto un `RenderFlex overflow` en la pantalla del carrito de compras, asegurando que todo el contenido (productos, métodos de pago, dirección de envío y resumen del pedido) se muestre correctamente y sea desplazable en pantallas más pequeñas.
+*   **Eliminación de "Publicaciones" del Menú de Compradores:** La opción de "Publicaciones (Reels)" ha sido retirada del menú de navegación del rol de comprador, simplificando la interfaz para este tipo de usuario.
 *   **Pulido Visual y Animaciones:**
     *   **Iconografía Mejorada:** Utilización de `FontAwesomeIcons` para un aspecto más moderno y profesional en el feed de publicaciones.
     *   **Animaciones Sutiles:** Incorporación de animaciones `fade` y `slideY` en los elementos del menú lateral de los dashboards para una experiencia de navegación más fluida y atractiva.
@@ -112,6 +121,9 @@ Se han implementado las siguientes correcciones para mejorar la estabilidad y fu
 *   **Mapeo Robusto de Productos (Inicio):**
     *   **Problema:** Los productos aparecían con precio de \$0.00 y sin imagen.
     *   **Solución:** El método `Product.fromMap` en `lib/models/product.dart` se ha modificado para parsear de forma robusta los valores de `price` y `stock` (aceptando `int`, `double` o `String`) y para asegurar que las `imageUrls` se extraen y validan correctamente.
+*   **Campo de `timestamp` para Productos:**
+    *   **Problema:** No se podía ordenar la lista de productos por fecha de creación de forma consistente.
+    *   **Solución:** Se añadió un campo `timestamp` al modelo `Product` (`lib/models/product.dart`) y se asegura su guardado automático al crear/actualizar un producto, permitiendo ordenar y filtrar por "Más Recientes".
 
 *   **Resolución de Crash en Publicaciones/Reels (Error de Tipo Long/Integer):**
     *   **Problema:** La aplicación podía cerrarse en la sección de Publicaciones/Reels debido a un error de `java.lang.Long cannot be cast to java.lang.Integer` al realizar consultas a Firebase.

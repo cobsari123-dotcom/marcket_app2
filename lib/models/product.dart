@@ -10,6 +10,12 @@ class Product {
   final String sellerId;
   final double averageRating; // New field
   final int reviewCount; // New field
+  final String? freshness; // New field
+  final DateTime? freshnessDate; // New field
+  final double? weightValue; // New field
+  final String? weightUnit; // New field
+  final String productType; // New field
+  final DateTime? timestamp; // New field
 
   const Product({
     required this.id,
@@ -23,6 +29,12 @@ class Product {
     required this.sellerId,
     required this.averageRating,
     required this.reviewCount,
+    this.freshness, // Add to constructor
+    this.freshnessDate, // Add to constructor
+    this.weightValue, // Add to constructor
+    this.weightUnit, // Add to constructor
+    this.productType = 'Artesanía', // Default value
+    this.timestamp, // Add to constructor
   });
 
   factory Product.fromMap(Map<String, dynamic> map, String id,
@@ -41,6 +53,17 @@ class Product {
           _parseToDouble(map['averageRating']), // Added to fromMap
       reviewCount:
           _parseToInt(map['reviewCount']), // Added to fromMap
+      freshness: map['freshness'], // Add to fromMap
+      freshnessDate: map['freshnessDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (map['freshnessDate'] as num).toInt())
+          : null,
+      weightValue: map['weightValue'] is num ? map['weightValue'].toDouble() : null, // Add to fromMap
+      weightUnit: map['weightUnit'], // Add to fromMap
+      productType: map['productType'] ?? 'Artesanía', // Add to fromMap
+      timestamp: map['timestamp'] != null
+          ? DateTime.fromMillisecondsSinceEpoch((map['timestamp'] as num).toInt())
+          : null, // Add to fromMap
     );
   }
 
@@ -56,7 +79,54 @@ class Product {
       'sellerId': sellerId,
       'averageRating': averageRating, // Added to toMap
       'reviewCount': reviewCount, // Added to toMap
+      'freshness': freshness, // Add to toMap
+      'freshnessDate': freshnessDate?.millisecondsSinceEpoch, // Add to toMap
+      'weightValue': weightValue, // Add to toMap
+      'weightUnit': weightUnit, // Add to toMap
+      'productType': productType, // Add to toMap
+      'timestamp': timestamp?.millisecondsSinceEpoch, // Add to toMap
     };
+  }
+
+  // Add copyWith method for consistency
+  Product copyWith({
+    String? id,
+    String? name,
+    String? description,
+    double? price,
+    int? stock,
+    List<String>? imageUrls,
+    String? category,
+    bool? isFeatured,
+    String? sellerId,
+    double? averageRating,
+    int? reviewCount,
+    String? freshness,
+    DateTime? freshnessDate,
+    double? weightValue,
+    String? weightUnit,
+    String? productType,
+    DateTime? timestamp,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      stock: stock ?? this.stock,
+      imageUrls: imageUrls ?? this.imageUrls,
+      category: category ?? this.category,
+      isFeatured: isFeatured ?? this.isFeatured,
+      sellerId: sellerId ?? this.sellerId,
+      averageRating: averageRating ?? this.averageRating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      freshness: freshness ?? this.freshness,
+      freshnessDate: freshnessDate ?? this.freshnessDate,
+      weightValue: weightValue ?? this.weightValue,
+      weightUnit: weightUnit ?? this.weightUnit,
+      productType: productType ?? this.productType,
+      timestamp: timestamp ?? this.timestamp,
+    );
   }
 }
 

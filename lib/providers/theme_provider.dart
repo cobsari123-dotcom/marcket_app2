@@ -35,11 +35,10 @@ class ThemeProvider with ChangeNotifier {
             .ref('users/${user.uid}')
             .onValue
             .listen((event) {
-          if (event.snapshot.exists) {
-            final userData = UserModel.fromMap(
-              Map<String, dynamic>.from(event.snapshot.value as Map),
-              user.uid,
-            );
+          if (event.snapshot.exists && event.snapshot.value is Map) {
+            final Map<dynamic, dynamic> rawData = event.snapshot.value as Map<dynamic, dynamic>;
+            final userDataMap = Map<String, dynamic>.from(rawData);
+            final userData = UserModel.fromMap(userDataMap, user.uid);
             final newThemeMode = userData.isDarkModeEnabled ?? false
                 ? ThemeMode.dark
                 : ThemeMode.light;

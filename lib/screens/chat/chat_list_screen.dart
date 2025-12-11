@@ -158,6 +158,7 @@ class ChatListScreenState extends State<ChatListScreen>
       arguments: {
         'chatRoomId': chatRoomId,
         'otherUserName': user.fullName,
+        'otherUserId': user.id, // Pass otherUserId
       },
     );
   }

@@ -16,6 +16,7 @@ import 'package:marcket_app/screens/common/about_us_screen.dart'; // Added impor
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:marcket_app/screens/common/welcome_dashboard_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -25,28 +26,57 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  // Add _currentUserModel and _databaseRef to fetch user data
+  UserModel? _currentUserModel;
+  final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final snapshot = await _databaseRef.child('users/${user.uid}').get();
+      if (snapshot.exists && mounted) {
+        setState(() {
+          _currentUserModel = UserModel.fromMap(
+            Map<String, dynamic>.from(snapshot.value as Map),
+            user.uid,
+          );
+        });
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser; // Get current Firebase user
     return Consumer2<AdminDashboardProvider, ThemeProvider>(
       builder: (context, adminProvider, themeProvider, child) {
         final List<Widget> adminScreens = [
+          const Scaffold(body: WelcomeDashboardScreen()), // 0: Welcome Dashboard for Admin
           // ignore: prefer_const_constructors
           Scaffold(
-            body: const SupportChatList(),
+            body: const SupportChatList(), // 1: Support Chat List
           ),
           // ignore: prefer_const_constructors
           Scaffold(
-            body: const AdminComplaintsSuggestionsScreen(),
+            body: const AdminComplaintsSuggestionsScreen(), // 2: Complaints and Suggestions
           ),
           // ignore: prefer_const_constructors
           Scaffold(
-            body: const AdminProfileScreen(),
+            body: const AdminProfileScreen(), // 3: Admin Profile
           ),
           // ignore: prefer_const_constructors
           Scaffold(
-            body: const UserManagementScreen(),
+            body: const UserManagementScreen(), // 4: User Management
           ),
+          const Scaffold(body: AdminSettingsScreen()), // 5: Admin Settings
+          const Scaffold(body: AboutUsScreen()), // 6: About Us
         ];
 
         final drawer = Drawer(
@@ -54,52 +84,18 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               _buildDrawerHeader(
-                adminProvider.currentUserModel,
+                _currentUserModel, // Pass _currentUserModel
                 adminProvider.isLoadingUserData,
+                user, // Pass Firebase user for email/display name
               ),
-              _buildDrawerItem(
-                Icons.support_agent,
-                'Soporte Técnico',
-                0,
-                adminProvider,
-              ),
-              _buildDrawerItem(
-                Icons.feedback,
-                'Quejas y Sugerencias',
-                1,
-                adminProvider,
-              ),
-              _buildDrawerItem(Icons.person, 'Mi Perfil', 2, adminProvider),
+              _buildDrawerItem(Icons.home, 'Inicio', 0, adminProvider),
+              _buildDrawerItem(Icons.support_agent, 'Soporte Técnico', 1, adminProvider),
+              _buildDrawerItem(Icons.feedback, 'Quejas y Sugerencias', 2, adminProvider),
+              _buildDrawerItem(Icons.person, 'Mi Perfil', 3, adminProvider),
               const Divider(),
-              _buildDrawerItem(
-                Icons.people,
-                'Gestión de Usuarios',
-                3,
-                adminProvider,
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Configuración'),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AdminSettingsScreen()));
-                                },              ),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text('Sobre Nosotros'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AboutUsScreen(),
-                    ),
-                  );
-                },
-              ),
+              _buildDrawerItem(Icons.people, 'Gestión de Usuarios', 4, adminProvider),
+              _buildDrawerItem(Icons.settings, 'Configuración', 5, adminProvider),
+              _buildDrawerItem(Icons.info_outline, 'Sobre Nosotros', 6, adminProvider),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout, color: AppTheme.error),
@@ -153,10 +149,13 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
         );
 
         final List<String> appBarTitles = [
-          'Soporte Técnico',
-          'Quejas y Sugerencias',
-          'Mi Perfil',
-          'Gestión de Usuarios',
+          'Bienvenida Administrativa', // 0
+          'Soporte Técnico', // 1
+          'Quejas y Sugerencias', // 2
+          'Mi Perfil', // 3
+          'Gestión de Usuarios', // 4
+          'Configuración', // 5
+          'Sobre Nosotros', // 6
         ];
 
         return ResponsiveScaffold(
@@ -172,7 +171,7 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDrawerHeader(UserModel? currentUserModel, bool isLoading) {
+  Widget _buildDrawerHeader(UserModel? currentUserModel, bool isLoading, User? firebaseUser) {
     if (isLoading) {
       return const DrawerHeader(
         decoration: BoxDecoration(color: AppTheme.primary),
@@ -180,18 +179,29 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
     return UserAccountsDrawerHeader(
-      accountName: Text(
-        currentUserModel?.fullName ?? 'Administrador',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      accountName: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            currentUserModel?.fullName ??
+                firebaseUser?.displayName ??
+                'Administrador',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            _getTranslatedRole(currentUserModel?.userType),
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
       ),
       accountEmail: Text(
-        currentUserModel?.email ?? 'admin@example.com',
+        firebaseUser?.email ?? 'admin@example.com',
         style: const TextStyle(color: Colors.white70),
       ),
       currentAccountPicture: CircleAvatar(
@@ -209,6 +219,19 @@ class AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       decoration: const BoxDecoration(color: AppTheme.primary),
     );
+  }
+
+  String _getTranslatedRole(String? userType) {
+    switch (userType) {
+      case 'Buyer':
+        return 'Comprador';
+      case 'Seller':
+        return 'Vendedor';
+      case 'Admin':
+        return 'Administrador';
+      default:
+        return 'Rol Desconocido';
+    }
   }
 
   Widget _buildDrawerItem(

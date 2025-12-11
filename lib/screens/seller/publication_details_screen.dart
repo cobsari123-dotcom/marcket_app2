@@ -243,9 +243,7 @@ class _PublicationDetailsScreenState extends State<PublicationDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.publication.title,
-                                style: textTheme.headlineMedium),
-                            const SizedBox(height: 8),
+
                             Text(
                               'Publicado el ${DateFormat('dd/MM/yyyy HH:mm').format(widget.publication.timestamp)}',
                               style: textTheme.bodySmall,

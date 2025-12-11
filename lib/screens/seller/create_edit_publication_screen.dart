@@ -231,7 +231,7 @@ class _CreateEditPublicationScreenState
             .child(widget.publication!.id)
             .update(publicationData);
       } else {
-        publicationData['ratings'] = {};
+        publicationData['ratings'] = {}; // Initialize ratings for new publications
         await publicationsRef.push().set(publicationData);
       }
 
@@ -455,7 +455,7 @@ class _CreateEditPublicationScreenState
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
-      {int? maxLines}) {
+      {int? maxLines, TextInputType keyboardType = TextInputType.text}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -463,6 +463,7 @@ class _CreateEditPublicationScreenState
         alignLabelWithHint: true,
       ),
       maxLines: maxLines,
+      keyboardType: keyboardType,
       validator: (value) => value!.isEmpty ? 'Por favor ingresa $label' : null,
     );
   }
@@ -478,3 +479,4 @@ class _CreateEditPublicationScreenState
     );
   }
 }
+

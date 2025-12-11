@@ -25,6 +25,7 @@ import 'package:marcket_app/screens/recover_password_screen.dart';
 import 'package:marcket_app/screens/buyer/buyer_dashboard_screen.dart';
 import 'package:marcket_app/screens/buyer/favorites_screen.dart';
 import 'package:marcket_app/screens/buyer/reels_publications_screen.dart';
+import 'package:marcket_app/screens/common/welcome_dashboard_screen.dart';
 import 'package:marcket_app/screens/seller/seller_dashboard_screen.dart';
 import 'package:marcket_app/screens/seller/add_edit_product_screen.dart';
 import 'package:marcket_app/models/product.dart';
@@ -151,6 +152,7 @@ class MyApp extends StatelessWidget {
               },
               '/favorites': (context) => const FavoritesScreen(),
               '/reels_publications': (context) => const ReelsPublicationsScreen(),
+              '/welcome_dashboard': (context) => const WelcomeDashboardScreen(),
               '/public_seller_profile': (context) {
                 final arguments = ModalRoute.of(context)!.settings.arguments;
                 if (arguments is Map<String, dynamic>) {

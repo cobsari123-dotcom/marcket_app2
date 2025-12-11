@@ -104,6 +104,7 @@ class FeedProvider with ChangeNotifier {
     try {
       final result = await _productService.getProducts(
         startAfterKey: _lastProductKey,
+        productCategory: _selectedCategory, // Pass category filter
         startAfterValue: _lastProductSortValue,
         limit: 10, // Define a page size
         sortBy: _sortBy,

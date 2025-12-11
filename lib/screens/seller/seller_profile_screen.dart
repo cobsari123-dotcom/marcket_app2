@@ -51,9 +51,11 @@ class _SellerProfileScreenState extends State<SellerProfileScreen>
             Tab(icon: Icon(Icons.shopping_bag), text: 'Mis Productos'),
             Tab(icon: Icon(Icons.article), text: 'Mis Publicaciones'),
           ],
-          labelColor: Theme.of(context).colorScheme.onPrimary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withAlpha((255 * 0.7).round()),
-          indicatorColor: Theme.of(context).colorScheme.secondary,
+          labelColor: AppTheme.secondary, // Highlight selected tab with secondary color
+          unselectedLabelColor: Colors.white70, // Subtle white for unselected
+          indicatorColor: AppTheme.secondary, // Keep indicator as secondary
+          indicatorWeight: 3.0, // Thicker indicator
+          indicatorSize: TabBarIndicatorSize.tab, // Full width indicator
         ),
         Expanded(
           child: TabBarView(

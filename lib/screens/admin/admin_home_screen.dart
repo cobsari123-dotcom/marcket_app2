@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:marcket_app/screens/buyer/feed_screen.dart';
+// import 'package:marcket_app/screens/buyer/feed_screen.dart'; // Removed
+import 'package:marcket_app/screens/common/welcome_dashboard_screen.dart'; // New import
 
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
@@ -8,9 +9,10 @@ class AdminHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Feed de Publicaciones'),
+        title: const Text('Bienvenida Administrativa'), // Changed title for Welcome
+        automaticallyImplyLeading: false, // Ensure no back button
       ),
-      body: const FeedScreen(),
+      body: const WelcomeDashboardScreen(), // Replaced FeedScreen
     );
   }
 }

@@ -15,12 +15,14 @@ class ChatScreen extends StatefulWidget {
   final String chatRoomId;
   final String otherUserName;
   final String? initialMessage; // New optional parameter
+  final String? otherUserId; // New optional parameter
 
   const ChatScreen(
       {super.key,
       required this.chatRoomId,
       required this.otherUserName,
-      this.initialMessage});
+      this.initialMessage,
+      this.otherUserId});
 
   @override
   State<ChatScreen> createState() => ChatScreenState();
@@ -233,8 +235,22 @@ class ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.otherUserName),
-        // Removed automaticallyImplyLeading: false to show the back button
+        title: GestureDetector(
+          onTap: () {
+            if (widget.otherUserId != null) {
+              Navigator.pushNamed(
+                context,
+                '/public_seller_profile',
+                arguments: {'sellerId': widget.otherUserId!},
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No se pudo encontrar el perfil del usuario.')),
+              );
+            }
+          },
+          child: Text(widget.otherUserName),
+        ),
       ),
       body: Center(
         child: ConstrainedBox(
@@ -432,7 +448,7 @@ class ChatScreenState extends State<ChatScreen> {
                     ),
             ],
           ),
-        ],
+        ], // <--- CORRECCIÓN AQUI: Se agregó el corchete de cierre
       ),
     );
   }

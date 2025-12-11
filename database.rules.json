@@ -8,7 +8,7 @@
     },
     
     "publications": {
-      ".indexOn": ["sellerId"]
+      ".indexOn": ["sellerId", "timestamp"]
     },
 
     "products": {

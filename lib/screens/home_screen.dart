@@ -21,16 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Redirect based on user type after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.userType == 'Buyer') {
-        Navigator.pushReplacementNamed(context, '/buyer_dashboard');
-      } else if (widget.userType == 'Seller') {
-        Navigator.pushReplacementNamed(context, '/seller_dashboard');
-      } else if (widget.userType == 'admin') {
-        Navigator.pushReplacementNamed(context, '/admin_home');
-      } else {
-        // Default to buyer or show an error
-        Navigator.pushReplacementNamed(context, '/buyer_dashboard');
-      }
+      Navigator.pushReplacementNamed(context, '/welcome_dashboard');
     });
   }
 

@@ -49,71 +49,120 @@ class ProductService {
   // Nuevo método para obtener productos paginados y ordenados para el feed principal
   Future<Map<String, dynamic>> getProducts({
     String? startAfterKey,
-    dynamic startAfterValue,
+    String? productCategory, // New parameter for category filter
+    dynamic startAfterValue, // Value of sortBy for pagination
     int limit = 10,
     String sortBy = 'timestamp',
     bool descending = true,
   }) async {
-    Query query = _productsRef.orderByChild(sortBy);
+    List<Product> allProducts = [];
 
-    if (descending) {
-      if (startAfterValue != null) {
-        // For descending, we want items *before* the startAfterValue
-        // combined with the last key to ensure unique pagination.
-        if (startAfterKey != null) {
-          query = query.endBefore(startAfterValue, key: startAfterKey);
-        } else {
-          query = query.endBefore(startAfterValue);
+    // Fetch all sellers' products
+    final allSellersSnapshot = await _productsRef.get();
+
+    if (allSellersSnapshot.exists && allSellersSnapshot.value != null) {
+      Map<dynamic, dynamic> sellersData = allSellersSnapshot.value as Map<dynamic, dynamic>;
+
+      // Iterate through each seller's products
+      sellersData.forEach((sellerId, productsData) {
+        if (productsData is Map) {
+          productsData.forEach((productId, productMap) {
+            try {
+              allProducts.add(Product.fromMap(Map<String, dynamic>.from(productMap), productId, sellerIdParam: sellerId));
+            } catch (e) {
+              debugPrint('Error parsing product $productId for seller $sellerId: $e');
+            }
+          });
         }
+      });
+    }
+
+    // Apply filtering (if any)
+    if (productCategory != null && productCategory != 'Todas') {
+      allProducts = allProducts
+          .where((product) => product.category == productCategory)
+          .toList();
+    }
+
+    // Apply sorting
+    allProducts.sort((a, b) {
+      dynamic aValue;
+      dynamic bValue;
+
+      // Extract values based on sortBy field
+      if (sortBy == 'timestamp') {
+        aValue = a.timestamp?.millisecondsSinceEpoch; // Use null-aware operator
+        bValue = b.timestamp?.millisecondsSinceEpoch; // Use null-aware operator
+      } else if (sortBy == 'price') {
+        aValue = a.price;
+        bValue = b.price;
+      } else if (sortBy == 'name') {
+        aValue = a.name;
+        bValue = b.name;
+      } else {
+        // Default to timestamp if sortBy is unknown or title
+        aValue = a.timestamp?.millisecondsSinceEpoch; // Use null-aware operator
+        bValue = b.timestamp?.millisecondsSinceEpoch; // Use null-aware operator
       }
-      query = query.limitToLast(limit);
-    } else {
-      if (startAfterValue != null) {
-        // For ascending, we want items *after* the startAfterValue
-        // combined with the last key to ensure unique pagination.
-        if (startAfterKey != null) {
-          query = query.startAfter(startAfterValue, key: startAfterKey);
+
+      // Handle comparison based on type and descending flag
+      if (aValue is num && bValue is num) {
+        return descending ? bValue.compareTo(aValue) : aValue.compareTo(bValue);
+      } else if (aValue is String && bValue is String) {
+        return descending ? bValue.compareTo(aValue) : aValue.compareTo(bValue);
+      }
+      return 0; // Fallback if types are incomparable
+    });
+
+    // Apply pagination (client-side for now)
+    List<Product> paginatedProducts = [];
+    int startIndex = 0;
+    if (startAfterKey != null && startAfterValue != null) {
+      // Find the index of the last product from the previous page
+      int lastIndex = allProducts.indexWhere((p) {
+        dynamic pValue;
+        if (sortBy == 'timestamp') {
+          pValue = p.timestamp?.millisecondsSinceEpoch; // Use null-aware operator
+        } else if (sortBy == 'price') {
+          pValue = p.price;
+        } else if (sortBy == 'name') {
+          pValue = p.name;
         } else {
-          query = query.startAfter(startAfterValue);
+          pValue = p.timestamp?.millisecondsSinceEpoch; // Default, use null-aware operator
         }
+
+        return p.id == startAfterKey && pValue == startAfterValue;
+      });
+      if (lastIndex != -1) {
+        startIndex = lastIndex + 1;
       }
-      query = query.limitToFirst(limit);
     }
 
-    final snapshot = await query.get();
-
-    if (snapshot.value == null) {
-      return {'products': [], 'lastKey': null, 'lastSortValue': null};
+    // Ensure startIndex is within bounds
+    if (startIndex < allProducts.length) {
+      paginatedProducts = allProducts.sublist(startIndex).take(limit).toList();
     }
 
-    final Map<String, dynamic> data =
-        Map<String, dynamic>.from(snapshot.value as Map);
-
-    // Convert map to list and sort
-    List<Product> products = data.entries.map((entry) {
-      return Product.fromMap(
-          Map<String, dynamic>.from(entry.value as Map), entry.key,
-          sellerIdParam: entry.value['sellerId']);
-    }).toList();
-
-    // If fetching in descending order, Firebase's limitToLast retrieves items
-    // in ascending order of the sort key, so we need to reverse them here.
-    if (descending) {
-      products = products.reversed.toList();
-    }
-    // No need for client-side sort if already ordered by child in query and reversed for descending
-
-    String? lastKey;
-    dynamic lastSortValue;
-    if (products.isNotEmpty) {
-      lastKey = products.last.id;
-      lastSortValue = products.last.toMap()[sortBy];
+    String? newLastKey;
+    dynamic newLastSortValue;
+    if (paginatedProducts.isNotEmpty) {
+      newLastKey = paginatedProducts.last.id;
+      if (sortBy == 'timestamp') {
+        newLastSortValue = paginatedProducts.last.timestamp?.millisecondsSinceEpoch;
+      } else if (sortBy == 'price') {
+        newLastSortValue = paginatedProducts.last.price;
+      } else if (sortBy == 'name') {
+        newLastSortValue = paginatedProducts.last.name;
+      } else {
+        newLastSortValue = paginatedProducts.last.timestamp?.millisecondsSinceEpoch; // Default
+      }
     }
 
     return {
-      'products': products,
-      'lastKey': lastKey,
-      'lastSortValue': lastSortValue
+      'products': paginatedProducts,
+      'lastKey': newLastKey,
+      'lastSortValue': newLastSortValue,
+      'hasMore': paginatedProducts.length == limit && (startIndex + limit) < allProducts.length,
     };
   }
 
@@ -171,6 +220,11 @@ class ProductService {
     required List<File> newImages,
     required List<String> imagesToRemove,
     List<String>? newImageUrlsFromWeb, // New parameter
+    required String productType, // New required parameter
+    String? freshness, // New optional parameter
+    DateTime? freshnessDate, // New optional parameter
+    double? weightValue, // New optional parameter
+    String? weightUnit, // New optional parameter
   }) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
@@ -208,7 +262,7 @@ class ProductService {
       ...?newImageUrlsFromWeb
     ];
 
-    final productData = {
+    final productData = <String, dynamic>{
       'name': name,
       'description': description,
       'price': price,
@@ -217,7 +271,23 @@ class ProductService {
       'imageUrls': finalImageUrls,
       'isFeatured': isFeatured,
       'sellerId': userId,
+      'productType': productType, // New field
+      'timestamp': DateTime.now().millisecondsSinceEpoch, // Added timestamp
     };
+
+    // Add optional fields only if they have values
+    if (freshness != null && freshness.isNotEmpty) {
+      productData['freshness'] = freshness;
+    }
+    if (freshnessDate != null) {
+      productData['freshnessDate'] = freshnessDate.millisecondsSinceEpoch;
+    }
+    if (weightValue != null) {
+      productData['weightValue'] = weightValue;
+    }
+    if (weightUnit != null && weightUnit.isNotEmpty) {
+      productData['weightUnit'] = weightUnit;
+    }
 
     // 4. Guardar en la base de datos
     if (existingProduct != null) {

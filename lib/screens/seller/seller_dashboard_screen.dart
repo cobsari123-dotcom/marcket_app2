@@ -19,6 +19,10 @@ import 'package:marcket_app/widgets/responsive_scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:marcket_app/services/auth_management_service.dart';
+import 'package:marcket_app/screens/common/welcome_dashboard_screen.dart'; // Added
+// import 'package:marcket_app/screens/buyer/explore_products_screen.dart'; // Removed
+// import 'package:marcket_app/screens/buyer/reels_publications_screen.dart'; // Removed
+
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -30,7 +34,7 @@ class SellerDashboardScreen extends StatefulWidget {
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   int _selectedIndex = 0;
   UserModel? _currentUserModel;
-  bool _isLoading = true;
+  bool _isLoading = true; // Use _isLoading directly for header state
 
   @override
   void initState() {
@@ -49,7 +53,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             Map<String, dynamic>.from(snapshot.value as Map),
             user.uid,
           );
-          _isLoading = false;
+          _isLoading = false; // Set loading to false once data is loaded
         });
       } else {
         if (mounted) setState(() => _isLoading = false);
@@ -65,110 +69,64 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     });
   }
 
-  void _onDrawerItemTapped(int index) {
+  // Renamed from _onDrawerItemTapped for clarity and consistency
+  void _selectPage(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pop(context);
+    Navigator.pop(context); // Close the Drawer
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final user = FirebaseAuth.instance.currentUser; // Get current Firebase user
 
     final List<Widget> widgetOptions = <Widget>[
+      const Scaffold(body: WelcomeDashboardScreen()), // 0: Welcome Dashboard for Seller
       // ignore: prefer_const_constructors
       Scaffold(
-        body: const MyProductsScreen(),
-      ),
-      // ignore: prefer_const_constructors
-      Scaffold(
-        body: const SellerPublicationsScreen(),
+        body: const MyProductsScreen(), // 1: My Products
       ),
       // ignore: prefer_const_constructors
       Scaffold(
-        body: const SellerOrdersScreen(),
+        body: const SellerPublicationsScreen(), // 2: My Publications
       ),
       // ignore: prefer_const_constructors
       Scaffold(
-        body: const ChatListScreen(),
+        body: const SellerOrdersScreen(), // 3: My Sales
+      ),
+      // ignore: prefer_const_constructors
+      Scaffold(
+        body: const ChatListScreen(), // 4: Messages
       ),
       Scaffold(
-        body: SellerProfileScreen(onProfileUpdated: _loadUserData),
+        body: SellerProfileScreen(onProfileUpdated: _loadUserData), // 5: My Profile
       ),
+      const Scaffold(body: SellerSettingsScreen()), // 6: Seller Settings
+      const Scaffold(body: NotificationsScreen()), // 7: Notifications
+      const Scaffold(body: ContactSupportScreen()), // 8: Support
+      const Scaffold(body: AdminAlertsScreen()), // 9: Admin Alerts
+      const Scaffold(body: AboutUsScreen()), // 10: About Us
     ];
 
     final drawer = Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          _buildDrawerHeader(),
-          _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 0),
-          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 1),
-          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 2),
-          _buildDrawerItem(Icons.chat, 'Mensajes', 3),
-          _buildDrawerItem(Icons.person, 'Mi Perfil', 4),
+          _buildDrawerHeader(user), // Pass Firebase user
+          _buildDrawerItem(Icons.home, 'Inicio', 0),
+          _buildDrawerItem(Icons.shopping_bag, 'Mis Productos', 1),
+          _buildDrawerItem(Icons.article, 'Mis Publicaciones', 2),
+          _buildDrawerItem(Icons.point_of_sale, 'Mis Ventas', 3),
+          _buildDrawerItem(Icons.chat, 'Mensajes', 4),
+          _buildDrawerItem(Icons.person, 'Mi Perfil', 5),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Configuración'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SellerSettingsScreen()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notificaciones'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationsScreen()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.support_agent),
-            title: const Text('Soporte Técnico'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ContactSupportScreen()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.warning_amber_rounded),
-            title: const Text('Alertas de Administrador'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AdminAlertsScreen()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.info_outline,
-              color: AppTheme.secondary,
-            ),
-            title: const Text('Sobre Nosotros'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AboutUsScreen(),
-                ),
-              );
-            },
-          ),
+          _buildDrawerItem(Icons.settings, 'Configuración', 6),
+          _buildDrawerItem(Icons.notifications, 'Notificaciones', 7),
+          _buildDrawerItem(Icons.support_agent, 'Soporte Técnico', 8),
+          _buildDrawerItem(Icons.warning_amber_rounded, 'Alertas de Administrador', 9),
+          _buildDrawerItem(Icons.info_outline, 'Sobre Nosotros', 10),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.error),
@@ -222,7 +180,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     );
 
     Widget? fab;
-    if (_selectedIndex == 0) {
+    if (_selectedIndex == 1) {
       // FAB for MyProductsScreen (Add Product)
       fab = FloatingActionButton(
         onPressed: () {
@@ -235,7 +193,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         backgroundColor: AppTheme.secondary,
         child: const Icon(Icons.add, color: AppTheme.onSecondary),
       );
-    } else if (_selectedIndex == 1) {
+    } else if (_selectedIndex == 2) {
       // FAB for SellerPublicationsScreen (Add Publication)
       fab = FloatingActionButton(
         onPressed: () {
@@ -247,11 +205,17 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     }
 
     final List<String> appBarTitles = [
-      'Mis Productos',
-      'Mis Publicaciones',
-      'Mis Ventas',
-      'Mensajes',
-      'Mi Perfil',
+      'Bienvenida Vendedor', // 0
+      'Mis Productos', // 1
+      'Mis Publicaciones', // 2
+      'Mis Ventas', // 3
+      'Mensajes', // 4
+      'Mi Perfil', // 5
+      'Configuración', // 6
+      'Notificaciones', // 7
+      'Soporte Técnico', // 8
+      'Alertas de Administrador', // 9
+      'Sobre Nosotros', // 10
     ];
 
     return ResponsiveScaffold(
@@ -264,7 +228,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     );
   }
 
-  Widget _buildDrawerHeader() {
+  Widget _buildDrawerHeader(User? firebaseUser) {
     if (_isLoading) {
       return const DrawerHeader(
         decoration: BoxDecoration(color: AppTheme.primary),
@@ -272,18 +236,29 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       );
     }
     return UserAccountsDrawerHeader(
-      accountName: Text(
-        _currentUserModel?.fullName ?? 'Vendedor',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      accountName: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _currentUserModel?.fullName ??
+                firebaseUser?.displayName ??
+                'Vendedor',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            _getTranslatedRole(_currentUserModel?.userType),
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
       ),
       accountEmail: Text(
-        _currentUserModel?.email ?? 'vendedor@example.com',
+        firebaseUser?.email ?? 'vendedor@example.com',
         style: const TextStyle(color: Colors.white70),
       ),
       currentAccountPicture: CircleAvatar(
@@ -297,6 +272,19 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       ),
       decoration: const BoxDecoration(color: AppTheme.primary),
     );
+  }
+
+  String _getTranslatedRole(String? userType) {
+    switch (userType) {
+      case 'Buyer':
+        return 'Comprador';
+      case 'Seller':
+        return 'Vendedor';
+      case 'Admin':
+        return 'Administrador';
+      default:
+        return 'Rol Desconocido';
+    }
   }
 
   // Ensure index is correctly handled in _buildDrawerItem
@@ -319,11 +307,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       selected: isSelected,
       selectedTileColor: AppTheme.primary.withAlpha(25),
       onTap: () {
-        _onDrawerItemTapped(index);
+        _selectPage(index); // Use _selectPage to handle navigation and closing drawer
       },
     )
         .animate()
         .fade(duration: 300.ms, delay: (50 * index).ms)
         .slideY(begin: 0.1, end: 0, duration: 300.ms, delay: (50 * index).ms);
   }
-}
+} // Add this closing brace
