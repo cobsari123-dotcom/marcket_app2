@@ -16,6 +16,7 @@
 *   [🛠️ Arquitectura y Tecnologías](#️-arquitectura-y-tecnologías)
     *   [Stack Tecnológico](#stack-tecnológico)
     *   [Arquitectura de Software](#arquitectura-de-software)
+    *   [Estructura del Proyecto](#estructura-del-proyecto)
 *   [🏁 Empezando](#-empezando)
 *   [🤝 Cómo Contribuir](#-cómo-contribuir)
 *   [© Licencia](#-licencia)
@@ -36,6 +37,7 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Seguimiento de Pedidos Detallado:** Rastrea el estado de tus pedidos, visualiza códigos de entrega, tiempos estimados y números de seguimiento.
 - **Chat Directo con Vendedores y Soporte:** Comunícate directamente con artesanos, pescadores locales y con el equipo de soporte para cualquier incidencia.
 - **Reseñas y Calificaciones:** Valora los productos y vendedores después de una compra.
+- **Inicio Dinámico:** La pantalla de inicio ahora muestra una variedad de productos de diferentes vendedores, con la opción de filtrar por categoría y una presentación aleatoria para una experiencia de compra más dinámica.
 
 ### Para Vendedores 🧑‍💼
 - **Dashboard de Vendedor:** Un panel de control intuitivo para gestionar tu tienda.
@@ -43,6 +45,7 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Gestión de Pedidos Avanzada:** Revisa y gestiona los pedidos, verifica comprobantes de pago, actualiza estados (preparación, enviado, entregado), genera códigos de entrega seguros y proporciona información de seguimiento.
 - **Perfil de Vendedor Personalizado:** Personaliza tu perfil público con tu historia, información de tu negocio y enlaces a redes sociales.
 - **Chat Directo con Compradores y Soporte:** Comunícate directamente con tus clientes y con el equipo de soporte para cualquier incidencia.
+- **Información de Usuario en el Menú:** El menú del dashboard ahora muestra el nombre, correo electrónico, rol y foto de perfil del vendedor.
 
 ### Para Administradores 👮
 - **Dashboard de Administrador:** Un panel central para supervisar y gestionar la plataforma.
@@ -50,6 +53,7 @@ Nuestra misión es empoderar a los productores locales, aumentar sus ingresos y 
 - **Soporte Centralizado:** Atiende consultas y gestiona quejas de los usuarios a través de un chat y un sistema de tickets.
 - **Notificaciones a Usuarios:** Envía avisos y notificaciones directamente a los usuarios.
 - **Control Total de Cuentas:** Supervisa y gestiona la actividad de vendedores, incluyendo la verificación de comprobantes de pago y la resolución de disputas.
+- **Información de Usuario en el Menú:** El menú del dashboard ahora muestra el nombre, correo electrónico y rol del administrador.
 
 ---
 
@@ -120,6 +124,14 @@ La aplicación utiliza una arquitectura moderna y escalable, diseñada para ser 
 -   **Notificaciones Push (FCM):** Se ha implementado la base para notificaciones push a través de Firebase Cloud Messaging (FCM). Una Cloud Function se encarga de enviar notificaciones a los usuarios cuando reciben nuevos mensajes de chat y ahora también para **actualizaciones de estado de pedidos**, asegurando una comunicación en tiempo real y contextualizada.
 
 -   **Diseño Adaptable (Responsive Design):** La navegación principal de la aplicación es totalmente adaptable. Utiliza un widget `ResponsiveScaffold` personalizado que muestra un `NavigationRail` (menú lateral fijo) en pantallas anchas como tabletas o computadoras, y un `Drawer` (menú de hamburguesa) en pantallas estrechas como las de los móviles. Esto asegura una experiencia de usuario óptima en cualquier dispositivo.
+
+### Estructura del Proyecto
+El proyecto sigue una estructura organizada para facilitar la navegación y el mantenimiento:
+- **`lib/models`**: Contiene los modelos de datos de la aplicación (ej. `User`, `Product`, `Order`).
+- **`lib/providers`**: Incluye los `ChangeNotifier` que gestionan el estado de la aplicación.
+- **`lib/screens`**: Contiene las diferentes pantallas de la aplicación, organizadas por rol (admin, buyer, seller).
+- **`lib/services`**: Encapsula la lógica de negocio y la comunicación con servicios externos como Firebase.
+- **`lib/widgets`**: Contiene widgets reutilizables utilizados en toda la aplicación.
 
 ---
 
