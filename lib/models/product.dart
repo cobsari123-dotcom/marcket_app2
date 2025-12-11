@@ -27,27 +27,20 @@ class Product {
 
   factory Product.fromMap(Map<String, dynamic> map, String id,
       {String? sellerIdParam}) {
-    List<String> imageUrls = [];
-    if (map['imageUrls'] is List) {
-      imageUrls = List<String>.from(map['imageUrls']);
-    } else if (map['imageUrl'] is String) {
-      imageUrls = [map['imageUrl']!];
-    }
-
     return Product(
       id: id,
       name: map['name'] ?? '',
       description: map['description'] ?? '',
-      price: (map['price'] ?? 0).toDouble(),
-      stock: (map['stock'] as num? ?? 0).toInt(),
-      imageUrls: imageUrls,
+      price: _parseToDouble(map['price']),
+      stock: _parseToInt(map['stock']),
+      imageUrls: _parseImageUrls(map),
       category: map['category'] ?? '',
       isFeatured: map['isFeatured'] ?? false,
       sellerId: sellerIdParam ?? map['sellerId'] ?? '',
       averageRating:
-          (map['averageRating'] ?? 0.0).toDouble(), // Added to fromMap
+          _parseToDouble(map['averageRating']), // Added to fromMap
       reviewCount:
-          (map['reviewCount'] as num? ?? 0).toInt(), // Added to fromMap
+          _parseToInt(map['reviewCount']), // Added to fromMap
     );
   }
 
@@ -65,4 +58,30 @@ class Product {
       'reviewCount': reviewCount, // Added to toMap
     };
   }
+}
+
+// Helper functions for robust parsing
+double _parseToDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+int _parseToInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+List<String> _parseImageUrls(Map<String, dynamic> map) {
+  final List<String> urls = [];
+  if (map['imageUrls'] is List) {
+    urls.addAll(List<String>.from(map['imageUrls'])
+        .where((url) => url.isNotEmpty));
+  } else if (map['imageUrl'] is String && (map['imageUrl'] as String).isNotEmpty) {
+    urls.add(map['imageUrl'] as String);
+  }
+  return urls;
 }

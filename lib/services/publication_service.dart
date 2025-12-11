@@ -25,9 +25,16 @@ class PublicationService {
     Query query = _publicationsRef.orderByChild(sortBy);
 
     if (startAfterValue != null && startAfterKey != null) {
+      // Explicitly cast numeric startAfterValue to int if it's a number,
+      // to avoid potential Long vs Integer casting issues on Android.
+      dynamic effectiveStartAfterValue = startAfterValue;
+      if (startAfterValue is num) {
+        effectiveStartAfterValue = startAfterValue.toInt();
+      }
+
       query = descending
-          ? query.endBefore(startAfterValue, key: startAfterKey)
-          : query.startAfter(startAfterValue, key: startAfterKey);
+          ? query.endBefore(effectiveStartAfterValue, key: startAfterKey)
+          : query.startAfter(effectiveStartAfterValue, key: startAfterKey);
     }
 
     query = descending ? query.limitToLast(limit) : query.limitToFirst(limit);

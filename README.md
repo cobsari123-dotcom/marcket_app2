@@ -105,6 +105,24 @@ Hemos realizado una serie de mejoras significativas en la aplicación para ofrec
 
 ---
 
+## ✨ Correcciones Críticas Recientes
+
+Se han implementado las siguientes correcciones para mejorar la estabilidad y funcionalidad de la aplicación:
+
+*   **Mapeo Robusto de Productos (Inicio):**
+    *   **Problema:** Los productos aparecían con precio de \$0.00 y sin imagen.
+    *   **Solución:** El método `Product.fromMap` en `lib/models/product.dart` se ha modificado para parsear de forma robusta los valores de `price` y `stock` (aceptando `int`, `double` o `String`) y para asegurar que las `imageUrls` se extraen y validan correctamente.
+
+*   **Resolución de Crash en Publicaciones/Reels (Error de Tipo Long/Integer):**
+    *   **Problema:** La aplicación podía cerrarse en la sección de Publicaciones/Reels debido a un error de `java.lang.Long cannot be cast to java.lang.Integer` al realizar consultas a Firebase.
+    *   **Solución:** Se ajustó la lógica de las consultas paginadas en `lib/services/product_service.dart` para evitar límites duplicados, y en `lib/services/publication_service.dart`, se añadió una conversión explícita a `int` para los valores numéricos de `startAfterValue` al consultar Firebase, previniendo conflictos de tipo en Android.
+
+*   **Visualización Completa en Menú Lateral (App Drawer):**
+    *   **Problema:** El menú lateral no mostraba el rol del usuario (Comprador, Vendedor, Administrador) y se usaba una referencia incorrecta al campo del modelo de usuario.
+    *   **Solución:** En `lib/screens/buyer/buyer_dashboard_screen.dart`, se modificó el `UserAccountsDrawerHeader` para mostrar correctamente el nombre completo, correo y el rol traducido del usuario (`userType`). Se corrigió la referencia del campo de `role` a `userType` en el modelo y en la función de traducción. (Nota: Si otras pantallas de dashboard tienen su propio `Drawer`, se necesitarían ajustes similares).
+
+---
+
 ## 🛠️ Arquitectura y Tecnologías
 
 ### Stack Tecnológico

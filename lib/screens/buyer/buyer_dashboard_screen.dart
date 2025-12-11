@@ -187,11 +187,26 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text(
-              _currentUserModel?.fullName ?? user?.displayName ?? 'Comprador',
-              style: textTheme.titleLarge?.copyWith(
-                color: AppTheme.onPrimary,
-              ),
+            accountName: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _currentUserModel?.fullName ??
+                      user?.displayName ??
+                      'Comprador',
+                  style: textTheme.titleLarge?.copyWith(
+                    color: AppTheme.onPrimary,
+                  ),
+                ),
+                Text(
+                  // Display role here
+                  _getTranslatedRole(_currentUserModel?.userType),
+                  style: textTheme.titleSmall?.copyWith(
+                    // Smaller font for role
+                    color: AppTheme.onPrimary.withAlpha((255 * 0.8).round()),
+                  ),
+                ),
+              ],
             ),
             accountEmail: Text(
               user?.email ?? 'comprador@ejemplo.com',
@@ -491,5 +506,18 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         .animate()
         .fade(duration: 300.ms, delay: (50 * index).ms)
         .slideY(begin: 0.1, end: 0, duration: 300.ms, delay: (50 * index).ms);
+  }
+
+  String _getTranslatedRole(String? userType) {
+    switch (userType) {
+      case 'Buyer': // Case 'Buyer' from UserModel
+        return 'Comprador';
+      case 'Seller': // Case 'Seller' from UserModel
+        return 'Vendedor';
+      case 'Admin': // Case 'Admin' from UserModel
+        return 'Administrador';
+      default:
+        return 'Rol Desconocido';
+    }
   }
 }

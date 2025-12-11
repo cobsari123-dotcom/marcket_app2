@@ -56,18 +56,28 @@ class ProductService {
   }) async {
     Query query = _productsRef.orderByChild(sortBy);
 
-    if (startAfterValue != null) {
-      if (descending) {
-        query = query.endBefore(startAfterValue);
-      } else {
-        query = query.startAfter(startAfterValue);
-      }
-    }
-
-    query = query.limitToFirst(limit); // For descending, this implies limitToLast then reverse
-
     if (descending) {
+      if (startAfterValue != null) {
+        // For descending, we want items *before* the startAfterValue
+        // combined with the last key to ensure unique pagination.
+        if (startAfterKey != null) {
+          query = query.endBefore(startAfterValue, key: startAfterKey);
+        } else {
+          query = query.endBefore(startAfterValue);
+        }
+      }
       query = query.limitToLast(limit);
+    } else {
+      if (startAfterValue != null) {
+        // For ascending, we want items *after* the startAfterValue
+        // combined with the last key to ensure unique pagination.
+        if (startAfterKey != null) {
+          query = query.startAfter(startAfterValue, key: startAfterKey);
+        } else {
+          query = query.startAfter(startAfterValue);
+        }
+      }
+      query = query.limitToFirst(limit);
     }
 
     final snapshot = await query.get();
@@ -76,25 +86,22 @@ class ProductService {
       return {'products': [], 'lastKey': null, 'lastSortValue': null};
     }
 
-    final List<Product> products = [];
     final Map<String, dynamic> data =
         Map<String, dynamic>.from(snapshot.value as Map);
 
-    // Convert map to list and apply client-side sorting for Firebase Realtime Database limitations
-    // (Firebase orderByChild with start/end after/before needs careful handling for full pagination)
-    data.forEach((key, value) {
-      products.add(Product.fromMap(Map<String, dynamic>.from(value), key,
-          sellerIdParam: value['sellerId'])); // sellerId is now part of the product data
-    });
+    // Convert map to list and sort
+    List<Product> products = data.entries.map((entry) {
+      return Product.fromMap(
+          Map<String, dynamic>.from(entry.value as Map), entry.key,
+          sellerIdParam: entry.value['sellerId']);
+    }).toList();
 
-    // Re-sort if fetching in descending order (since Firebase's limitToLast is tricky with actual order)
+    // If fetching in descending order, Firebase's limitToLast retrieves items
+    // in ascending order of the sort key, so we need to reverse them here.
     if (descending) {
-      products.sort((a, b) =>
-          b.toMap()[sortBy].compareTo(a.toMap()[sortBy])); // Sort in descending
-    } else {
-      products.sort((a, b) =>
-          a.toMap()[sortBy].compareTo(b.toMap()[sortBy])); // Sort in ascending
+      products = products.reversed.toList();
     }
+    // No need for client-side sort if already ordered by child in query and reversed for descending
 
     String? lastKey;
     dynamic lastSortValue;
