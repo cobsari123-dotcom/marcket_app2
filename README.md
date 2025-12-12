@@ -1,3 +1,5 @@
+> _Última actualización: 12 de diciembre de 2025_
+
 # Marcket App: Manos del Mar 🛍️
 
 ¡Bienvenido a Marcket App, también conocida como "Manos del Mar"! Una aplicación móvil de comercio electrónico desarrollada con Flutter que conecta a artesanos y pescadores locales de Campeche, México, con consumidores interesados en productos auténticos y sostenibles.
